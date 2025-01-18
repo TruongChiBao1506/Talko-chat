@@ -1,0 +1,39 @@
+.mainpage {
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+    background-color: #0A2647;
+    color: white;
+    /* Remove any default margins/padding */
+    margin: 0;
+    padding: 0;
+    /* Prevent horizontal scrolling */
+    overflow-x: hidden;
+    /* Ensure the app takes up full width */
+    position: absolute;
+    left: 0;
+    right: 0;
+  }
+  
+  /* Ensure content stretches full width */
+  .welcome-screen {
+    flex: 1;
+    width: 100%;
+    max-width: none;
+    padding: 40px;
+    /* Add gradient background to fill space */
+    background: linear-gradient(135deg, #ecf4fd 0%, #dce7f8 100%);
+  }
+  
+  /* Make message list take appropriate space
+  .message-list {
+    width: 320px;
+    min-width: 320px;
+    max-width: 320px;
+  } */
+  /* 
+  Ensure sidebar stays fixed width
+  .sidebar {
+    width: 60px;
+    min-width: 60px;
+  } */

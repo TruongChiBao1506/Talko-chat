@@ -1,0 +1,101 @@
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.modal {
+  background: #ecf4fd;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 480px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #eee;
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 500;
+  color: #3e4c5d;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  color: #666;
+}
+
+.close-button:hover {
+  color: #333;
+}
+
+.modal-content {
+  padding: 20px;
+  text-align: center;
+}
+
+.modal-content h3 {
+  margin: 0 0 12px;
+  font-size: 16px;
+  font-weight: normal;
+  color: #3e4c5d;
+}
+
+.phone-number {
+  font-size: 16px;
+  color: #5c7795;
+  margin: 12px 0;
+}
+
+.description {
+  color: #3e4c5d;
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 16px 0 24px;
+}
+
+.button-group {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.change-button {
+  background: none;
+  border: none;
+  color: #002c5a;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 8px 16px;
+}
+
+.verify-button {
+  background: #0068FF;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 24px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.verify-button:hover {
+  background: #0052cc;
+}

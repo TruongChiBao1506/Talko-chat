@@ -1,0 +1,139 @@
+
+.login-container {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* background: linear-gradient(180deg, #e6f2ff 0%, #ffffff 100%); */
+  background-image: url('../../../assets//images/login-bg.png');
+  padding: 20px;
+}
+
+.login-card {
+  background-color: #ecf4fd;
+  border-radius: 16px;
+  padding: 40px;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.login-header h1 {
+  color: #ffde59;
+  font-size: 36px;
+  font-family: Georgia, 'Times New Roman', Times, serif;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.login-header p {
+  font-size: 14px;
+  color: #5c7795;
+  opacity: 0.9;
+}
+
+.login-options {
+  display: flex;
+  justify-content: space-around;
+  margin: 20px 0;
+}
+
+.tab-button {
+  background: none;
+  border: none;
+  font-size: 14px;
+  color: #2883ec;
+  cursor: pointer;
+}
+
+.tab-button.active {
+  font-weight: bold;
+  border-bottom: 2px solid #2883ec;
+}
+
+.input-group {
+  margin-bottom: 15px;
+  text-align: left;
+}
+
+.input-group label {
+  display: block;
+  font-size: 14px;
+  color: #5c7795;
+  margin-bottom: 5px;
+}
+
+.phone-input {
+  display: flex;
+  align-items: center;
+  border-radius: 8px;
+  padding: 3px;
+}
+
+.phone-input span {
+  padding: 10px;
+  background-color: #e9ecef;
+  border: 1px solid #ced4da;
+  border-right: none;
+  border-radius: 8px 0 0 8px;
+}
+
+.phone-input input {
+  border: none;
+  outline: none;
+  flex-grow: 1;
+  height: 37px;
+  border-radius: 0 8px 8px 0;
+  padding: 12px 0px;
+  padding-left: 10px;
+  
+}
+
+
+.forgot-password {
+  display: block;
+  margin-top: 10px;
+  font-size: 12px;
+  color: #2883ec;
+  text-decoration: none;
+}
+
+.qr-section {
+  margin-top: 20px;
+}
+
+.register-link p {
+  font-size: 14px;
+  color: #5c7795;
+  margin-top: 20px;
+ 
+}
+
+.register-link a {
+  color: #2883ec;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.register-link a:hover {
+  text-decoration: underline;
+}
+
+.qr-section p {
+  color: #5c7795;
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+.qr-code-placeholder {
+  width: 150px;
+  height: 150px;
+  margin: 0 auto;
+  border: 2px dashed #cccccc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #999999;
+  font-size: 14px;
+}

@@ -1,0 +1,37 @@
+.button-primary {
+    width: 100%;
+    padding: 14px;
+    background-color: #2883ec;
+    border: none;
+    border-radius: 8px;
+    color: #002c5a;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .button-primary:hover {
+    background-color: #1E6BCC;
+  }
+
+  .button-primary:active {
+    background-color: #1654a7;
+  }
+
+.button-sideBar {
+  background: none;
+    border: none;
+    color: #8b9cb3;
+    font-size: 24px;
+    margin: 10px 0;
+    cursor: pointer;
+    transition: color 0.3s;
+    width: 50px;
+    height: 50px;
+    border-radius: 10px;
+}
+.button-sideBar:hover,
+.button-sideBar.active {
+  background-color: #0f54a0;
+}
