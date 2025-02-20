@@ -6,7 +6,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { message } from 'antd';
 import authApi from '../../apis/authApi';
 import { useDispatch } from 'react-redux'
-import { setLoading } from '../../screen/Auth/authSlice';
+import { setLoading } from '../../screen/auth/authSlice';
 
 const VerificationModal = ({ isOpenUI, account, onClose }) => {
     const navigate = useNavigate();

@@ -1,14 +1,14 @@
-import { configureStore } from '@reduxjs/toolkit';
-import auth from '../screen/Auth/authSlice';
-import home from '../screen/Home/homeSlice';
-import global from '../redux/globalSlice';
+import { configureStore } from "@reduxjs/toolkit";
+import auth from "../screen/auth/authSlice";
+import home from "../screen/Home/homeSlice";
+import global from "../redux/globalSlice";
 const rootReducer = {
-    auth,
-    home,
-    global
-}
+  auth,
+  home,
+  global,
+};
 const Store = configureStore({
-    reducer: rootReducer
+  reducer: rootReducer,
 });
 
 export default Store;

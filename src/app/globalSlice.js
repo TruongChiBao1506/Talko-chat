@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import meApi from "api/meApi";
+import meApi from "../api/meApi";
 
 const KEY = "global";
 
