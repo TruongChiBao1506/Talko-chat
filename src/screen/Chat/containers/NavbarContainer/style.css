@@ -1,0 +1,76 @@
+#sidebar_wrapper{
+    width: 100%;
+    background-color: #2883ec;
+    border-right: 1px solid #acbcd0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 0;
+    height: 100%;
+}
+.sidebar-main {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+    width: 100%;
+}
+.sidebar_nav {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+.sidebar_nav_item {
+    width: 45px;
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 16%;
+    cursor: pointer;
+    transition: background 0.3s ease-in-out;
+}
+.sidebar_nav_item:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+.icon-avatar button {
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background-color: transparent;
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+.icon-avatar button:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+.sidebar_nav_item--icon button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s;
+    color: white;
+    font-size: 20px;
+}
+.sidebar_nav_item--icon button:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+.pop_up-personal--item-text {
+    pointer-events: auto !important;
+    cursor: pointer;
+}

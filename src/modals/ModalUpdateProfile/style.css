@@ -1,0 +1,89 @@
+.modal-update-profile .ant-modal-content {
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  
+  .modal-update-profile .ant-modal-header {
+    background-color: #0068ff;
+    border-bottom: none;
+    padding: 16px 24px;
+  }
+  
+  .modal-update-profile .ant-modal-title {
+    color: white;
+    font-size: 18px;
+    font-weight: 600;
+  }
+  
+  .modal-update-profile .ant-modal-body {
+    padding: 14px;
+  }
+  
+  .modal-update-profile .avatar-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+  
+  .modal-update-profile .ant-avatar {
+    margin-bottom: 12px;
+    border: 2px solid #0068ff;
+  }
+  
+  .modal-update-profile .upload-btn {
+    background-color: #f0f2f5;
+    border: none;
+    color: #0068ff;
+    font-weight: 600;
+  }
+  
+  .modal-update-profile .upload-btn:hover {
+    background-color: #e4e6eb;
+  }
+  
+  .modal-update-profile .input-field,
+  .modal-update-profile .datepicker-field {
+    width: 100%;
+    margin-bottom: 16px;
+  }
+  .modal-update-profile .radio-group {
+    display: flex;
+    justify-content: flex-start;
+    margin-bottom: 16px;
+    margin-top: 10px;
+  }
+  .modal-update-profile .ant-input,
+  .modal-update-profile .ant-picker {
+    margin-top: 10px;
+    border-radius: 8px;
+    border: 1px solid #d9d9d9;
+  }
+  
+  .modal-update-profile .ant-input:focus,
+  .modal-update-profile .ant-picker:focus {
+    border-color: #0068ff;
+    box-shadow: 0 0 0 2px rgba(0, 104, 255, 0.2);
+  }
+  
+  .modal-update-profile .ant-btn-primary {
+    background-color: #0068ff;
+    border-color: #0068ff;
+  }
+  
+  .modal-update-profile .ant-btn-primary:hover {
+    background-color: #0056d6;
+    border-color: #0056d6;
+  }
+  
+  
+  .modal-update-profile .ant-picker-cell-in-view.ant-picker-cell-selected .ant-picker-cell-inner {
+    background-color: #0068ff;
+  }
+  .modal-update-profile .ant-modal-close-x{
+    top: 5px;
+    right: 0px;
+  }
+  .modal-update-profile .ant-modal-content{
+    padding: 10px 10px;
+  }

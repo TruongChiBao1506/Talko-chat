@@ -1,0 +1,76 @@
+#search-wrapper {
+    background: #ffffff;
+    height: 100%;
+
+}
+
+#search-wrapper .ant-input-affix-wrapper {
+    border-radius: 8px;
+    background-color: #d4e6fb;
+    color: #5c7795;
+    font-size: 16px;
+}
+
+#search-wrapper .search-top {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 16px;
+}
+
+#search-wrapper .search-top div ~ div {
+    margin: 0 2px;
+}
+
+#search-wrapper .search-top_add-friend,
+#search-wrapper .search-top_create-group {
+    font-size: 20px;
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    text-align: center;
+    border-radius: 20px;
+    transition: 0.2s;
+    color: #5c7795;
+}
+
+#search-wrapper .search-top_add-friend:hover,
+#search-wrapper .search-top_create-group:hover {
+    background-color: #f0f0f0; 
+}
+
+#search-wrapper .search-top_input-search {
+    flex-grow: 1;
+   
+}
+
+#search-wrapper .search-bottom .classify-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+}
+
+#search-wrapper .search-bottom .classify-title span:last-child {
+    font-size: 17px;
+    font-weight: 500;
+}
+
+#search-wrapper .search-bottom .classify-element {
+    padding-left: 16px;
+}
+
+#search-wrapper .search-bottom .add-classify {
+    width: 32px;
+    font-size: 20px;
+    border-radius: 20px;
+    height: 32px;
+    text-align: center;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+#search-wrapper .search-bottom .add-classify:hover {
+    background-color: #f0f0f0;
+}

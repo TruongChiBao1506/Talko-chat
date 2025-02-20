@@ -23,6 +23,7 @@ const Input = forwardRef(({ type, placeholder, value, onChange, style={}}, ref) 
         <div className="input-container">
             <input
                 type={type}
+                ref={ref}
                 className="input"
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
