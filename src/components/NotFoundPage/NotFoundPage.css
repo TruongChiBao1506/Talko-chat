@@ -1,0 +1,59 @@
+.not-found-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background-color: #f3f4f6;
+    padding: 20px;
+    text-align: center;
+    background-image: url('../../assets/images/login-bg.png');
+  }
+  
+  .not-found-content {
+    max-width: 500px;
+  }
+  
+  .not-found-title {
+    font-size: 72px;
+    font-weight: bold;
+    color: #002c5a;
+    margin-bottom: 10px;
+  }
+  
+  .not-found-subtitle {
+    font-size: 24px;
+    font-weight: 600;
+    color: #002c5a;
+    margin-bottom: 20px;
+  }
+  
+  .not-found-message {
+    font-size: 18px;
+    color: #2f3e50;
+    margin-bottom: 30px;
+  }
+  
+  .not-found-image-container {
+    margin-bottom: 30px;
+  }
+  
+  .not-found-image {
+    max-width: 100%;
+    height: auto;
+    animation: float 6s ease-in-out infinite;
+  }
+  
+  @keyframes float {
+    0% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-20px);
+    }
+    100% {
+      transform: translateY(0px);
+    }
+  }
+  
+  

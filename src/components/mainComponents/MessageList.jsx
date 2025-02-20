@@ -1,22 +1,10 @@
 import React from 'react';
 import './MessageList.css';
-
+import SearchContainer from '../../screen/Chat/containers/SearchContainer';
 function MessageList() {
   return (
     <div className="message-list">
-      <div className="message-list-header">
-        <div className="search-bar">
-          <i className="icon-search"></i>
-          <input type="text" placeholder="Tìm kiếm" />
-        </div>
-        <div className="message-tabs">
-          <button className="tab active">Tất cả</button>
-          <button className="tab">Chưa đọc</button>
-          <button className="tab">
-            Phân loại <i className="icon-chevron-down"></i>
-          </button>
-        </div>
-      </div>
+      <SearchContainer valueClassify='0'/>
       <div className="message-items">
         {[1, 2, 3, 4, 5].map((i) => (
           <div key={i} className="message-item">

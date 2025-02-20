@@ -2,6 +2,11 @@ import { useEffect, useState } from 'react'
 import './PasswordRecovery.css'
 import Button from '../../../components/buttonComponent/Button';
 import Input from '../../../components/inputComponent/Input';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { setLoading } from '../authSlice';
+import { message } from 'antd';
+import authApi from '../../../apis/authApi';
 
 export default function PasswordRecovery() {
     const [activationCode, setActivationCode] = useState('')
@@ -9,6 +14,10 @@ export default function PasswordRecovery() {
     const [confirmPassword, setConfirmPassword] = useState('')
     const [timer, setTimer] = useState(60);
     const [isResendEnabled, setIsResendEnabled] = useState(false);
+    const location = useLocation();
+    const account = location.state?.account || '';
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
     useEffect(() => {
         document.title = 'Khôi phục mật khẩu - Talko Chat'
     }, [])
@@ -22,15 +31,37 @@ export default function PasswordRecovery() {
             setIsResendEnabled(true);
         }
     }, [timer]);
-    const handleResendCode = () => {
+    const handleResendCode = async (username) => {
         console.log('Yêu cầu gửi lại mã kích hoạt...');
-        setTimer(60);
-        setIsResendEnabled(false);
+        await authApi.resetOtp(username)
+            .then(() => {
+                message.success('mã Otp đã được gửi lại');
+                setTimer(60);
+                setIsResendEnabled(false);
+            })
     }
-    const handleSubmit = (e) => {
-        e.preventDefault()
+    const handleSubmit = async (username, otp, password) => {
         // Handle form submission
+        dispatch(setLoading(true));
         console.log('Form submitted')
+        if(password !== confirmPassword){
+            dispatch(setLoading(false));
+            message.error('Mật khẩu không khớp');
+            return;
+        }
+        else{
+            await authApi.confirmPassword(username, otp, password)
+            .then(()=>{
+                dispatch(setLoading(false));
+                message.success('Khôi phục mật khẩu thành công');
+                navigate('/auth/login',{state:{account:username}}); // Redirect to login page
+            })
+            .catch((err)=>{
+                dispatch(setLoading(false));
+                message.error('Khôi phục mật khẩu thất bại');
+            })
+        }
+        
     }
 
     return (
@@ -41,13 +72,16 @@ export default function PasswordRecovery() {
                     <h1>Khôi phục mật khẩu Talko</h1>
                 </div>
 
-                <form onSubmit={handleSubmit} className="recovery-form">
+                <form onSubmit={(e)=>{e.preventDefault(); handleSubmit(account, activationCode, password)}} className="recovery-form">
                     <div className="activation-section">
                         <p>Mã kích hoạt đã được gửi đến số điện thoại:</p>
                         <Input type='number'
                             placeholder='Nhập mã kích hoạt'
                             value={activationCode} onChange={(value) => setActivationCode(value)} style={{ textAlign: "center" }} />
-                        {isResendEnabled && <a href="#" className="resend-link" onClick={handleResendCode}>
+                        {isResendEnabled && <a href="#" className="resend-link" onClick={(e) => {
+                            e.preventDefault();
+                            handleResendCode(account);
+                        }}>
                             Nhận lại mã kích hoạt
                         </a>}
 

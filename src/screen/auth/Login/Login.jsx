@@ -3,17 +3,40 @@ import "./Login.css";
 import Input from '../../../components/inputComponent/Input';
 import Button from '../../../components/buttonComponent/Button';
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import authApi from "../../../apis/authApi";
+import { useDispatch } from "react-redux";
+import {setLoading} from '../authSlice';
+import {message} from 'antd'
 const Login = () => {
-  const [activeTab, setActiveTab] = useState("phone");
+  const location = useLocation();
+  const dispatch = useDispatch();
+  const [activeTab, setActiveTab] = useState("account");
   const navigate = useNavigate();
-  const [phone, setPhone] = useState("");
+  const [account, setAccount] = useState(location.state?.account || '');
   const [password, setPassword] = useState("");
+  
   useEffect(() => {
     document.title = "Đăng nhập - Talko Chat";
   }, []);
-  const handleLogin = () => {
-    navigate("/main");
+  const handleLogin = async (username, password) => {
+    if(!username || !password) {
+      message.error("Vui lòng nhập đầy đủ thông tin");
+      return;
+    }
+    try {
+      dispatch(setLoading(true));
+      const {token, refreshToken} = await authApi.login(username, password);
+      localStorage.setItem("token", token);
+      localStorage.setItem("refreshToken", refreshToken);
+      navigate("/main");
+      message.success("Đăng nhập thành công");
+    } catch (error) {
+      console.log(error);
+      navigate("/auth/login");
+      message.error("Tài khoản hoặc mật khẩu không đúng");
+    }
+    dispatch(setLoading(false));
   };
   return (
     <div className="login-container">
@@ -30,29 +53,28 @@ const Login = () => {
             Với mã QR
           </button>
           <button
-            className={`tab-button ${activeTab === "phone" ? "active" : ""}`}
-            onClick={() => setActiveTab("phone")}
+            className={`tab-button ${activeTab === "account" ? "active" : ""}`}
+            onClick={() => setActiveTab("account")}
           >
-            Với số điện thoại
+            Với tài khoản
           </button>
         </div>
-
-        {activeTab === "phone" && (
+        
+        {activeTab === "account" && (
           <div className="login-form">
-            <form>
+            <form onSubmit={(e)=> {
+              e.preventDefault();
+              handleLogin(account, password)}}>
               <div className="input-group">
-                <label>Số điện thoại</label>
-                <Input type="tel" placeholder="94344xxxx" value={phone} onChange={setPhone}/>
+                <label>Tài khoản</label>
+                <Input type="text" placeholder="Email hoặc số điện thoại" value={account} onChange={(value)=> setAccount(value)}/>
               </div>
               <div className="input-group">
                 <label>Mật khẩu</label>
-                <Input type="password" placeholder="Nhập mật khẩu" value={password} onChange={setPassword}/>
+                <Input type="password" placeholder="Nhập mật khẩu" value={password} onChange={(value)=>setPassword(value)}/>
               </div>
-              {/* <button type="submit" className="login-button" onClick={handleLogin}>
-                Đăng nhập với mật khẩu
-              </button> */}
-              <Button className="button-primary" type="submit" onClick={handleLogin} children="Đăng nhập với mật khẩu"/>
-              <a href="/forgotpassword" className="forgot-password">
+              <Button className="button-primary" type="submit" children="Đăng nhập với mật khẩu"/>
+              <a href="/auth/forgotpassword" className="forgot-password">
                 Quên mật khẩu?
               </a>
             </form>
@@ -71,7 +93,7 @@ const Login = () => {
 
         <div className="register-link">
           <p>
-            Bạn chưa có tài khoản? <a href="/register">Đăng ký ngay!</a>
+            Bạn chưa có tài khoản? <a href="/auth/register">Đăng ký ngay!</a>
           </p>
         </div>
       </div>

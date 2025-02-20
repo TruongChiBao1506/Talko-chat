@@ -5,26 +5,19 @@ import Input from '../../../components/inputComponent/Input';
 import VerificationModal from '../../../modals/VerificationPhoneNumberModal/VerificationPhoneNumber';
 const ForgotPassword = () => {
     const navigate = useNavigate();
-    const [phone, setPhone] = useState("");
+    const [account, setAccount] = useState("");
     const [isOpen, setIsOpen] = useState(false);
-    const [errorMess, setErrorMess] = useState("");
     useEffect(() => {
         document.title = "Quên mật khẩu - Talko Chat";
-      }, []);
+    }, []);
     const inputRef = useRef(null);
     const handleOpenModal = () => {
-        const phoneRegex = /^[0-9]{10}$/;
-        if(phone && phoneRegex.test(phone)){
-            setIsOpen(true);
-            setErrorMess("");
-        }
-        else{
-            setErrorMess("Số điện thoại không hợp lệ");
-        }
+        setIsOpen(true);
     };
     const handleCloseModal = () => {
         setIsOpen(false);
-        inputRef.current.focus();
+        if (inputRef.current)
+            inputRef.current.focus();
     };
     return (
         <div className="forgot-password-container">
@@ -33,20 +26,19 @@ const ForgotPassword = () => {
 
                 <div className="form-container">
                     <p className="instruction">
-                        Nhập số điện thoại để nhận mã xác thực
+                        Nhập tài khoản để nhận mã xác thực
                     </p>
-                    <Input ref={inputRef}  type="tel" placeholder="969xxx" value={phone} onChange={(value) => setPhone(value)} />
-                    {errorMess && <p className="error-message" style={{color: "red", textAlign: 'left'}}>{errorMess}</p>}
+                    <Input ref={inputRef} type="text" placeholder="Email hoặc số điện thoại" value={account} onChange={(value) => setAccount(value)} />
                     <button className="continue-button" onClick={handleOpenModal}>
                         Tiếp tục
                     </button>
-                    <VerificationModal isOpenUI={isOpen} phoneNumber={phone} onClose={handleCloseModal} />
-                    <a href="#"  
-                    className="back-link"
-                    onClick={(e)=>{
-                        e.preventDefault();
-                        navigate(-1);
-                    }}>
+                    <VerificationModal isOpenUI={isOpen} account={account} onClose={handleCloseModal} />
+                    <a href="#"
+                        className="back-link"
+                        onClick={(e) => {
+                            e.preventDefault();
+                            navigate(-1);
+                        }}>
                         « Quay lại
                     </a>
                 </div>
