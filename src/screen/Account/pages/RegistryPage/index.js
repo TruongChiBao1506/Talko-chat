@@ -18,8 +18,9 @@ import { registryValues } from "screen/Account/initValues";
 import { FastField, Form, Formik } from "formik";
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import { useHistory } from "react-router";
+import { useNavigate } from "react-router-dom"; // Thay thế useHistory bằng useNavigate
 import { Link } from "react-router-dom";
+import { Routes, Route } from "react-router-dom"; // Thay Switch bằng Routes
 
 const RESEND_OTP_TIME_LIMIT = 60;
 const { Text, Title } = Typography;
@@ -28,11 +29,9 @@ function RegistryPage(props) {
   const dispatch = useDispatch();
   let resendOTPTimerInterval;
   const [isError, setError] = useState("");
-  const history = useHistory();
-  //set time counter
-  const [counter, setCounter] = useState(0);
-  //set OTP value
-  const [isSubmit, setIsSubmit] = useState(false);
+  const navigate = useNavigate(); // Thay thế useHistory bằng useNavigate
+  const [counter, setCounter] = useState(0); // set time counter
+  const [isSubmit, setIsSubmit] = useState(false); // set OTP value
 
   const openNotification = (mes) => {
     const args = {
@@ -45,10 +44,10 @@ function RegistryPage(props) {
     Modal.success({
       content: "Đăng ký thành công !",
       onOk: () => {
-        history.push("/account/login");
+        navigate("/account/login"); // Sử dụng navigate thay vì history.push
       },
       onCancel: () => {
-        history.push("/account/login");
+        navigate("/account/login");
       },
     });
   }
@@ -80,7 +79,6 @@ function RegistryPage(props) {
     dispatch(setLoading(false));
   };
 
-  //start time from 30 to '0'
   const startResendOTPTimer = () => {
     if (resendOTPTimerInterval) {
       clearInterval(resendOTPTimerInterval);
@@ -106,7 +104,6 @@ function RegistryPage(props) {
     dispatch(setLoading(false));
   };
 
-  //useEffect khi counter thay đổi
   useEffect(() => {
     startResendOTPTimer();
     return () => {

@@ -18,8 +18,9 @@ import { forgotValues } from "screen/Account/initValues";
 import { FastField, Form, Formik } from "formik";
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import { useHistory } from "react-router";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom"; // Thay `useHistory` bằng `useNavigate`
+import { Link } from "react-router-dom"; // Sử dụng `Link` từ React Router v6
+import { Routes, Route } from "react-router-dom"; // Cập nhật cho React Router v6/7
 
 const RESEND_OTP_TIME_LIMIT = 60;
 const { Text, Title } = Typography;
@@ -28,11 +29,9 @@ function ForgotPage(props) {
   const dispatch = useDispatch();
   let resendOTPTimerInterval;
   const [isError, setError] = useState("");
-  const history = useHistory();
-  //set time counter
-  const [counter, setCounter] = useState(0);
-  //set OTP value
-  const [account, setAccount] = useState(null);
+  const navigate = useNavigate(); // Thay `useHistory` bằng `useNavigate`
+  const [counter, setCounter] = useState(0); // Set time counter
+  const [account, setAccount] = useState(null); // Set OTP value
   const [isSubmit, setIsSubmit] = useState(false);
 
   const openNotification = (mes) => {
@@ -46,10 +45,10 @@ function ForgotPage(props) {
     Modal.success({
       content: "Cập nhật tài khoản thành công !",
       onOk: () => {
-        history.push("/account/login");
+        navigate("/account/login"); // Thay `history.push` bằng `navigate`
       },
       onCancel: () => {
-        history.push("/account/login");
+        navigate("/account/login");
       },
     });
   }
@@ -87,7 +86,6 @@ function ForgotPage(props) {
     dispatch(setLoading(false));
   };
 
-  //start time from 30 to '0'
   const startResendOTPTimer = () => {
     if (resendOTPTimerInterval) {
       clearInterval(resendOTPTimerInterval);
@@ -101,7 +99,6 @@ function ForgotPage(props) {
     }, 1000);
   };
 
-  //useEffect khi counter thay đổi
   useEffect(() => {
     startResendOTPTimer();
     return () => {

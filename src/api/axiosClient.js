@@ -28,7 +28,7 @@ axiosClient.interceptors.response.use(
   },
   async (error) => {
     const refreshToken = localStorage.getItem("refreshToken");
-    if (error.response.status !== 401) {
+    if (error.response?.status !== 401) {
       return Promise.reject(error);
     }
     axios.interceptors.response.eject(axiosClient.interceptors);

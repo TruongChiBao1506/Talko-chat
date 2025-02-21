@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Col, Input, Row, Tag, Typography } from "antd";
+import { Col, Input, Row, Typography } from "antd";
 import { ErrorMessage } from "formik";
 import TagCustom from "components/TagCustom";
 

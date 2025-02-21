@@ -34,10 +34,10 @@ const Header = () => {
           ) : (
           <>
             <li>
-              <Link className='login' to="/auth/login">Đăng nhập</Link>
+              <Link className='login' to="/account/login">Đăng nhập</Link>
             </li>
             <li>
-              <Link className='register' to="/auth/register">Đăng ký</Link>
+              <Link className='register' to="/account/registry">Đăng ký</Link>
             </li>
           </>
           )}

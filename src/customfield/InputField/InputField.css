@@ -1,0 +1,40 @@
+/* InputField.css */
+
+.input-field-row {
+  margin-bottom: 16px;
+}
+
+.input-field-title {
+  display: flex;
+  align-items: center;
+}
+
+.input-field-title .ant-typography {
+  margin-bottom: 0;
+}
+
+.input-field-input {
+  width: 100%;
+  height: 35px; /* Chiều cao của trường nhập liệu */
+  font-size: 16px;
+  border-radius: 2px;
+  outline: none;
+}
+
+.input-field-error {
+  margin-top: 8px;
+}
+
+.input-field-button {
+  width: 100%;
+  height: 40px; /* Chiều cao của nút bấm */
+  font-size: 16px;
+  border-radius: 4px;
+  background-color: #4d93ff; /* Màu nền của nút bấm */
+  border: none;
+  color: white;
+}
+
+.input-field-button:hover {
+  background-color: #357ae8; /* Màu nền của nút bấm khi hover */
+}

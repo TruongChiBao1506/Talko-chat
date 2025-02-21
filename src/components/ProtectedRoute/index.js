@@ -1,6 +1,6 @@
 import React from "react";
 import { useSelector } from "react-redux";
-import { Redirect, Route } from "react-router-dom";
+import { Navigate, Route } from "react-router-dom";
 
 const ProtectedRoute = ({ component: Component, ...rest }) => {
   const { user } = useSelector((state) => state.global);
@@ -12,7 +12,7 @@ const ProtectedRoute = ({ component: Component, ...rest }) => {
         if (user && !user.isAdmin) return <Component {...props} />;
 
         return (
-          <Redirect
+          <Navigate
             to={{
               pathname: "/account/login",
               state: {

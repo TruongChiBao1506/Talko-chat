@@ -11,8 +11,8 @@ import { FastField, Form, Formik } from "formik";
 import React, { useEffect, useState } from "react";
 import ReCAPTCHA from "react-google-recaptcha";
 import { useDispatch } from "react-redux";
-import { useHistory } from "react-router";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom"; // Thay useHistory bằng useNavigate
+import { Link } from "react-router-dom"; // Thay vì sử dụng `useHistory`, ta sử dụng `Link`
 import IMAGE_ACCOUNT_PAGE from "assets/images/account/account-bg.png";
 
 const { Text, Title } = Typography;
@@ -24,13 +24,15 @@ function LoginPage(props) {
   const [isError, setError] = useState(false);
   const [isVerify, setVerify] = useState(false);
   const [keyGoogleCaptcha, setKeyGoogleCaptcha] = useState(null);
-  const history = useHistory();
+  const navigate = useNavigate(); // Thay useHistory bằng useNavigate
 
   const handleSubmit = async (values) => {
+    console.log("🚀 ~ handleSubmit ~ values:", values);
+
     const { username, password } = values;
     console.log(isVerify);
     try {
-      if (isVerify) {
+      if (!isVerify) {
         dispatch(setLoading(true));
         const { token, refreshToken } = await loginApi.login(
           username,
@@ -40,8 +42,8 @@ function LoginPage(props) {
         localStorage.setItem("refreshToken", refreshToken);
         dispatch(setLogin(true));
         const { isAdmin } = unwrapResult(await dispatch(fetchUserProfile()));
-        if (isAdmin) history.push("/admin");
-        else history.push("/chat");
+        if (isAdmin) navigate("/admin"); // Thay history.push bằng navigate
+        else navigate("/chat"); // Thay history.push bằng navigate
       } else {
         message.error("hãy xác thực capcha", 5);
       }
@@ -62,6 +64,7 @@ function LoginPage(props) {
       .get("/common/google-captcha")
       .then((res) => setKeyGoogleCaptcha(res.KEY_GOOGLE_CAPTCHA));
   }, []);
+
   return (
     <div className="account-common-page">
       <div className="account-wrapper">
@@ -84,64 +87,64 @@ function LoginPage(props) {
               {(formikProps) => {
                 return (
                   <Form>
-                    <Row gutter={[0, 8]}>
-                      <Col span={24}>
-                        <FastField
-                          name="username"
-                          component={InputField}
-                          type="text"
-                          title="Tài khoản"
-                          placeholder="Nhập tài khoản"
-                          maxLength={50}
-                          titleCol={24}
-                          inputCol={24}
-                        />
-                      </Col>
+                  <Row gutter={[0, 16]}>
+                    <Col span={24}>
+                    <FastField
+                      name="username"
+                      component={InputField}
+                      type="text"
+                      title="Tài khoản"
+                      placeholder="Nhập tài khoản"
+                      maxLength={50}
+                      titleCol={24}
+                      inputCol={24}
+                    />
+                    </Col>
 
-                      <Col span={24}>
-                        <FastField
-                          name="password"
-                          component={InputField}
-                          type="password"
-                          title="Mật khẩu"
-                          placeholder="Nhập mật khẩu"
-                          maxLength={200}
-                          titleCol={24}
-                          inputCol={24}
-                        />
-                      </Col>
-                      <Col span={24}>
-                        <br />
-                        {keyGoogleCaptcha && (
-                          <ReCAPTCHA
-                            sitekey={keyGoogleCaptcha}
-                            onChange={onChange}
-                          />
-                        )}
-                      </Col>
-                      {isError ? (
-                        <Col span={24}>
-                          <Tag
-                            color="error"
-                            style={{
-                              fontWeight: "bold",
-                            }}
-                            icon={<CloseCircleOutlined />}
-                          >
-                            Tài khoản không hợp lệ
-                          </Tag>
-                        </Col>
-                      ) : (
-                        ""
-                      )}
+                    <Col span={24}>
+                    <FastField
+                      name="password"
+                      component={InputField}
+                      type="password"
+                      title="Mật khẩu"
+                      placeholder="Nhập mật khẩu"
+                      maxLength={200}
+                      titleCol={24}
+                      inputCol={24}
+                    />
+                    </Col>
+                    <Col span={24}>
+                    <br />
+                    {keyGoogleCaptcha && (
+                      <ReCAPTCHA
+                      sitekey={keyGoogleCaptcha}
+                      onChange={onChange}
+                      />
+                    )}
+                    </Col>
+                    {isError ? (
+                    <Col span={24}>
+                      <Tag
+                      color="error"
+                      style={{
+                        fontWeight: "bold",
+                      }}
+                      icon={<CloseCircleOutlined />}
+                      >
+                      Tài khoản không hợp lệ
+                      </Tag>
+                    </Col>
+                    ) : (
+                    ""
+                    )}
 
-                      <Col span={24}>
-                        <br />
-                        <Button type="primary" htmlType="submit" block>
-                          Đăng nhập
-                        </Button>
-                      </Col>
-                    </Row>
+                    <Col span={24}>
+                    <br />
+                    <Button type="primary" htmlType="submit" block>
+                      Đăng nhập
+                    </Button>
+                    </Col>
+                  </Row>
                   </Form>
                 );
               }}
