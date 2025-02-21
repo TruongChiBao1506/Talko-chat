@@ -22,14 +22,14 @@ import LoginPage from "screen/Account/pages/LoginPage";
 import RegistryPage from "screen/Account/pages/RegistryPage";
 
 function App() {
-  const navigate = useNavigate(); 
-  
+  const navigate = useNavigate();
+
   const dispatch = useDispatch();
   const [isFetch, setIsFetch] = useState(false);
-  
+
   const isLogin = useSelector((state) => state.global?.isLogin);
-    const { user } = useSelector((state) => state.global);
-  
+  const { user } = useSelector((state) => state.global);
+
   useEffect(() => {
     const fetchProfile = async () => {
       const token = localStorage.getItem("token");
@@ -77,9 +77,9 @@ function App() {
 
           {/* <Route exact path="/jf-link/:conversationId" element={<JoinFromLink />} /> */}
 
-          {/* <Route path="/chat" element={<ProtectedRoute />}>
-                    <Route path="/chat" element={<ChatLayout />} />
-                </Route> */}
+          <Route path="/chat" element={<ProtectedRoute />}>
+            <Route path="/chat" element={<ChatLayout />} />
+          </Route>
 
           {/* <Route path="/admin" element={<AdminProtectedRoute />}>
                     <Route path="/admin" element={<Admin />} />
@@ -92,7 +92,6 @@ function App() {
           <Route path="/account" element={<Account />} />
           <Route path="/account/login" element={<LoginPage />} />
           <Route path="/account/registry" element={<RegistryPage />} />
-          
 
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
