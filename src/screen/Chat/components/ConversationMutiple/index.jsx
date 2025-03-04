@@ -2,6 +2,7 @@ import { Avatar } from "antd";
 import PropTypes from "prop-types";
 import React from "react";
 import "./style.scss";
+
 ConversationMutiple.propTypes = {
   participants: PropTypes.number,
 };
