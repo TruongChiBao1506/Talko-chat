@@ -16,7 +16,7 @@ import useWindowDimensions from "hooks/useWindowDimensions";
 import PropTypes from "prop-types";
 import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useRouteMatch } from "react-router";
+import { useNavigate, useRouteMatch } from "react-router";
 import { useHistory, useLocation } from "react-router-dom";
 import renderWidthDrawer from "utils/DrawerResponsive";
 import DrawerPinMessage from "./components/DrawerPinMessage";
@@ -92,7 +92,7 @@ function Chat({ socket, idNewMessage }) {
   const [visibleNews, setVisibleNews] = useState(false);
   const [tabActiveInNews, setTabActiveNews] = useState(0);
   const location = useLocation();
-  const history = useHistory();
+  const navigate = useNavigate();
   const [isVisibleModalJoinGroup, setIsVisibleJoinGroup] = useState(false);
   const [summaryGroup, setSummary] = useState({});
   const refCurrentConversation = useRef();
@@ -168,10 +168,17 @@ function Chat({ socket, idNewMessage }) {
           dispatch(getLastViewOfMembers({ conversationId: tempId }));
         }
 
-        history.replace({
+        // history.replace({
+        //   state: {
+        //     conversationId: null,
+        //   },
+        // });
+
+        navigate('', {  // Giữ nguyên URL hiện tại
+          replace: true,  // Thay thế lịch sử thay vì push mới
           state: {
             conversationId: null,
-          },
+          }
         });
       }
     };
