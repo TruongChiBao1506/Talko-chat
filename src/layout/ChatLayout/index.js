@@ -15,7 +15,7 @@ import {
   updateAvatarWhenUpdateMember,
   updateFriendChat,
 } from "screen/Chat/slice/chatSlice";
-import Friend from "screen/Friend";
+// import Friend from "screen/Friend";
 import {
   fetchFriends,
   fetchListGroup,
@@ -230,13 +230,13 @@ function ChatLayout(props) {
               )}
             />
 
-            <Route
+            {/* <Route
               exact
               path={`${url}/friends`}
               render={(props) => (
                 <Friend {...props} socket={socket} authed={true} />
               )}
-            />
+            /> */}
 
             <Route component={NotFoundPage} />
           </Switch>
