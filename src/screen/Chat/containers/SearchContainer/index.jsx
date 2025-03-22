@@ -6,7 +6,12 @@ import { useDispatch, useSelector } from 'react-redux';
 import Scrollbars from 'react-custom-scrollbars-2';
 import ModalAddFriend from '../../../../modals/ModalAddFriend';
 import ModalCreateGroup from '../../../../modals/ModalCreateGroup';
+import UserCard from '../../components/UserCard';
+import userApi from '../../../../apis/userApi';
+import {createGroup} from '../../../../screen/Chat/slices/chatSlice';
 import './style.css';
+
+
 SearchContainer.propTypes = {
     onVisibleFilter: PropTypes.func,
     onSearchChange: PropTypes.func,
@@ -20,9 +25,13 @@ function SearchContainer ({ valueText='', onSearchChange=null, onSubmitSearch=nu
     const [visibleModalAddFriend, setVisibleModalAddFriend] = useState(false);
     const [visibleModalCreateGroup, setVisibleModalCreateGroup] = useState(false);
     const [confirmLoading, setConfirmLoading] = useState(false);
+    const { classifies } = useSelector(state => state.chat);
     const [visibleModalClassify, setVisibleModalClassify] = useState(false);
+    const [visibleModalUserCard, setVisibleModalUserCard] = useState(false);
     const [userIsFind, setUserIsFind] = useState({});
     const refDebounce = useRef(null);
+    const dispatch = useDispatch();
+
 
     const handleOpenModalClassify = () => {
         setVisibleModalClassify(true);
@@ -45,18 +54,17 @@ function SearchContainer ({ valueText='', onSearchChange=null, onSubmitSearch=nu
     const handCloseModalAddFriend = ()=>{
         setVisibleModalAddFriend(false);
     }
-    const handleFindUser = (value) => {
+    const handleFindUser = async (value) => {
         try{
-            const user = value;
-            console.log('user', user);
+            const user = await userApi.fetchUser(value);
             setUserIsFind(user);
+            setVisibleModalUserCard(true);
             setVisibleModalAddFriend(false);
         }catch(err){
             message.error('Không tìm thấy người dùng');
-        }
-       
-
+        } 
     }
+    
     const handOnSearchUser = (value) => {
         handleFindUser(value);
     }
@@ -71,6 +79,13 @@ function SearchContainer ({ valueText='', onSearchChange=null, onSubmitSearch=nu
         setVisibleModalCreateGroup(false);
     }
 
+    const handleOKModalCreateGroup = (value) => {
+        setConfirmLoading(true);
+        dispatch(createGroup(value));
+        setConfirmLoading(false);
+        setVisibleModalCreateGroup(false);
+    };
+
     const handleInputChange = (e) => {
         const value = e.target.value;
         if(onSearchChange){
@@ -84,6 +99,9 @@ function SearchContainer ({ valueText='', onSearchChange=null, onSubmitSearch=nu
                 onSubmitSearch(value);
             }
         }, 400);
+    }
+    const handleCloseModalUserCard = () => {
+        setVisibleModalUserCard(false);
     }
 
     return (
@@ -124,8 +142,11 @@ function SearchContainer ({ valueText='', onSearchChange=null, onSubmitSearch=nu
                                     autoHideTimeout={1000}
                                     autoHideDuration={200}
                                     style={{height: '42px', width: '100%'}}>
-                                        <Radio.Group size='small'>
+                                        <Radio.Group onChange={handleOnChange} value={valueClassify}>
                                             <Radio value={'0'}>Tất cả</Radio>
+                                            {classifies.map((ele, index) => (
+                                                <Radio key={index} value={ele._id}>{ele.name}</Radio>
+                                            ))}
                                         </Radio.Group>
 
                                     </Scrollbars>
@@ -144,8 +165,14 @@ function SearchContainer ({ valueText='', onSearchChange=null, onSubmitSearch=nu
             <ModalCreateGroup 
             isVisible={visibleModalCreateGroup}
             onCancel={handleCloseModalCreateGroup}
-            onOk={handleCloseModalCreateGroup}
+            onOk={handleOKModalCreateGroup}
             loading={confirmLoading}/>
+
+            <UserCard 
+            user={userIsFind}
+            isVisible={visibleModalUserCard}
+            onCancel={handleCloseModalUserCard}
+            />
         </div>
     )
 };
