@@ -29,8 +29,9 @@ const Login = () => {
       const {token, refreshToken} = await authApi.login(username, password);
       localStorage.setItem("token", token);
       localStorage.setItem("refreshToken", refreshToken);
-      navigate("/main");
+      navigate("/chat");
       message.success("Đăng nhập thành công");
+      window.location.reload();
     } catch (error) {
       console.log(error);
       navigate("/auth/login");
