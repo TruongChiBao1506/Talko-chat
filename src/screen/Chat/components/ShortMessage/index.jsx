@@ -26,9 +26,9 @@ ShortMessage.defaultsProps = {
     type: Protypes.bool
 };
 
-const ShortMessage = ({ message, type }) => {
+function ShortMessage ({ message, type }){
 
-    const { user } = useSelector(state => state.user);
+    const { user } = useSelector(state => state.global);
     const { content, isDeleted } = message;
 
     const renderName = () => {
