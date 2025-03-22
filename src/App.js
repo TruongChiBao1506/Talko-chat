@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import Auth from './screen/Auth';
 import Home from './screen/Home';
 import NotFoundPage from './components/NotFoundPage/NotFoundPage';
-import Chat from './screen/Chat';
+import ChatLayout from './layout/ChatLayout';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchUserProfile } from './redux/globalSlice'
 import { useEffect, useState } from 'react';
@@ -29,7 +29,7 @@ function App() {
       <Routes>
         <Route path='/' element={<Home />} />
         <Route path='/auth/*' element={isLogin ? <Navigate to="/main" /> : <Auth />} />
-        <Route path='/main' element={<Chat />}/>
+        <Route path='/chat/*' element={<ChatLayout />}/>
         <Route path='*' element={<NotFoundPage />} />
       </Routes>
     </Router>
