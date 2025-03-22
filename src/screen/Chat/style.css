@@ -18,11 +18,34 @@
 }
 
 /* Cột Danh sách cuộc trò chuyện */
-.search-container {
+.main-conversation {
     height: 100%;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
     border-right: 2px solid #f0f2f5;
+    background-color: #ffffff;
 }
 
+.main-conversation_list-conversation {
+    margin-top: 16px;
+    flex: 1;
+
+    overflow-y: scroll;
+}
+.main-conversation_list-conversation::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+    position: absolute;
+    right: 0;
+}
+.main-conversation_list-conversation::-webkit-scrollbar-thumb {
+    background-color: #ccc;
+    border-radius: 6px;
+}
+.main-conversation_list-conversation::-webkit-scrollbar-track {
+    background-color: none;
+}
 /* Cột màn hình chat */
 .welcome-screen {
     height: 100%;
