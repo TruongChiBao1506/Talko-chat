@@ -12,8 +12,9 @@ import { useDispatch, useSelector } from 'react-redux';
 import PersonalIcon from '../../components/PersonalIcon';
 import './style.css';
 import ModalUpdateProfile from '../../../../modals/ModalUpdateProfile';
+import ModalChangePassword from '../../../../modals/ModalChangePassword';
 import { setToTalUnread } from '../../slices/chatSlice';
-import { setTabActive } from '../../../../redux/globalSlice';
+import { setTabActive, setLogin } from '../../../../redux/globalSlice';
 import NavbarStyle from './NavbarStyle';
 NavbarContainer.propTypes = {
     onSaveCodeRevoke: PropTypes.func,
@@ -50,7 +51,8 @@ function NavbarContainer({onSaveCodeRevoke = null}){
     const handleLogout = () => {
         localStorage.removeItem('token');
         localStorage.removeItem('refreshToken');
-        window.location.href = 'auth/login';
+        window.location.href = '/auth/login';
+        dispatch(setLogin(false));
     };
 
     const handleSetTabActive = (value) => {
@@ -138,9 +140,9 @@ function NavbarContainer({onSaveCodeRevoke = null}){
                                     <PersonalIcon
                                         isActive={true}
                                         common={false}
-                                        avatar={user.avatar}
-                                        name={user.name}
-                                        color={user.avatarColor}
+                                        avatar={user?.avatar}
+                                        name={user?.name}
+                                        color={user?.avatarColor}
                                     />
                                 </div>
                             </Button>
@@ -183,7 +185,7 @@ function NavbarContainer({onSaveCodeRevoke = null}){
                             <Popover
                                 placement="rightTop"
                                 content={setting}
-                                trigger="focus"
+                                trigger="click"
                             >
                                 <Button
                                     style={NavbarStyle.BUTTON_SETTING}
@@ -207,11 +209,11 @@ function NavbarContainer({onSaveCodeRevoke = null}){
             />
 
 
-            {/* <ModalChangePassword
+            <ModalChangePassword
                 visible={visibleModalChangePassword}
                 onCancel={() => setvisibleModalChangePassword(false)}
                 onSaveCodeRevoke={onSaveCodeRevoke}
-            /> */}
+            />
 
 
         </div>
