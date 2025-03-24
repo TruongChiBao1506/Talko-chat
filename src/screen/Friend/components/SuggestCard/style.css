@@ -1,0 +1,26 @@
+.suggest_card {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: #fff;
+    width: 400px;
+    height: 400px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.suggest_card-info {
+    text-align: center;
+    margin-top: 16px;
+}
+
+.suggest_card-info span {
+    display: block;
+    font-size: 20.8px;
+    color: grey;
+}
+
+.suggest_card-btn {
+    margin-top: 16px;
+}
