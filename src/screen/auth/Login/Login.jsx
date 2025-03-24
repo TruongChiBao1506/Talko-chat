@@ -4,6 +4,7 @@ import Input from '../../../components/inputComponent/Input';
 import Button from '../../../components/buttonComponent/Button';
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { setLogin } from '../../../redux/globalSlice';
 import authApi from "../../../apis/authApi";
 import { useDispatch } from "react-redux";
 import {setLoading} from '../authSlice';
@@ -19,6 +20,7 @@ const Login = () => {
   useEffect(() => {
     document.title = "Đăng nhập - Talko Chat";
   }, []);
+
   const handleLogin = async (username, password) => {
     if(!username || !password) {
       message.error("Vui lòng nhập đầy đủ thông tin");
@@ -29,9 +31,10 @@ const Login = () => {
       const {token, refreshToken} = await authApi.login(username, password);
       localStorage.setItem("token", token);
       localStorage.setItem("refreshToken", refreshToken);
+      dispatch(setLogin(true));
       navigate("/chat");
-      message.success("Đăng nhập thành công");
       window.location.reload();
+      message.success("Đăng nhập thành công");
     } catch (error) {
       console.log(error);
       navigate("/auth/login");

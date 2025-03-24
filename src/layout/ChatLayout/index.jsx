@@ -42,8 +42,6 @@ function ChatLayout() {
     const [codeRevoke, setCodeRevoke] = useState('');
     const codeRevokeRef = useRef();
 
-    console.log('ChatLayout: ', url);
-    
     useEffect(() => {
         return () => {
             socket.close();
@@ -176,8 +174,8 @@ function ChatLayout() {
                 >
                     <Routes>
                         <Route path="" element={<Chat socket={socket} />} />
-                        {/* <Route path={`${url}/friends`} element={<Friend socket={socket} authed={true} />} /> */}
-                        <Route path="friends" element={<Friend />} />
+                        <Route path="friends" element={<Friend socket={socket} authed={true} />} />
+                        {/* <Route path="friends" element={<Friend />} /> */}
                         <Route path="*" element={<NotFoundPage />} />
                     </Routes>
                 </Col>
