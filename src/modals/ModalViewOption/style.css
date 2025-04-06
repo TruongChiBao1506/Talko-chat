@@ -1,0 +1,84 @@
+.footer_wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-direction: row-reverse;
+}
+
+.item-menu {
+    font-weight: 500;
+    font-size: 13px;
+}
+
+.modal-view-option_title {
+    text-align: center;
+}
+
+.modal-view-option_title small {
+    color: #72808e;
+}
+
+.modal-view-option_title strong {
+    color: initial;
+}
+
+.modal-view-option .overview-text {
+    color: #0068ff;
+    margin-left: 32px;
+    margin-top: 16px;
+    margin-bottom: 16px;
+}
+
+.modal-view-option .overview-text:hover {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.modal-view-option_item {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+}
+
+.modal-view-option .vote-message_item_name-option {
+    z-index: 1;
+}
+
+.modal-view-option_avatar {
+    width: 60px;
+}
+
+.modal-view-option_list {
+    padding: 0 32px;
+}
+
+.modal-view-option_list .ant-checkbox-group {
+    display: block;
+}
+
+.modal-view-option_add {
+    margin-top: 32px;
+    padding: 0 32px;
+}
+
+.modal-view-option_form {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    align-items: center;
+}
+
+.modal-view-option .temp-space {
+    width: 15%;
+}
+
+.modal-view-option .form-input {
+    margin-left: 16px;
+    width: 100%;
+}
+
+.modal-view-option .form-input .ant-input-affix-wrapper {
+    padding: 4px 4px;
+}
