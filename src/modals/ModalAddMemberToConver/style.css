@@ -1,0 +1,132 @@
+#modal-add-member-to-conver {
+    height: 70vh;
+}
+
+#modal-add-member-to-conver .divider-title {
+    font-weight: 500;
+}
+
+#modal-add-member-to-conver .heading-group {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+#modal-add-member-to-conver .heading-group .select-background {
+    font-size: 24px;
+    width: 48px;
+    height: 48px;
+    text-align: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: 0.5px solid #ccc;
+    display: flex;
+    align-items: center;
+    color: #888;
+}
+
+#modal-add-member-to-conver .heading-group .input-name-group {
+    padding: 0 16px;
+    flex: 1;
+}
+
+#modal-add-member-to-conver .list-friend-interact {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: row;
+}
+
+#modal-add-member-to-conver .list-friend-interact .checkbox-list-friend {
+    height: 40vh;
+    overflow-y: scroll;
+}
+
+#modal-add-member-to-conver .list-friend-interact .checkbox-list-friend::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+    position: absolute;
+    right: 0;
+}
+
+#modal-add-member-to-conver .list-friend-interact .checkbox-list-friend::-webkit-scrollbar-thumb {
+    border-radius: 6px;
+    background: #e1e4ea;
+}
+
+#modal-add-member-to-conver .list-friend-interact .checkbox-list-friend::-webkit-scrollbar-track {
+    background: none;
+}
+
+#modal-add-member-to-conver .list-friend-interact--left {
+    height: 100%;
+    width: 55%;
+    overflow: hidden;
+    transition: 0.2s;
+}
+
+#modal-add-member-to-conver .list-friend-interact--left .title-list-friend {
+    font-weight: 500;
+    margin-bottom: 22px;
+}
+
+#modal-add-member-to-conver .list-friend-interact--left .checkbox-list-friend {
+    overflow-y: scroll;
+    height: 42vh;
+}
+
+#modal-add-member-to-conver .list-friend-interact--left .checkbox-list-friend .item-checkbox {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+#modal-add-member-to-conver .list-friend-interact--left .checkbox-list-friend .item-checkbox .item-name {
+    font-size: 16px;
+    padding: 0 16px;
+}
+
+#modal-add-member-to-conver .list-friend-interact--left.full-container {
+    width: 100%;
+}
+
+#modal-add-member-to-conver .list-friend-interact--right {
+    position: absolute;
+    height: 100%;
+    display: flex;
+    flex-flow: column nowrap;
+    width: 40%;
+    margin: 0 13px;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+    overflow: hidden;
+    right: 0;
+    transition: 0.2s;
+}
+
+#modal-add-member-to-conver .list-friend-interact--right .title-list-friend-checked {
+    margin: 0 16px;
+    display: block;
+    overflow: hidden;
+    font-weight: bold;
+    color: #007bff;
+}
+
+#modal-add-member-to-conver .list-friend-interact--right.close {
+    transition: 0.2s;
+    right: -100%;
+}
+
+#modal-add-member-to-conver .list-friend-interact--right.close .title-list-friend-checked {
+    display: none;
+}
+
+@media only screen and (min-width: 577px) and (max-width: 767px),
+only screen and (max-width: 576px) {
+    #modal-add-member-to-conver .list-friend-interact--left {
+        width: 100%;
+    }
+    #modal-add-member-to-conver .list-friend-interact--right {
+        display: none;
+    }
+}
