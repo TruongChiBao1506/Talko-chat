@@ -1,0 +1,89 @@
+#main-footer-chat {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+#main-footer-chat .chat-editor {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    position: relative;
+    align-items: center;
+    flex: 1;
+    background-color: #ffffff;
+}
+
+#main-footer-chat .chat-editor .mention-option_wrapper {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    background: red;
+}
+
+#main-footer-chat .chat-editor .mention-option_wrapper .name-user-item {
+    margin-left: 160px;
+    font-size: 12px;
+    font-weight: 400;
+    flex: 1;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+#main-footer-chat .chat-editor .main-editor {
+    flex: 1;
+    width: 100%;
+}
+
+#main-footer-chat .chat-editor .main-editor .ant-mentions:hover,
+#main-footer-chat .chat-editor .main-editor .ant-mentions:focus,
+#main-footer-chat .chat-editor .main-editor .ant-mentions-focused {
+    border-right-width: 0 !important;
+    border-color: none !important;
+    outline: 0;
+    box-shadow: none !important;
+}
+
+#main-footer-chat .chat-editor .main-editor textarea::-webkit-scrollbar {
+    width: 0.5em;
+    height: 0.5em;
+    position: absolute;
+    right: 0;
+}
+
+#main-footer-chat .chat-editor .main-editor textarea::-webkit-scrollbar-thumb {
+    border-radius: 6px;
+    background: #e1e4ea;
+}
+
+#main-footer-chat .chat-editor .main-editor textarea::-webkit-scrollbar-track {
+    background: none;
+}
+
+#main-footer-chat .chat-editor .addtion-interaction {
+    display: flex;
+    flex-direction: row;
+    font-size: 38.4px;
+    padding: 0 12.8px;
+    align-self: flex-end;
+}
+
+#main-footer-chat .chat-editor .addtion-interaction .emoji-or-stiker,
+#main-footer-chat .chat-editor .addtion-interaction .like-emoji {
+    margin: 3.2px 0;
+    padding: 6.4px 16px;
+    transition: 0, 2s;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+#main-footer-chat .chat-editor .addtion-interaction .send-text-thumb {
+    font-weight: 500;
+    color: #0068ff;
+    font-size: 24px;
+}
+
+#main-footer-chat .chat-editor .addtion-interaction .emoji-or-stiker:hover,
+#main-footer-chat .chat-editor .addtion-interaction .like-emoji:hover {
+    background: #f4f5f7;
+}
