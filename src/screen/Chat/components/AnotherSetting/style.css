@@ -1,0 +1,59 @@
+.info_setting {
+    background: #ffffff;
+}
+
+.info_setting-header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    padding: 12.8px 19.2px;
+}
+
+.info_setting-header-title {
+    font-weight: 600;
+    font-size: 25.6px;
+}
+
+.info_setting-header-icon {
+    transition: 0.2s;
+    font-size: 25.6px;
+    color: #72808e;
+}
+
+.info_setting-interact {
+    position: relative;
+    overflow-y: hidden;
+    max-height: 300px;
+    transition: max-height 0.2s ease;
+}
+
+.info_setting-interact-amount {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 12.8px 22.4px;
+    cursor: pointer;
+}
+
+.info_setting-interact-amount-icon {
+    font-size: 28.8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6.4px;
+    transition: 0.2s;
+}
+
+.info_setting-interact-amount-text {
+    padding-left: 16px;
+}
+
+.info_setting-interact .danger {
+    color: red !important;
+}
+
+.info_setting-interact-amount:hover {
+    background: #e8eaef;
+}
