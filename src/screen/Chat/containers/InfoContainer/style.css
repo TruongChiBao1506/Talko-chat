@@ -1,0 +1,11 @@
+#main-info {
+    background: #ffffff;
+    height: 100%;
+}
+
+#main-info .info_member-wrapper,
+#main-info .info_archive-media-wrapper,
+#main-info .info_archive-file-wrapper,
+#main-info .info_another-setting-wrapper {
+    border-top: 9.6px solid #e8eaef;
+}
