@@ -1,0 +1,35 @@
+#navigation-chat-box {
+    font-size: 20px;
+    padding: 6.4px 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    background-color: #ffffff;
+}
+
+#navigation-chat-box > ul {
+    list-style-type: none;
+    list-style: none;
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 0;
+}
+
+#navigation-chat-box .item-chat-box {
+    width: 40px;
+    border-radius: 5px;
+    cursor: pointer;
+    height: 40px;
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    margin-left: 16px;
+}
+
+#navigation-chat-box .item-chat-box:hover {
+    background-color: #f4f5f7;
+    color: inherit !important;
+}
+
+.item-menu-vote {
+    font-size: 20.8px;
+    font-weight: 500;
+}
