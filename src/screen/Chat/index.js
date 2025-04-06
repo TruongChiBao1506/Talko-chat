@@ -11,7 +11,6 @@ import conversationApi from '../../apis/conversationApi';
 import { setJoinChatLayout } from '../../redux/globalSlice';
 import FilterContainer from './components/FilterContainer';
 import ModalJoinGroupFromLink from '../../modals/ModalJoinGroupFromLink';
-import Slider from '../../components/Slider';
 import useWindowDimensions from '../../hook/useWindowDimensions';
 import PropTypes from 'prop-types';
 import React, { useEffect, useRef, useState } from 'react';
