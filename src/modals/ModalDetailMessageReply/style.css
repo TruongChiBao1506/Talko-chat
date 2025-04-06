@@ -1,0 +1,96 @@
+.modal-detail-reply .reply-info {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.modal-detail-reply .reply-info .time-user {
+    margin-left: 16px;
+    color: #72808e;
+}
+
+.modal-detail-reply .reply-item {
+    min-height: 40px;
+    border-radius: 8px;
+    background: #e5efff;
+    padding: 20.8px;
+    display: flex;
+    align-items: center;
+    position: relative;
+    word-break: break-all;
+}
+
+.modal-detail-reply .reply-item.smoker {
+    background: #f4f5f7;
+}
+
+.modal-detail-reply .reply-item.video {
+    cursor: pointer;
+}
+
+.modal-detail-reply .reply-item.smoker::after {
+    background: #f4f5f7;
+}
+
+.modal-detail-reply .reply-item.center {
+    justify-content: center;
+}
+
+.modal-detail-reply .reply-item::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 12px;
+    background: #e5efff;
+    width: 15px;
+    height: 15px;
+    transform: rotate(45deg) translateY(-50%);
+}
+
+.modal-detail-reply .file_info {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    flex: 1;
+    cursor: pointer;
+}
+
+.modal-detail-reply .file_info-name {
+    margin-left: 16px;
+    font-weight: 500;
+}
+
+.modal-detail-reply .file_info-icon {
+    max-height: 96px;
+    max-width: 96px;
+}
+
+.modal-detail-reply .file_info-icon svg {
+    width: 80px;
+}
+
+.modal-detail-reply .file_info-wrapper-reply {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    min-width: 480px;
+    padding: 16px;
+    border-radius: 5px;
+    background: #eeeff2;
+}
+
+.modal-detail-reply .file_info-wrapper-reply .icon-download {
+    cursor: pointer;
+    margin-left: 16px;
+    font-size: 32px; 
+    height: 30px;
+    width: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+    border-radius: 5px;
+    border: 1px solid #e1e4ea;
+}
