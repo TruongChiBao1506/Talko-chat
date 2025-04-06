@@ -1,0 +1,8 @@
+.channel-item.active {
+    background: rgba(88, 174, 255, 0.3);
+    color: #396edd;
+}
+
+.channel-item.active:hover {
+    background: rgba(88, 174, 255, 0.3);
+}
