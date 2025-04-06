@@ -1,0 +1,72 @@
+.reply-block-wrapper {
+    background-color: #ffffff;
+}
+.reply-block {
+    height: 60px;
+    background: rgba(0, 0, 0, 0.04);
+    margin: 13px 13.6px;
+    border-radius: 5px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 0 32px;
+    position: relative;
+    max-width: 100%;
+    overflow: hidden;
+}
+
+.reply-block .vertical-bar {
+    position: absolute;
+    height: 40px;
+    width: 2px;
+    background: #0068ff;
+    transform: translateX(-16px);
+}
+
+.reply-block_close-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    cursor: pointer;
+    display: inline-grid;
+}
+
+.reply-block_info--user {
+    font-weight: 500;
+}
+
+.reply-block_info {
+    margin-top: 10px;
+    margin-left: 16px;
+    font-size: 16px;
+}
+
+.reply-block_logo {
+    width: 36px;
+    height: 36px;
+    overflow: hidden;
+    border-radius: 2px;
+    cursor: pointer;
+}
+
+.reply-block_logo svg {
+    height: 36px;
+    width: 36px;
+}
+
+.reply-block_logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    background-position: center center;
+}
+
+.info-blog_info--bottom {
+    display: inline-block;
+    color: #72808e;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    word-wrap: break-word;
+    max-width: 40vw;
+}
