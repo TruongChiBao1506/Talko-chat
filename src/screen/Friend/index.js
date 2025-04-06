@@ -4,7 +4,7 @@ import conversationApi from '../../apis/conversationApi';
 import ICON_CONTACT from '../../assets/images/contacts_icon.png';
 import ICON_FRIEND from '../../assets/images/icon_friend.png';
 import ICON_GROUP from '../../assets/images/icon_group.png';
-import FilterContainer from '../../screen/Chat/components/FilterContainer';
+import FilterContainer from '../Chat/components/FilterContainer';
 import { getValueFromKey } from '../../constants/filterFriend';
 import SearchContainer from '../Chat/containers/SearchContainer';
 import PropTypes from 'prop-types';
@@ -129,14 +129,14 @@ function Friend({ socket }) {
     };
 
     const menuLeft = (
-        <Menu onClick={()=>{}}>
+        <Menu onClick={handleMenuLeftSelect}>
             <Menu.Item key="1">Tất cả</Menu.Item>
             <Menu.Item key="2">Nhóm tôi quản lý</Menu.Item>
         </Menu>
     );
 
     const menuRight = (
-        <Menu onClick={()=>{}}>
+        <Menu onClick={handleMenuRightSelect}>
             <Menu.Item key="1">Theo tên nhóm từ (A-Z)</Menu.Item>
             <Menu.Item key="2">Theo tên nhóm từ (Z-A)</Menu.Item>
         </Menu>
@@ -189,6 +189,7 @@ function Friend({ socket }) {
                                     valueText={valueInput}
                                     onSubmitSearch={handleOnSubmitSearch}
                                     isFriendPage={true}
+                                    
                                 />
                             </div>
 
