@@ -1,7 +1,21 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import conversationApi from '../../apis/conversationApi';
 import { Col, Row } from 'antd';
+import conversationApi from '../../apis/conversationApi';
+import { setTabActive } from '../../redux/globalSlice';
+import NotFoundPage from '../../components/NotFoundPage/NotFoundPage';
+import Chat from '../../screen/Chat';
+import NavbarContainer from '../../screen/Chat/containers/NavbarContainer';
+import {
+    addMessage,
+    addMessageInChannel,
+    fetchAllSticker,
+    fetchConversationById,
+    fetchListClassify,
+    fetchListColor,
+    fetchListConversations,
+    updateAvatarWhenUpdateMember,
+    updateFriendChat,
+} from '../../screen/Chat/slices/chatSlice';
+import Friend from '../../screen/Friend';
 import {
     fetchFriends,
     fetchListGroup,
@@ -15,21 +29,11 @@ import {
     updateMyRequestFriend,
     updateRequestFriends,
 } from '../../screen/Friend/friendSlice';
-import {
-    fetchConversationById,
-    fetchListClassify,
-    fetchListColor,
-    fetchListConversations,
-} from '../../screen/Chat/slices/chatSlice';
-import { setTabActive } from '../../redux/globalSlice';
 import useWindowUnloadEffect from '../../hook/useWindowUnloadEffect';
-import NotFoundPage from '../../components/NotFoundPage/NotFoundPage';
-import NavbarContainer from '../../screen/Chat/containers/NavbarContainer';
-import Chat from '../../screen/Chat';
-import Friend from '../../screen/Friend';
-import { init, socket } from '../../utils/socketClient';
-import { Route, Routes, useLocation } from 'react-router-dom';
-init();
+import React, { useEffect, useRef, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { Route, Routes, Switch, useLocation, useRouteMatch } from 'react-router-dom';
+import { socket } from '../../utils/socketClient';
 
 function ChatLayout() {
     const location = useLocation();
@@ -42,9 +46,29 @@ function ChatLayout() {
     const [codeRevoke, setCodeRevoke] = useState('');
     const codeRevokeRef = useRef();
 
+    // useEffect(() => {
+    //     return () => {
+    //         socket.close();
+    //     };
+    // }, []);
+
     useEffect(() => {
+        socket.on('connect', () => {
+            console.log('Socket connected successfully with ID:', socket.id);
+        });
+        
+        socket.on('connect_error', (error) => {
+            console.error('Socket connection error:', error);
+        });
+        
+        socket.on('disconnect', (reason) => {
+            console.log('Socket disconnected:', reason);
+        });
+        
         return () => {
-            socket.close();
+            socket.off('connect');
+            socket.off('connect_error');
+            socket.off('disconnect');
         };
     }, []);
 
@@ -65,12 +89,16 @@ function ChatLayout() {
         dispatch(fetchListClassify());
         dispatch(fetchListColor());
         dispatch(fetchListConversations({}));
+        dispatch(fetchAllSticker());
         dispatch(setTabActive(1));
+        // dispatch(fetchInfoWebs());
     }, []);
+
     useEffect(() => {
         const userId = user._id;
         if (userId) socket.emit('join', userId);
     }, [user]);
+
     useEffect(() => {
         if (conversations.length === 0) return;
 
@@ -96,6 +124,45 @@ function ChatLayout() {
         );
     }, []);
 
+    useEffect(() => {
+        socket.off('new-message');
+        socket.on('new-message', (conversationId, newMessage) => {    
+            console.log('new-message', conversationId, newMessage);
+              
+            dispatch(addMessage(newMessage));
+            setIdNewMessage(newMessage._id);
+        });
+
+        socket.on('update-member', async (conversationId) => {
+            const data = await conversationApi.getConversationById(
+                conversationId
+            );
+            const { avatar, totalMembers } = data;
+            dispatch(
+                updateAvatarWhenUpdateMember({
+                    conversationId,
+                    avatar,
+                    totalMembers,
+                })
+            );
+        });
+
+        socket.on(
+            'new-message-of-channel',
+            (conversationId, channelId, message) => {
+                dispatch(
+                    addMessageInChannel({ conversationId, channelId, message })
+                );
+                setIdNewMessage(message._id);
+            }
+        );
+
+        socket.on('create-conversation', (conversationId) => {
+            console.log('tạo nhóm', conversationId);
+            dispatch(fetchConversationById({ conversationId }));
+        });
+    }, []);
+
     function sleep(ms) {
         return new Promise((resolve) => setTimeout(resolve, ms));
     }
@@ -107,6 +174,7 @@ function ChatLayout() {
 
         await leaveApp();
     }, true);
+
     useEffect(() => {
         socket.on('accept-friend', (value) => {
             dispatch(setNewFriend(value));
@@ -129,10 +197,10 @@ function ChatLayout() {
         });
 
         // xóa kết bạn
-        // socket.on('deleted-friend', (_id) => {
-        //     dispatch(updateFriend(_id));
-        //     dispatch(updateFriendChat(_id));
-        // });
+        socket.on('deleted-friend', (_id) => {
+            dispatch(updateFriend(_id));
+            dispatch(updateFriendChat(_id));
+        });
         // revokeToken
 
         socket.on('revoke-token', ({ key }) => {
@@ -173,7 +241,7 @@ function ChatLayout() {
                     xs={{ span: 20 }}
                 >
                     <Routes>
-                        <Route path="" element={<Chat socket={socket} />} />
+                        <Route path="" element={<Chat socket={socket} authed = {true} idNewMessage={idNewMessage} />} />
                         <Route path="friends" element={<Friend socket={socket} authed={true} />} />
                         {/* <Route path="friends" element={<Friend />} /> */}
                         <Route path="*" element={<NotFoundPage />} />
