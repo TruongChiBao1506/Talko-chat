@@ -23,7 +23,7 @@ function ConverMutipleSearch({ data }) {
         dispatch(fetchListMessages({ conversationId: value._id, size: 10 }));
         dispatch(setCurrentConversation(value._id));
 
-        // navigate(`/chat`);
+        navigate(`/chat`);
     }
 
     return (

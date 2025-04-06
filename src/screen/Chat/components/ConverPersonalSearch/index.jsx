@@ -23,7 +23,7 @@ function ConverPersonalSearch({ data }) {
     const handleClickItem = (value) => {
         dispatch(fetchListMessages({ conversationId: value._id, size: 10 }));
         dispatch(setCurrentConversation(value._id));
-        // navigate(`/chat`);
+        navigate(`/chat`);
     }
     return (
         <div className='list-filter_single-conver'>
