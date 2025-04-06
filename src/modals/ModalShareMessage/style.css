@@ -1,0 +1,129 @@
+#modal-share-message {
+    height: 70vh;
+}
+
+#modal-share-message .divider-title {
+    font-weight: 500;
+}
+
+#modal-share-message .heading-group {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+#modal-share-message .heading-group .select-background {
+    font-size: 24px;
+    width: 48px;
+    height: 48px;
+    text-align: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: 0.5px solid #e8eaef;
+    display: flex;
+    align-items: center;
+    color: #87929e;
+}
+
+#modal-share-message .heading-group .input-name-group {
+    padding: 0 16px;
+    flex: 1;
+}
+
+#modal-share-message .list-conver-interact {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: row;
+}
+
+#modal-share-message .list-conver-interact .checkbox-list-conver {
+    height: 55vh;
+    overflow-y: scroll;
+}
+
+#modal-share-message .list-conver-interact .checkbox-list-conver::-webkit-scrollbar {
+    width: 0.5em;
+    height: 0.5em;
+    position: absolute;
+    right: 0;
+}
+
+#modal-share-message .list-conver-interact .checkbox-list-conver::-webkit-scrollbar-thumb {
+    border-radius: 6px;
+    background: #e1e4ea;
+}
+
+#modal-share-message .list-conver-interact .checkbox-list-conver::-webkit-scrollbar-track {
+    background: none;
+}
+
+#modal-share-message .list-conver-interact--left {
+    height: 100%;
+    width: 55%;
+    overflow: hidden;
+    transition: 0.2s;
+}
+
+#modal-share-message .list-conver-interact--left .title-list-conver {
+    font-weight: 500;
+    margin-bottom: 22.4px;
+}
+
+#modal-share-message .list-conver-interact--left .checkbox-list-conver {
+    overflow-y: scroll;
+    height: 55vh;
+}
+
+#modal-share-message .list-conver-interact--left .checkbox-list-conver .ant-checkbox-wrapper {
+    align-items: center;
+}
+
+#modal-share-message .list-conver-interact--left .checkbox-list-conver .item-checkbox {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    height: 50px;
+}
+
+#modal-share-message .list-conver-interact--left .checkbox-list-conver .item-checkbox .item-name {
+    font-size: 16px;
+    padding: 0 16px;
+}
+
+#modal-share-message .list-conver-interact--left.full-container {
+    width: 100%;
+}
+
+#modal-share-message .list-conver-interact--right {
+    position: absolute;
+    height: 100%;
+    display: flex;
+    flex-flow: column nowrap;
+    width: 40%;
+    margin: 0 12.8px;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+    overflow: hidden;
+    right: 0;
+    transition: 0.2s;
+}
+
+#modal-share-message .list-conver-interact--right .title-list-conver-checked {
+    margin: 0 16px;
+    display: block;
+    overflow: hidden;
+}
+
+#modal-share-message .list-conver-interact--right .title-list-conver-checked strong {
+    color: #4c92ff;
+}
+
+#modal-share-message .list-conver-interact--right.close {
+    transition: 0.2s;
+    right: -100%;
+}
+
+#modal-share-message .list-conver-interact--right.close .title-list-conver-checked {
+    display: none;
+}
