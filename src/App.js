@@ -28,7 +28,8 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path='/' element={isLogin ? <ChatLayout /> : <Home />} />
+
+        <Route path='/home' element={<Home />} />
         <Route path='/auth/*' element={<Auth />} />
         <Route path='/chat/*' element={<ChatLayout />} />
         <Route path='*' element={<NotFoundPage />} />
