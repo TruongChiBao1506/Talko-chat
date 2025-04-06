@@ -1,0 +1,19 @@
+#content-tabpane-media-wrapper {
+    padding: 0 19.2px;
+}
+
+#content-tabpane-media-wrapper .item-in-archive-media {
+    margin: 25.6px 0;
+}
+
+#content-tabpane-media-wrapper .item-in-archive-media .time-sent {
+    font-size: 22.4px;
+    font-weight: 600;
+    margin: 16px 0;
+}
+
+#content-tabpane-media-wrapper .item-in-archive-media .list-item-sent {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}

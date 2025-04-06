@@ -1,0 +1,18 @@
+#info_media-search {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+#info_media-search .info_media-search-content {
+    flex: 1;
+}
+
+.info_media-search--tabpane {
+    background-color: #ffffff;
+    padding: 0 19.2px;
+}
+
+.info_media-search-content {
+    background-color: #ffffff;
+}
