@@ -1,0 +1,105 @@
+.vote-message-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 64px;
+    margin-top: 16px;
+}
+
+.vote-message {
+    min-width: 531.2px;
+    background: #ffffff;
+    border-radius: 8px;
+    padding: 16px;
+    text-align: center;
+}
+
+.vote-message_list {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.vote-message_number-voted {
+    color: #0068ff;
+    font-weight: 500;
+    font-size: 19.2px;
+    cursor: pointer;
+}
+
+.vote-message_list {
+    margin-top: 16px;
+    margin-bottom: 16px; 
+    display: flex;
+    flex-direction: column;
+}
+
+.vote-message_list div ~ div {
+    margin-top: 16px;
+}
+
+.vote-message_view-all {
+    padding: 0 9.6px;
+}
+
+.vote-message_item {
+    width: 300px;
+    background: #e8eaef;
+    border-radius: 5px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    padding: 9.6px 14.4px;
+    cursor: pointer;
+}
+
+.vote-message_item span {
+    width: 80%;
+    word-break: break-all;
+    text-align: left;
+    z-index: 1;
+}
+
+.vote-message_item strong {
+    width: 20%;
+    text-align: right;
+    z-index: 1;
+}
+
+.vote-message_progress {
+    position: absolute;
+    top: 0;
+    left: 0;
+    background: rgb(171, 205, 255);
+    border-radius: 5px;
+    height: 100%;
+    transition: 0.2s;
+}
+
+@media only screen and (min-width: 992px) and (max-width: 1199px) {
+   
+}
+
+@media only screen and (min-width: 768px) and (max-width: 991px) {
+    
+}
+
+@media only screen and (min-width: 577px) and (max-width: 767px) {
+    .vote-message {
+        min-width: 451.2px;
+    }
+    .vote-message_item {
+        width: 448px;
+    }
+}
+
+@media only screen and (max-width: 576px) {
+    .vote-message {
+        min-width: 451.2px;
+    }
+    .vote-message_item {
+        width: 448px;
+    }
+}

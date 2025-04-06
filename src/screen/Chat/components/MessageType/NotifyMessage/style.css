@@ -1,0 +1,37 @@
+.notify-message-wrapper {
+    display: flex;
+    justify-content: center;
+}
+
+.notify-message-wrapper .notify-message-content {
+    display: flex;
+    justify-content: center;
+    flex-direction: row;
+    align-items: center;
+    word-wrap: break-word;
+    max-width: 90%;
+    padding: 7px 14px;
+    font-size: 13px;
+    margin: 16px 0;
+    background: #fff;
+    border-radius: 10px;
+}
+
+.notify-message-wrapper .notify-message-content .view-click {
+    color: #58aeff;
+    cursor: pointer;
+}
+
+.notify-message-wrapper .notify-message-content_group-avatar {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.notify-message-wrapper .notify-message-content_per-avatar:nth-child(n + 2) {
+    margin-left: -8px;
+}
+
+.notify-message-wrapper .notify-message-content-title {
+    margin-left: 16px;
+}
