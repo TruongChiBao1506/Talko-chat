@@ -16,6 +16,7 @@ import ModalChangePassword from '../../../../modals/ModalChangePassword';
 import { setToTalUnread } from '../../slices/chatSlice';
 import { setTabActive, setLogin } from '../../../../redux/globalSlice';
 import NavbarStyle from './NavbarStyle';
+import { closeConnection } from '../../../../utils/socketClient';
 NavbarContainer.propTypes = {
     onSaveCodeRevoke: PropTypes.func,
 };
@@ -51,6 +52,8 @@ function NavbarContainer({onSaveCodeRevoke = null}){
     const handleLogout = () => {
         localStorage.removeItem('token');
         localStorage.removeItem('refreshToken');
+        // Đóng kết nối socket
+        closeConnection();
         window.location.href = '/auth/login';
         dispatch(setLogin(false));
     };
