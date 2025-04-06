@@ -1,8 +1,5 @@
-.list_conversation{
-    background-color: #ffffff;
-}
 .conversation-item {
-    padding: 8px 13px;
+    padding: 8px 12.8px;
     list-style: none;
     transition: 0.2s;
     cursor: pointer;
@@ -24,8 +21,8 @@
     display: flex;
     flex-direction: column;
     flex: 1;
-    padding-left: 13px;
-    padding-right: 6px;
+    padding-left: 12.8px;
+    padding-right: 6.4px;
     width: calc(100% - 94px);
 }
 
@@ -47,22 +44,22 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    min-width: 73px;
+    min-width: 73.6px;
 }
 
 .conversation-item .right-side-box .lastest-time {
-    font-size: 12px;
+    font-size: 14px;
     color: #87929e;
     text-align: center;
 }
 
 .conversation-item .right-side-box .message-count {
     display: none;
-    height: 16px;
-    width: 16px;
+    height: 18px;
+    width: 18px;
     color: #ffffff;
     text-align: center;
-    line-height: 16px;
+    line-height: 18px;
     background-color: #de433e;
     font-weight: 500;
     border-radius: 50%;
@@ -73,17 +70,17 @@
     margin-top: -8px;
 }
 
-.ant-avatar-group .ant-avatar:nth-child(1),
-.ant-avatar-group .ant-avatar:nth-child(3) {
+.conversation-item .ant-avatar-group .ant-avatar:nth-child(1),
+.conversation-item .ant-avatar-group .ant-avatar:nth-child(3) {
     margin-left: 0 !important;
 }
 
-.ant-avatar-group .ant-avatar:nth-child(3),
-.ant-avatar-group .ant-avatar:nth-child(4) {
+.conversation-item .ant-avatar-group .ant-avatar:nth-child(3),
+.conversation-item .ant-avatar-group .ant-avatar:nth-child(4) {
     margin-top: -8px;
 }
 
-.ant-avatar-group {
+.conversation-item .ant-avatar-group {
     display: flex;
     flex-wrap: wrap;
 }
