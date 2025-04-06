@@ -1,0 +1,36 @@
+.sticker-item_list-sticker {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-items: center;
+  }
+  
+  .sticker-item_list-sticker .sticker-item_img {
+    width: 96px;
+    height: 96px;
+    border-radius: 5px;
+    transition: 0.2s;
+    overflow: hidden;
+    cursor: pointer;
+    margin: 8px 8px;
+  }
+  
+  .sticker-item_list-sticker .sticker-item_img img {
+    max-height: 90%;
+    max-width: 90%;
+  }
+  
+  .sticker-item_list-sticker .sticker-item_img:hover {
+    background: #eeeff2;
+  }
+  
+  .sticker-item_name {
+    font-size: 25.6px;
+    font-weight: 500;
+    margin-left: 8px;
+  }
+  
+  .sticker-item {
+    margin-top: 16px;
+  }
