@@ -1,6 +1,6 @@
 #sticker-list {
     max-height: 45vh;
-    max-width: 40vh;
+    max-width: 100vh;
     overflow-x: hidden;
     overflow-y: scroll;
   }
