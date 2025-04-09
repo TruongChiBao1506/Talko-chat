@@ -1,4 +1,5 @@
 import { Modal, Spin } from 'antd';
+import { LoadingOutlined } from '@ant-design/icons';
 import DividerCustom from '../../components/DividerCustom';
 import ModalShareMessage from '../../../../modals/ModalShareMessage';
 import UserMessage from '../../components/UserMessage';
@@ -313,7 +314,7 @@ function BodyChatContainer({
             {/* <div className='main-body-conversation'> */}
 
             <div className="spinning-custom">
-                <Spin spinning={loading} />
+                <Spin indicator={<LoadingOutlined style={{fontSize : 38}}/>} spinning={loading} />
             </div>
 
             {renderMessages(messages)}
