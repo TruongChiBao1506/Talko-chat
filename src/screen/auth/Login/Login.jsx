@@ -22,8 +22,23 @@ const Login = () => {
   }, []);
 
   const handleLogin = async (username, password) => {
+    const regexUser =
+    /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    const regexPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/;
     if(!username || !password) {
       message.error("Vui lòng nhập đầy đủ thông tin");
+      return;
+    }
+    if(!regexUser.test(username)){
+      message.error("Email không hợp lệ");
+      return;
+    }
+    if (password.length < 8 || password.length > 50) {
+      message.error("Mật khẩu phải có độ dài từ 8 đến 50 ký tự");
+      return;
+    }
+    if (!regexPassword.test(password)) {
+      message.error("Mật khẩu phải chứa ít nhất 1 chữ hoa, 1 chữ thường và 1 số");
       return;
     }
     try {
@@ -71,7 +86,7 @@ const Login = () => {
               handleLogin(account, password)}}>
               <div className="input-group">
                 <label>Tài khoản</label>
-                <Input type="text" placeholder="Email hoặc số điện thoại" value={account} onChange={(value)=> setAccount(value)}/>
+                <Input type="text" placeholder="Email" value={account} onChange={(value)=> setAccount(value)}/>
               </div>
               <div className="input-group">
                 <label>Mật khẩu</label>
