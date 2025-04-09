@@ -39,10 +39,10 @@ function PersonalIcon({ avatar, isActive, demention, common, isHost, name, color
         <KeyOutlined
             style={{
                 backgroundColor: 'rgba(0,0,0,0.3)',
-                padding: '0.24rem',
+                padding: '3.84px',
                 borderRadius: '50%',
                 color: 'yellow',
-                fontSize: '1.2rem',
+                fontSize: '19.2px',
             }}
         />
     ) : null;
