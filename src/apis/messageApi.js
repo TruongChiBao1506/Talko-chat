@@ -16,25 +16,25 @@ const messageApi = {
         return axiosClient.post(`${API_URL}/text`, message);
     },
 
-    // sendFileThroughMessage: (file, attachInfo, cb) => {
-    //     const { type, conversationId, channelId } = attachInfo;
+    sendFileThroughMessage: (file, attachInfo, cb) => {
+        const { type, conversationId, channelId } = attachInfo;
 
-    //     const config = {
-    //         params: {
-    //             type,
-    //             conversationId,
-    //             channelId,
-    //         },
-    //         onUploadProgress: function (progressEvent) {
-    //             let percentCompleted = Math.round(
-    //                 (progressEvent.loaded * 100) / progressEvent.total
-    //             );
-    //             cb(percentCompleted);
-    //         },
-    //     };
+        const config = {
+            params: {
+                type,
+                conversationId,
+                channelId,
+            },
+            onUploadProgress: function (progressEvent) {
+                let percentCompleted = Math.round(
+                    (progressEvent.loaded * 100) / progressEvent.total
+                );
+                cb(percentCompleted);
+            },
+        };
 
-    //     return axiosClient.post(`${API_URL}/files`, file, config);
-    // },
+        return axiosClient.post(`${API_URL}/files`, file, config);
+    },
 
     redoMessage: (idMessage) => {
         return axiosClient.delete(`${API_URL}/${idMessage}`);
