@@ -162,7 +162,7 @@ function UserCard(props) {
                 <div className="user-card_wrapper">
                     <div className="user-card_cover-image">
                         <Image
-                            src={coverImage}
+                            src={user?.coverImage}
                             preview={false}
                             style={UserCardStyle.CoverImageStyle}
                         />
