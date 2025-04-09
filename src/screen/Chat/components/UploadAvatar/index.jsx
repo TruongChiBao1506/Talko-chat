@@ -18,42 +18,38 @@ UploadAvatar.defaultProps = {
 function UploadAvatar({ avatar, getFile, isClear }) {
     const [imagePreview, setImagePreview] = useState("");
 
-    // Cập nhật ảnh khi `avatar` thay đổi
-    useEffect(() => {
-        if (avatar) {
-            setImagePreview(avatar);
-        }
-    }, [avatar]);
-
-    // Xóa ảnh khi `isClear` được kích hoạt
     useEffect(() => {
         if (isClear) {
+            console.log('clear');
             setImagePreview('');
         }
     }, [isClear]);
 
-    const handleOnChange = (e) => {
-        const fileImage = e.target.files[0]; // Lấy file ảnh từ input
+    const handleOnChange = async (e) => {
+        const files = e.target.files;
 
-        if (!fileImage || !fileImage.type.match('image.*')) {
-            return;
-        }
-
+        const fileImage = files[0];
+        
         const reader = new FileReader();
-        reader.readAsDataURL(fileImage); // Đọc file dưới dạng URL dữ liệu base64
-        reader.onloadend = () => setImagePreview(reader.result);
-        // Khi quá trình đọc kết thúc, cập nhật ảnh preview bằng URL base64
-        if (getFile) {
-            getFile(fileImage); // Truyền file ảnh ra ngoài
+        if (fileImage && fileImage.type.match('image.*')) {   
+            reader.readAsDataURL(fileImage);
+            reader.onloadend = function (e) {
+                setImagePreview(reader.result);
+            };
+
+            if (getFile) {
+                getFile(fileImage)
+            }
+
         }
-    };
+    }
 
     return (
         <div className='upload-avatar'>
             <div className="upload-avatar_default-avatar">
                 <div className="upload-avatar_image">
-                    {imagePreview ? (
-                        <img src={imagePreview} alt="Avatar Preview" />
+                    {(avatar || imagePreview) ? (
+                        <img src={imagePreview ? imagePreview : avatar} alt="Avatar Preview" />
                     ) : (
                         <label className='upload-avatar_text-select' htmlFor="upload-photo_custom">
                             <FileImageOutlined style={{fontSize:'25px'}}/>
