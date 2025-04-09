@@ -95,7 +95,7 @@
 #main-chat-wrapper .main-conversation_list-conversation {
     /* margin-top: 16px; */
     flex: 1;
-    overflow-y: scroll;
+    overflow-y: auto;
     background-color: #ffffff;
 }
 
