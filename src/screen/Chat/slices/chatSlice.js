@@ -213,7 +213,7 @@ export const getLastViewChannel = createAsyncThunk(
 export const fetchAllSticker = createAsyncThunk(
     `${KEY}/fetchAllSticker`,
     async () => {
-        const data = await stickerApi.fetchAllSticker();
+        const data = await stickerApi.fetchAllSticker();    
         return data;
     }
 );
