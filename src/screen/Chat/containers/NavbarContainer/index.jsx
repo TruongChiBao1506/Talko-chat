@@ -91,11 +91,11 @@ function NavbarContainer({onSaveCodeRevoke = null}){
 
             <div className="pop_up-personal--item">
                 <div className="pop_up-personal--item-icon">
-                    <LogoutOutlined />
+                    <LogoutOutlined style={{color: "red"}}/>
                 </div>
 
                 <div
-                    className="pop_up-personal--item-text"
+                    className="pop_up-personal--item-text_logout"
                     onClick={handleLogout}
                 >
                     Đăng xuất

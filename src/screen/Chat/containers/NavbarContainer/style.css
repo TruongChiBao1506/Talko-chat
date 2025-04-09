@@ -20,14 +20,21 @@ ul {
     padding-left: 12.8px;
     padding-right: 48px;
 }
+.pop_up-personal--item-text_logout{
+    padding-left: 12.8px;
+    padding-right: 48px;
+}
 
 .pop_up-personal--item:hover {
     color: #396edd;
 }
+.pop_up-personal--item-text_logout {
+    color: red;
+}
 
 #sidebar_wrapper {
     height: 100vh;
-    background: #4c92ff;
+    background: #2883ec;
     display: flex;
     flex-direction: column;
 }
