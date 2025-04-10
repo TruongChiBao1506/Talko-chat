@@ -14,7 +14,7 @@
 
 .channel-header-title {
     font-weight: 600;
-    font-size: 25.6px;
+    font-size: 16px;
 }
 
 .channel-header-title .total-channel-notify {
@@ -124,7 +124,7 @@
 }
 
 .channel-interact-amount-icon {
-    font-size: 28.8px;
+    font-size: 18px;
     display: flex;
     align-items: center;
     justify-content: center;

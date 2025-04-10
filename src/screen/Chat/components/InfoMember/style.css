@@ -14,12 +14,12 @@
 
 .info_member-header-title {
     font-weight: 600;
-    font-size: 25.6px;
+    font-size: 16px;
 }
 
 .info_member-header-icon {
     transition: 0.2s;
-    font-size: 25.6px;
+    font-size: 16px;
     color: #72808e;
 }
 
@@ -38,7 +38,7 @@
 
 .info_member-interact_button {
     position: absolute;
-    right: 19.2px;
+    right: 12px;
     display: flex;
     justify-content: space-between;
     width: 20%;
@@ -88,8 +88,8 @@
 }
 
 .info_member-interact_button .cirle-button {
-    width: 48px;
-    height: 48px;
+    width: 24px;
+    height: 24px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -98,13 +98,13 @@
 }
 
 .info_member-interact_button svg {
-    font-size: 25.6px;
+    font-size: 16px;
     color: #0068ff;
 }
 
 .info_member-interact_link-des {
     color: #4c92ff;
-    font-size: 19.2px;
+    font-size: 14px;
     width: 70%;
     text-overflow: ellipsis;
     white-space: nowrap;
