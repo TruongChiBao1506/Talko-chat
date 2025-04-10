@@ -2,7 +2,7 @@ import { Tabs } from "antd";
 import mediaApi from "api/mediaApi";
 import PropTypes from "prop-types";
 import React, { useEffect, useState } from "react";
-import Scrollbars from "react-custom-scrollbars";
+import Scrollbars from "react-custom-scrollbars-2";
 import { useSelector } from "react-redux";
 import ContentTabPaneFile from "../ContentTabPaneFile";
 import ContentTabPaneMedia from "../ContentTabPaneMedia";

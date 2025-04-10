@@ -12,11 +12,11 @@ import { setJoinChatLayout } from "app/globalSlice";
 import FilterContainer from "components/FilterContainer";
 import ModalJoinGroupFromLink from "components/ModalJoinGroupFromLink";
 import Slider from "components/Slider";
-import useWindowDimensions from "hooks/useWindowDimensions";
+import useWindowDimensions from "hook/useWindowDimensions";
 import PropTypes from "prop-types";
 import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate, useRouteMatch } from "react-router";
+import { useMatch, useNavigate } from "react-router";
 import { useHistory, useLocation } from "react-router-dom";
 import renderWidthDrawer from "utils/DrawerResponsive";
 import DrawerPinMessage from "./components/DrawerPinMessage";
@@ -56,7 +56,7 @@ import {
   updateTimeForConver,
   updateVoteMessage,
 } from "./slice/chatSlice";
-import "./style.scss";
+import "./style.css";
 
 Chat.propTypes = {
   socket: PropTypes.object,
@@ -78,7 +78,10 @@ function Chat({ socket, idNewMessage }) {
     currentChannel,
     channels,
   } = useSelector((state) => state.chat);
-  const { path } = useRouteMatch();
+  const location = useLocation();
+  const isChatRoute = useMatch("/chat");
+  const navigate = useNavigate();
+
   const [scrollId, setScrollId] = useState("");
   // const [idNewMessage, setIdNewMessage] = useState('')
   const [isShow, setIsShow] = useState(false);
@@ -91,8 +94,6 @@ function Chat({ socket, idNewMessage }) {
   );
   const [visibleNews, setVisibleNews] = useState(false);
   const [tabActiveInNews, setTabActiveNews] = useState(0);
-  const location = useLocation();
-  const navigate = useNavigate();
   const [isVisibleModalJoinGroup, setIsVisibleJoinGroup] = useState(false);
   const [summaryGroup, setSummary] = useState({});
   const refCurrentConversation = useRef();
@@ -174,11 +175,12 @@ function Chat({ socket, idNewMessage }) {
         //   },
         // });
 
-        navigate('', {  // Giữ nguyên URL hiện tại
-          replace: true,  // Thay thế lịch sử thay vì push mới
+        navigate("", {
+          // Giữ nguyên URL hiện tại
+          replace: true, // Thay thế lịch sử thay vì push mới
           state: {
             conversationId: null,
-          }
+          },
         });
       }
     };
@@ -569,10 +571,10 @@ function Chat({ socket, idNewMessage }) {
       <div id="main-chat-wrapper">
         <Row gutter={[0, 0]}>
           <Col
-            span={5}
-            xl={{ span: 5 }}
-            lg={{ span: 6 }}
-            md={{ span: 7 }}
+            span={6}
+            xl={{ span: 6 }}
+            lg={{ span: 7 }}
+            md={{ span: 8 }}
             sm={{ span: currentConversation ? 0 : 24 }}
             xs={{ span: currentConversation ? 0 : 24 }}
           >
@@ -610,7 +612,7 @@ function Chat({ socket, idNewMessage }) {
               )}
             </div>
           </Col>
-          {path === "/chat" && currentConversation ? (
+          {isChatRoute && currentConversation ? (
             <>
               <Col
                 span={isOpenInfo ? 13 : 19}

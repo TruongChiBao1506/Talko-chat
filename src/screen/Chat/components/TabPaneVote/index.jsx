@@ -4,7 +4,7 @@ import "./style.scss";
 import VoteMessage from "../MessageType/VoteMessage";
 import { useDispatch, useSelector } from "react-redux";
 import { useState } from "react";
-import { fetchVotes, updateVote } from "features/Chat/slice/chatSlice";
+import { fetchVotes, updateVote } from "screen/Chat/slice/chatSlice";
 import { Button } from "antd";
 import { CaretDownOutlined } from "@ant-design/icons";
 import voteApi from "api/voteApi";

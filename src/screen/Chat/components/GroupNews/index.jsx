@@ -2,12 +2,12 @@ import { BarChartOutlined, NumberOutlined } from "@ant-design/icons";
 import { Tabs } from "antd";
 import PropTypes from "prop-types";
 import React from "react";
-import Scrollbars from "react-custom-scrollbars";
 import { useSelector } from "react-redux";
 import InfoTitle from "../InfoTitle";
 import ListChannel from "../ListChannel";
 import TabPaneVote from "../TabPaneVote";
 import "./style.scss";
+import Scrollbars from "react-custom-scrollbars-2";
 
 GroupNews.propTypes = {
   onBack: PropTypes.func,

@@ -10,7 +10,7 @@ import InfoTitle from "screen/Chat/components/InfoTitle";
 import { fetchAllMedia } from "screen/Chat/slice/mediaSlice";
 import PropTypes from "prop-types";
 import React, { useEffect, useState } from "react";
-import Scrollbars from "react-custom-scrollbars";
+import Scrollbars from "react-custom-scrollbars-2";
 import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
 import UserCard from "components/UserCard";

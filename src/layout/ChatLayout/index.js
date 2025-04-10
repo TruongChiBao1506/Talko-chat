@@ -1,9 +1,9 @@
 import { Col, Row } from "antd";
-import conversationApi from "api/conversationApi";
-import { setTabActive } from "app/globalSlice";
-import NotFoundPage from "components/NotFoundPage";
-import Chat from "screen/Chat";
-import NavbarContainer from "screen/Chat/containers/NavbarContainer";
+import conversationApi from "../../api/conversationApi";
+import { setTabActive } from "../../redux/globalSlice";
+import NotFoundPage from "../../components/NotFoundPage/NotFoundPage";
+import Chat from "../../screen/Chat";
+import NavbarContainer from "../../screen/Chat/containers/NavbarContainer";
 import {
   addMessage,
   addMessageInChannel,
@@ -14,8 +14,8 @@ import {
   fetchListConversations,
   updateAvatarWhenUpdateMember,
   updateFriendChat,
-} from "screen/Chat/slice/chatSlice";
-// import Friend from "screen/Friend";
+} from "../../screen/Chat/slice/chatSlice";
+// import Friend from "../../screen/Friend";
 import {
   fetchFriends,
   fetchListGroup,
@@ -28,17 +28,16 @@ import {
   updateFriend,
   updateMyRequestFriend,
   updateRequestFriends,
-} from "screen/Friend/friendSlice";
-import { fetchInfoWebs } from "screen/Home/homeSlice";
-import useWindowUnloadEffect from "hooks/useWindowUnloadEffect";
+} from "../../screen/Friend/friendSlice";
+import useWindowUnloadEffect from "../../hook/useWindowUnloadEffect";
 import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Route, Switch, useRouteMatch } from "react-router-dom";
-import { init, socket } from "utils/socketClient";
-init();
+import { Route, Routes, useLocation } from "react-router-dom";
+import { socket } from "../../utils/socketClient";
 
-function ChatLayout(props) {
-  const { url } = useRouteMatch();
+function ChatLayout() {
+  const location = useLocation();
+  const url = location.pathname;
   const dispatch = useDispatch();
   const { conversations } = useSelector((state) => state.chat);
   const { isJoinChatLayout, user } = useSelector((state) => state.global);
@@ -47,9 +46,29 @@ function ChatLayout(props) {
   const [codeRevoke, setCodeRevoke] = useState("");
   const codeRevokeRef = useRef();
 
+  // useEffect(() => {
+  //     return () => {
+  //         socket.close();
+  //     };
+  // }, []);
+
   useEffect(() => {
+    socket.on("connect", () => {
+      console.log("Socket connected successfully with ID:", socket.id);
+    });
+
+    socket.on("connect_error", (error) => {
+      console.error("Socket connection error:", error);
+    });
+
+    socket.on("disconnect", (reason) => {
+      console.log("Socket disconnected:", reason);
+    });
+
     return () => {
-      socket.close();
+      socket.off("connect");
+      socket.off("connect_error");
+      socket.off("disconnect");
     };
   }, []);
 
@@ -72,7 +91,7 @@ function ChatLayout(props) {
     dispatch(fetchListConversations({}));
     dispatch(fetchAllSticker());
     dispatch(setTabActive(1));
-    dispatch(fetchInfoWebs());
+    // dispatch(fetchInfoWebs());
   }, []);
 
   useEffect(() => {
@@ -106,7 +125,10 @@ function ChatLayout(props) {
   }, []);
 
   useEffect(() => {
+    socket.off("new-message");
     socket.on("new-message", (conversationId, newMessage) => {
+      console.log("new-message", conversationId, newMessage);
+
       dispatch(addMessage(newMessage));
       setIdNewMessage(newMessage._id);
     });
@@ -192,11 +214,29 @@ function ChatLayout(props) {
     setCodeRevoke(code);
     codeRevokeRef.current = code;
   };
-
   return (
-    <div>
-      {/* <button onClick={leaveApp} >test scoket</button> */}
-      <Row gutter={[0, 0]}>
+    <div
+      style={{
+        width: "100%",
+        height: "100vh",
+        // overflow: "visible",
+        display: "flex",
+        // position: "fixed",
+        // top: 0,
+        // left: 0,
+        // right: 0,
+        // bottom: 0,
+      }}
+    >
+      <Row
+        gutter={[0, 0]}
+        style={{
+          width: "100%",
+          margin: 0,
+          height: "100vh",
+          // overflow: "hidden",
+        }}
+      >
         <Col
           span={1}
           xl={{ span: 1 }}
@@ -216,34 +256,27 @@ function ChatLayout(props) {
           sm={{ span: 21 }}
           xs={{ span: 20 }}
         >
-          <Switch>
+          <Routes>
             <Route
-              exact
-              path={url}
-              render={(props) => (
+              path=""
+              element={
                 <Chat
-                  {...props}
                   socket={socket}
                   authed={true}
                   idNewMessage={idNewMessage}
                 />
-              )}
+              }
             />
-
             {/* <Route
-              exact
-              path={`${url}/friends`}
-              render={(props) => (
-                <Friend {...props} socket={socket} authed={true} />
-              )}
+              path="friends"
+              element={<Friend socket={socket} authed={true} />}
             /> */}
-
-            <Route component={NotFoundPage} />
-          </Switch>
+            {/* <Route path="friends" element={<Friend />} /> */}
+            <Route path="*" element={<NotFoundPage />} />
+          </Routes>
         </Col>
       </Row>
     </div>
   );
 }
-
 export default ChatLayout;

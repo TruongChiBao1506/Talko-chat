@@ -4,10 +4,10 @@ import { Modal, Input, Button, Avatar, DatePicker, Radio, Form } from 'antd';
 import { UserOutlined } from '@ant-design/icons';
 import { useSelector } from 'react-redux';
 import { useFormik } from 'formik';
-import meApi from '../../apis/meApi';
 import * as Yup from 'yup';
 import dayjs from 'dayjs';
 import './style.css';
+import meApi from 'api/meApi';
 
 const ModalUpdateProfile = ({ open = false, onCancel = null, onOk = null, loading = false }) => {
     const { user } = useSelector((state) => state.global);

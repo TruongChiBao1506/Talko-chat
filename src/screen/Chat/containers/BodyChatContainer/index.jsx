@@ -4,7 +4,7 @@ import ModalShareMessage from "screen/Chat/components/ModalShareMessage";
 import UserMessage from "screen/Chat/components/UserMessage";
 import PropTypes from "prop-types";
 import React, { useEffect, useRef, useState } from "react";
-import { Scrollbars } from "react-custom-scrollbars";
+import { Scrollbars } from "react-custom-scrollbars-2";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchNextPageMessage,

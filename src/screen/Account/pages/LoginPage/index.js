@@ -41,9 +41,15 @@ function LoginPage(props) {
         localStorage.setItem("token", token);
         localStorage.setItem("refreshToken", refreshToken);
         dispatch(setLogin(true));
-        const { isAdmin } = unwrapResult(await dispatch(fetchUserProfile()));
-        if (isAdmin) navigate("/admin"); // Thay history.push bằng navigate
-        else navigate("/chat"); // Thay history.push bằng navigate
+
+        // const { isAdmin } = unwrapResult(await dispatch(fetchUserProfile()));
+        // if (isAdmin) navigate("/admin");
+        // else navigate("/chat");
+
+        dispatch(fetchUserProfile());
+        navigate("/chat");
+
+        window.location.reload();
       } else {
         message.error("hãy xác thực capcha", 5);
       }
@@ -87,64 +93,64 @@ function LoginPage(props) {
               {(formikProps) => {
                 return (
                   <Form>
-                  <Row gutter={[0, 16]}>
-                    <Col span={24}>
-                    <FastField
-                      name="username"
-                      component={InputField}
-                      type="text"
-                      title="Tài khoản"
-                      placeholder="Nhập tài khoản"
-                      maxLength={50}
-                      titleCol={24}
-                      inputCol={24}
-                    />
-                    </Col>
+                    <Row gutter={[0, 16]}>
+                      <Col span={24}>
+                        <FastField
+                          name="username"
+                          component={InputField}
+                          type="text"
+                          title="Tài khoản"
+                          placeholder="Nhập tài khoản"
+                          maxLength={50}
+                          titleCol={24}
+                          inputCol={24}
+                        />
+                      </Col>
 
-                    <Col span={24}>
-                    <FastField
-                      name="password"
-                      component={InputField}
-                      type="password"
-                      title="Mật khẩu"
-                      placeholder="Nhập mật khẩu"
-                      maxLength={200}
-                      titleCol={24}
-                      inputCol={24}
-                    />
-                    </Col>
-                    <Col span={24}>
-                    <br />
-                    {keyGoogleCaptcha && (
-                      <ReCAPTCHA
-                      sitekey={keyGoogleCaptcha}
-                      onChange={onChange}
-                      />
-                    )}
-                    </Col>
-                    {isError ? (
-                    <Col span={24}>
-                      <Tag
-                      color="error"
-                      style={{
-                        fontWeight: "bold",
-                      }}
-                      icon={<CloseCircleOutlined />}
-                      >
-                      Tài khoản không hợp lệ
-                      </Tag>
-                    </Col>
-                    ) : (
-                    ""
-                    )}
+                      <Col span={24}>
+                        <FastField
+                          name="password"
+                          component={InputField}
+                          type="password"
+                          title="Mật khẩu"
+                          placeholder="Nhập mật khẩu"
+                          maxLength={200}
+                          titleCol={24}
+                          inputCol={24}
+                        />
+                      </Col>
+                      <Col span={24}>
+                        <br />
+                        {keyGoogleCaptcha && (
+                          <ReCAPTCHA
+                            sitekey={keyGoogleCaptcha}
+                            onChange={onChange}
+                          />
+                        )}
+                      </Col>
+                      {isError ? (
+                        <Col span={24}>
+                          <Tag
+                            color="error"
+                            style={{
+                              fontWeight: "bold",
+                            }}
+                            icon={<CloseCircleOutlined />}
+                          >
+                            Tài khoản không hợp lệ
+                          </Tag>
+                        </Col>
+                      ) : (
+                        ""
+                      )}
 
-                    <Col span={24}>
-                    <br />
-                    <Button type="primary" htmlType="submit" block>
-                      Đăng nhập
-                    </Button>
-                    </Col>
-                  </Row>
+                      <Col span={24}>
+                        <br />
+                        <Button type="primary" htmlType="submit" block>
+                          Đăng nhập
+                        </Button>
+                      </Col>
+                    </Row>
                   </Form>
                 );
               }}

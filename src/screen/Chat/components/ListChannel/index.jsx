@@ -7,7 +7,7 @@ import {
   fetchListMessages,
   getLastViewOfMembers,
   setCurrentChannel,
-} from "features/Chat/slice/chatSlice";
+} from "screen/Chat/slice/chatSlice";
 import { NumberOutlined } from "@ant-design/icons";
 
 ListChannel.propTypes = {
