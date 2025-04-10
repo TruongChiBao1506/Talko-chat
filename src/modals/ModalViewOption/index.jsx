@@ -129,14 +129,26 @@ function ModalViewOption({ isModalVisible, onCancel, data, onShowDetail }) {
 
     const footer = (
         <div className="footer_wrapper">
-            <div className="footer_right-btn">
+            <div className="footer_right-btn" style={{ display: 'flex', alignItems: 'center' }}>
                 <Button onClick={handleCancel}>Hủy</Button>
+
                 <Button
+                    style={{
+                        marginLeft: 10,
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        minWidth: 100, // Để nút không co lại khi chỉ có icon
+                    }}
                     type="primary"
                     onClick={handleOk}
-                    icon={<Spin indicator={<LoadingOutlined style={{fontSize : 20}}/>} spinning={confirmLoading} />}
+                    disabled={confirmLoading}
                 >
-                    Xác nhận
+                    {confirmLoading ? (
+                        <LoadingOutlined style={{ fontSize: 20, color: 'white' }} spin />
+                    ) : (
+                        'Xác nhận'
+                    )}
                 </Button>
             </div>
         </div >
