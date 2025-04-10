@@ -36,15 +36,13 @@ function InfoContainer({ socket, onViewChannel, onOpenInfoBlock }) {
     const [isVisible, setIsVisible] = useState(false);
     const [userChose, setUserChose] = useState(null);
     const dispatch = useDispatch();
-
+    
     const handleChoseUser = async (value) => {
         const user = await userApi.fetchUser(value.username);
         setUserChose(user);
         setIsVisible(true);
     }
-
-
-
+    
     const handleViewMemberClick = (value) => {
         setFind({ view: value, tabpane: 0 });
     };
@@ -93,10 +91,10 @@ function InfoContainer({ socket, onViewChannel, onOpenInfoBlock }) {
                                     {type && (
                                         <>
                                             <div className='info_member-wrapper'>
-                                                <InfoMember
-                                                    viewMemberClick={handleViewMemberClick}
-                                                    quantity={memberInConversation.length}
-                                                />
+                                               
+                                                <InfoMember 
+                                                viewMemberClick={handleViewMemberClick}
+                                                quantity={memberInConversation.length}/>
                                             </div>
 
                                             <div className='info_member-wrapper'>

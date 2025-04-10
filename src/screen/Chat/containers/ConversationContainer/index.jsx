@@ -97,7 +97,7 @@ function ConversationContainer({ valueClassify, onClickConver }) {
                 <ul className="list_conversation">
                     {converFilter.map((conversationEle, index) => {
                         if (true) {
-                            const { numberUnread } = conversationEle;
+                            const { numberUnread } = conversationEle;           
                             if (conversationEle.lastMessage) {
                                 return (
                                     <Dropdown
