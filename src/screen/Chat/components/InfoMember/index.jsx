@@ -10,16 +10,18 @@ InfoMember.propTypes = {
     viewMemberClick: PropTypes.func,
     quantity: PropTypes.number.isRequired,
 };
+InfoMember.defaultProps = {
+    viewMemberClick: null,
+};
 
-function InfoMember(viewMemberClick = null, quantity) {
+function InfoMember({viewMemberClick, quantity}) {
     const [isDrop, setIsDrop] = useState(true);
     const { currentConversation, conversations } = useSelector(state => state.chat);
     const [status, setSatus] = useState(false);
     const { confirm } = Modal;
     const { user } = useSelector(state => state.global);
     const [checkLeader, setCheckLeader] = useState(false);
-
-
+    
 
     useEffect(() => {
         const tempStatus = conversations.find(ele => ele._id === currentConversation).isJoinFromLink;
