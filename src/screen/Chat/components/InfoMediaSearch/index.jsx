@@ -19,7 +19,7 @@ InfoMediaSearch.defaultProps = {
     onBack: null,
 }
 
-function InfoMediaSearch(onBack, tabpane) {
+function InfoMediaSearch({onBack, tabpane}) {
     const { TabPane } = Tabs;
     const [activeKey, setActiveKey] = useState(tabpane.toString());
     const { memberInConversation, currentConversation } = useSelector(

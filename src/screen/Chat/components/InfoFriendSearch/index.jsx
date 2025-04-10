@@ -15,7 +15,7 @@ InfoFriendSearch.propTypes = {
 };
 
 
-function InfoFriendSearch(onBack = null, members = [], onChoseUser = null) {
+function InfoFriendSearch({onBack = null, members = [], onChoseUser = null}) {
     const { user } = useSelector(state => state.global);
     const { currentConversation, conversations } = useSelector(state => state.chat);
     const { confirm } = Modal;

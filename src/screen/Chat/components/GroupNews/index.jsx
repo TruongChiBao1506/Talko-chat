@@ -14,7 +14,12 @@ GroupNews.propTypes = {
     tabActive: PropTypes.number,
 }
 
-function GroupNews({ onBack = null, tabActive = 0, onChange }) {
+GroupNews.defaultProps = {
+    onBack: null,
+    tabActive: 0,
+}
+
+function GroupNews({ onBack, tabActive, onChange }) {
     const { TabPane } = Tabs
     const { channels } = useSelector(state => state.chat);
 

@@ -14,7 +14,15 @@ ModalCreateGroup.propTypes = {
     onOk: PropTypes.func,
     loading: PropTypes.bool,
 };
-function ModalCreateGroup({ isVisible = false, onCancel = null, onOk = null, loading = false }) {
+
+ModalCreateGroup.defaultProps = {
+    isVisible: false,
+    onCancel: null,
+    onOk: null,
+    loading: false,
+};
+
+function ModalCreateGroup({ isVisible, onCancel, onOk, loading }) {
     const [checkList, setCheckList] = useState([]);
     const [itemSelected, setItemSelected] = useState([]);
     const [nameGroup, setNameGroup] = useState('');
