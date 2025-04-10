@@ -29,7 +29,7 @@ const Header = () => {
           </li>
           {isLogin ? (
             <li>
-              <p>{user?.name}</p>
+              <Link className='chat' to="/chat">{user?.name}</Link>
             </li>
           ) : (
           <>
