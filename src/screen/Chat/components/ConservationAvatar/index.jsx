@@ -80,12 +80,15 @@ function ConversationAvatar({
                         <Avatar
                             size={dimension}
                             style={{
-                                backgroundColor: '#7562d8',
-                                color: '#fff',
+                                fontSize: 12,
+                                backgroundColor: '#e2e5e9',
+                                borderColor: '#cdd4de',
+                                borderWidth: 1,
+                                color: '#788395',
                                 marginTop: (dimension / 6) * -1,
                             }}
                         >
-                            +{totalMembers - 3}
+                            {(totalMembers - 3) >= 100 ? `${totalMembers - 3}+` : totalMembers - 3}
                         </Avatar>
                     </Tooltip>
                 </div>
