@@ -284,7 +284,9 @@ function FooterChatContainer({onScrollWhenSentText, socket, replyMessage, onClos
     const handleSetValueEditor = (content) => {
         setValueText(content);
     };
-
+    const handleSetEmojiEditor = (emoji) => {
+        setValueText((prev) => prev + emoji);
+    };
     const handleSelectMention = ({ object }, _) => {
         setMentionSelect([...mentionSelect, object]);
         setMentionsList(mentionList.filter(ele => ele._id !== object._id));
@@ -300,6 +302,7 @@ function FooterChatContainer({onScrollWhenSentText, socket, replyMessage, onClos
                     onScroll={handleOnScroll}
                     onViewVotes={onViewVotes}
                     onOpenInfoBlock={onOpenInfoBlock}
+                    onEmojiClick={handleSetEmojiEditor}
                 />
             </div>
             {

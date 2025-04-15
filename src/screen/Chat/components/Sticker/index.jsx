@@ -10,10 +10,11 @@ Sticker.propTypes = {
     data: PropTypes.array,
     onClose: PropTypes.func,
     onScroll: PropTypes.func,
+    onEmojiClick: PropTypes.func,
 };
 
 
-function Sticker({ data = [], onClose = null, onScroll = null }) {
+function Sticker({ data = [], onClose = null, onScroll = null, onEmojiClick = null }) {
 
     const handleOnClose = () => {
         if (onClose) {
@@ -26,6 +27,36 @@ function Sticker({ data = [], onClose = null, onScroll = null }) {
     function handleOnChange() {
 
     }
+    const handleEmojiClick = (emoji) => {
+        if (onEmojiClick) {
+            onEmojiClick(emoji);
+        }
+    };
+    const emojiCategories = [
+        {
+          name: 'Phổ biến',
+          emojis: [
+            '😀', '😃', '😄', '😁', '😆', '😅', '🤣', '😂', '🙂', '🙃',
+            '😉', '😊', '😇', '🥰', '😍', '😘', '😗', '😚', '😙', '😋',
+            '👍', '👎', '👏', '🙌', '👐', '🤝', '❤️', '💔', '💯', '🔥',
+          ]
+        },
+        {
+          name: 'Biểu cảm',
+          emojis: [
+            '😀', '😃', '😄', '😁', '😆', '😅', '😂', '🤣', '☺️', '😊',
+            '😇', '🙂', '🙃', '😉', '😌', '😍', '🥰', '😘', '😗', '😙',
+            '😚', '😋', '😛', '😝', '😜', '🤪', '🤨', '🧐', '🤓', '😎',
+          ]
+        },
+        {
+          name: 'Động vật',
+          emojis: [
+            '🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', '🐨', '🐯',
+            '🦁', '🐮', '🐷', '🐽', '🐸', '🐵', '🙈', '🙉', '🙊', '🐒',
+          ]
+        }
+      ];
 
     return (
         <div id='sticker'>
@@ -42,6 +73,29 @@ function Sticker({ data = [], onClose = null, onScroll = null }) {
                         onClose={handleOnClose}
                         onScroll={onScroll}
                     />
+                </TabPane>
+                {/* Tab EMOJI mới */}
+                <TabPane
+                    tab={
+                        <span className='menu-item'><SmileOutlined /> EMOJI</span>
+                    }
+                    key="2"
+                >
+                    <div className="emoji-container">
+                        {emojiCategories.map((category, index) => (
+                            <div key={index} className="emoji-category">
+                                <h4>{category.name}</h4>
+                                <div className="emoji-list">
+                                    {category.emojis.map((emoji, idx) => (
+                                        <span 
+                                        key={idx} 
+                                        className="emoji-item"
+                                        onClick={()=>handleEmojiClick(emoji)}>{emoji}</span>
+                                    ))}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
                 </TabPane>
             </Tabs>
         </div>

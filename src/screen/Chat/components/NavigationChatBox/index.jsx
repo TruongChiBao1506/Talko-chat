@@ -21,6 +21,7 @@ NavigationChatBox.propTypes = {
     onScroll: PropTypes.func,
     onViewVotes: PropTypes.func,
     onOpenInfoBlock: PropTypes.func,
+    onEmojiClick: PropTypes.func
 };
 
 NavigationChatBox.defaultProps = {
@@ -28,7 +29,8 @@ NavigationChatBox.defaultProps = {
     isFocus: false,
     onScroll: null,
     onViewVotes: null,
-    onOpenInfoBlock: null
+    onOpenInfoBlock: null,
+    onEmojiClick: null
 };
 
 const styleBorder = {
@@ -46,7 +48,7 @@ const styleButton = {
 
 
 function NavigationChatBox(props) {
-    const { onClickTextFormat, isFocus, onScroll, onViewVotes, onOpenInfoBlock } = props;
+    const { onClickTextFormat, isFocus, onScroll, onViewVotes, onOpenInfoBlock, onEmojiClick } = props;
     const [visiblePop, setVisiblePop] = useState(false);
     const { stickers, currentConversation, conversations } = useSelector(state => state.chat);
     const [isVisibleVote, setIsVisibleVote] = useState(false);
@@ -107,6 +109,7 @@ function NavigationChatBox(props) {
                             onClose={handleOnClose}
                             data={stickers}
                             onScroll={onScroll}
+                            onEmojiClick={onEmojiClick}
                         />}
                     trigger="click"
                     open={visiblePop}
