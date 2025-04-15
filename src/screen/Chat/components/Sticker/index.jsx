@@ -34,29 +34,33 @@ function Sticker({ data = [], onClose = null, onScroll = null, onEmojiClick = nu
     };
     const emojiCategories = [
         {
-          name: 'Phổ biến',
-          emojis: [
-            '😀', '😃', '😄', '😁', '😆', '😅', '🤣', '😂', '🙂', '🙃',
-            '😉', '😊', '😇', '🥰', '😍', '😘', '😗', '😚', '😙', '😋',
-            '👍', '👎', '👏', '🙌', '👐', '🤝', '❤️', '💔', '💯', '🔥',
-          ]
+            name: 'Phổ biến',
+            emojis: [
+                '😀', '😃', '😄', '😁', '😆', '😅', '🤣', '😂', '🙂', '🙃',
+                '😉', '😊', '😇', '🥰', '😍', '😘', '😗', '😚', '😙', '😋',
+                '👍', '👎', '👏', '🙌', '👐', '🤝', '❤️', '💔', '💯', '🔥',
+            ]
         },
         {
-          name: 'Biểu cảm',
-          emojis: [
-            '😀', '😃', '😄', '😁', '😆', '😅', '😂', '🤣', '☺️', '😊',
-            '😇', '🙂', '🙃', '😉', '😌', '😍', '🥰', '😘', '😗', '😙',
-            '😚', '😋', '😛', '😝', '😜', '🤪', '🤨', '🧐', '🤓', '😎',
-          ]
+            name: 'Biểu cảm',
+            emojis: [
+                '😀', '😃', '😄', '😁', '😆', '😅', '😂', '🤣', '☺️', '😊',
+                '😇', '🙂', '🙃', '😉', '😌', '😍', '🥰', '😘', '😗', '😙',
+                '😚', '😋', '😛', '😝', '😜', '🤪', '🤨', '🧐', '🤓', '😎',
+            ]
         },
         {
-          name: 'Động vật',
-          emojis: [
-            '🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', '🐨', '🐯',
-            '🦁', '🐮', '🐷', '🐽', '🐸', '🐵', '🙈', '🙉', '🙊', '🐒',
-          ]
+            name: 'Động vật',
+            emojis: [
+                '🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', '🐨', '🐯',
+                '🦁', '🐮', '🐷', '🐽', '🐸', '🐵', '🙈', '🙉', '🙊', '🐒',
+            ]
+        },
+        {
+            name: 'Mắt kính & học tập',
+            emojis: ['👓', '🕶️', '📚', '📖', '✏️', '🖊️', '🧠', '💡']
         }
-      ];
+    ];
 
     return (
         <div id='sticker'>
@@ -87,10 +91,10 @@ function Sticker({ data = [], onClose = null, onScroll = null, onEmojiClick = nu
                                 <h4>{category.name}</h4>
                                 <div className="emoji-list">
                                     {category.emojis.map((emoji, idx) => (
-                                        <span 
-                                        key={idx} 
-                                        className="emoji-item"
-                                        onClick={()=>handleEmojiClick(emoji)}>{emoji}</span>
+                                        <span
+                                            key={idx}
+                                            className="emoji-item"
+                                            onClick={() => handleEmojiClick(emoji)}>{emoji}</span>
                                     ))}
                                 </div>
                             </div>
