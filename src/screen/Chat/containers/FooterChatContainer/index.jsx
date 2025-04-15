@@ -43,7 +43,7 @@ FooterChatContainer.defaultProps = {
     onOpenInfoBlock: null,
 };
 
-function FooterChatContainer({onScrollWhenSentText, socket, replyMessage, onCloseReply, userMention, onRemoveMention, onViewVotes, onOpenInfoBlock }) {
+function FooterChatContainer({ onScrollWhenSentText, socket, replyMessage, onCloseReply, userMention, onRemoveMention, onViewVotes, onOpenInfoBlock }) {
     const [showTextFormat, setShowTextFormat] = useState(false);
     const { currentConversation, conversations, currentChannel, memberInConversation } = useSelector(
         (state) => state.chat
@@ -208,6 +208,11 @@ function FooterChatContainer({onScrollWhenSentText, socket, replyMessage, onClos
 
 
     };
+    const handleSentLike = () => {
+        sendMessage('👍', 'TEXT');
+        setValueText('');
+        socket.emit('not-typing', currentConversation, user);
+    }
 
     const handleOnChageInput = (value) => {
         if (mentionSelect.length > 0) {
@@ -393,14 +398,26 @@ function FooterChatContainer({onScrollWhenSentText, socket, replyMessage, onClos
                     }
                 >
 
+                    {
+                        isShowLike ? (
+                            <div className='like-emoji'>
+                                <div
+                                    className='send-text-thumb'
+                                    onClick={handleSentLike}>
+                                    <LikeTwoTone twoToneColor='#fadb14' />
+                                </div>
+                            </div>
+                        ) : (
+                            <div className='like-emoji'>
+                                <div
+                                    className='send-text-thumb'
+                                    onClick={handleSentMessage}>
+                                    <SendOutlined />
+                                </div>
+                            </div>
+                        )
+                    }
 
-                    <div className='like-emoji'>
-                        <div
-                            className='send-text-thumb'
-                            onClick={handleSentMessage}>
-                            <SendOutlined />
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
