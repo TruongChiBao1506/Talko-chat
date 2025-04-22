@@ -49,7 +49,7 @@ function FooterChatContainer({onScrollWhenSentText, socket, replyMessage, onClos
         (state) => state.chat
     );
 
-    const getTypeConversation = conversations.find(ele => ele._id === currentConversation).type;
+    const getTypeConversation = conversations.find(ele => ele._id === currentConversation)?.type;
 
     const [isShowLike, setShowLike] = useState(true);
     // const { TextArea } = Input;

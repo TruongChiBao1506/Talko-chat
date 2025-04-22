@@ -32,7 +32,7 @@ function ConversationContainer({ valueClassify, onClickConver }) {
     const { user } = useSelector((state) => state.global);
 
     const tempClassify =
-        classifies.find((ele) => ele._id === valueClassify) || 0;
+        classifies?.find((ele) => ele._id === valueClassify) || 0;
 
     const checkConverInClassify = (idMember) => {
         if (tempClassify === 0) return true;

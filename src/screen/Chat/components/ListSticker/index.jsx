@@ -12,7 +12,7 @@ ListSticker.propTypes = {
 function ListSticker({ data = [], onClose = null, onScroll = null }) {
     return (
         <div id='sticker-list'>
-            {data.map((ele, index) => (
+            {data?.map((ele, index) => (
                 <StickerItem
                     key={index}
                     data={ele}

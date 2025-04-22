@@ -50,7 +50,7 @@ function NavigationChatBox(props) {
     const [visiblePop, setVisiblePop] = useState(false);
     const { stickers, currentConversation, conversations } = useSelector(state => state.chat);
     const [isVisibleVote, setIsVisibleVote] = useState(false);
-    const checkIsGroup = conversations.find(conver => conver._id === currentConversation).type;
+    const checkIsGroup = conversations.find(conver => conver._id === currentConversation)?.type;
 
     const handleOnClickTextFormat = () => {
 

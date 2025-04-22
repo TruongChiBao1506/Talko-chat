@@ -10,6 +10,7 @@ import UserCard from '../../components/UserCard';
 import userApi from '../../../../apis/userApi';
 import {createGroup} from '../../../../screen/Chat/slices/chatSlice';
 import './style.css';
+import ModalClassify from '../../../../modals/ModalClassify';
 
 
 SearchContainer.propTypes = {
@@ -144,7 +145,7 @@ function SearchContainer ({ valueText='', onSearchChange=null, onSubmitSearch=nu
                                     style={{height: '42px', width: '100%'}}>
                                         <Radio.Group onChange={handleOnChange} value={valueClassify}>
                                             <Radio value={'0'}>Tất cả</Radio>
-                                            {classifies.map((ele, index) => (
+                                            {classifies?.map((ele, index) => (
                                                 <Radio key={index} value={ele._id}>{ele.name}</Radio>
                                             ))}
                                         </Radio.Group>
@@ -172,6 +173,16 @@ function SearchContainer ({ valueText='', onSearchChange=null, onSubmitSearch=nu
             user={userIsFind}
             isVisible={visibleModalUserCard}
             onCancel={handleCloseModalUserCard}
+            />
+
+            <ModalClassify
+            isVisible={visibleModalClassify}
+            onCancel={handleCloseModalClassify}
+            onOk={handleCloseModalClassify}
+            onChange={handleOnChange}
+            value={valueClassify}
+            onFilterClasify={onFilterClasify}
+                        
             />
         </div>
     )

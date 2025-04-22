@@ -11,7 +11,7 @@ InfoMember.propTypes = {
     quantity: PropTypes.number.isRequired,
 };
 
-function InfoMember(viewMemberClick = null, quantity) {
+function InfoMember({viewMemberClick = null, quantity}) {
     const [isDrop, setIsDrop] = useState(true);
     const { currentConversation, conversations } = useSelector(state => state.chat);
     const [status, setSatus] = useState(false);
@@ -127,11 +127,11 @@ function InfoMember(viewMemberClick = null, quantity) {
                             checkLeader &&
                             <>
                                 {status ? (
-                                    <div className="authorize-toggle cirle-button  green" onClick={showConfirm}>
+                                    <div className="authorize-toggle cirle-button green" onClick={showConfirm}>
                                         <UnlockOutlined />
                                     </div>
                                 ) : (
-                                    <div className="authorize-toggle cirle-button  red" onClick={showConfirm}>
+                                    <div className="authorize-toggle cirle-button red" onClick={showConfirm}>
                                         <LockOutlined />
                                     </div>
                                 )}

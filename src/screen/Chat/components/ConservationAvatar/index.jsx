@@ -1,7 +1,7 @@
 import { UserOutlined } from '@ant-design/icons';
 import { Avatar, Badge, Tooltip } from 'antd';
 import DEFAULT_AVATAR from '../../../../assets/images/user.png';
-import AvatarCustom from '../../../../components/avatarCustom';
+import AvatarCustom from '../../../../components/AvatarCustom';
 import PropTypes from 'prop-types';
 import React from 'react';
 import COVERSATION_STYLE from './ConservationAvatarStyle';
@@ -41,6 +41,7 @@ function ConversationAvatar({
     sizeAvatar,
     frameSize,
     avatarColor,
+    onClick = null,
 }) {
     const renderAvatar = () => {
         if (!Array.isArray(avatar) || totalMembers < 1) return null;
@@ -93,8 +94,14 @@ function ConversationAvatar({
         );
     };
 
+    const handleOnClick = (e) => {
+        if (onClick) {
+            onClick(e);
+        }
+    }
+    
     return (
-        <div className="avatar_conversation">
+        <div className="avatar_conversation" onClick={handleOnClick}>
             {typeof avatar === 'string' ? (
                 <Badge dot={isActived} offset={[-5, 40]} color="green">
                     <AvatarCustom size={sizeAvatar} src={avatar || DEFAULT_AVATAR} color={avatarColor} name={name} />
