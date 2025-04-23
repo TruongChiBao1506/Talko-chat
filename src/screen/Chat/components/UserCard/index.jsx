@@ -1,5 +1,5 @@
-import { ExclamationCircleOutlined, UserDeleteOutlined } from '@ant-design/icons';
-import { Button, Image, message, Modal, Avatar } from 'antd';
+import { ExclamationCircleOutlined, UserDeleteOutlined, CopyOutlined } from '@ant-design/icons';
+import { Button, Image, message, Modal, Avatar, Tooltip } from 'antd';
 import DEFAULT_AVATAR from '../../../../assets/images/user.png';
 import PropTypes from 'prop-types';
 import React from 'react';
@@ -63,24 +63,24 @@ function UserCard(props) {
             const response = await conversationApi.createConversationIndividual(user._id);
             const { _id, isExists } = response;
             console.log('response', response);
-    
+
             if (!isExists) {
                 const conver = await conversationApi.getConversationById(_id);
                 dispatch(setConversations(conver));
             }
-    
+
             const tempConver = conversations.find(ele => ele._id === _id);
-    
+
             if (tempConver?.type) {
                 dispatch(fetchChannels({ conversationId: _id }));
             }
-    
+
             dispatch(getLastViewOfMembers({ conversationId: _id }));
             dispatch(fetchListMessages({ conversationId: _id, size: 10 }));
             dispatch(setCurrentConversation(_id));
-    
+
             navigate('/chat');
-    
+
             handleOnCancle();
         } catch (error) {
             console.error("Error in handleClickMessage:", error);
@@ -147,6 +147,17 @@ function UserCard(props) {
             message.error('Xóa thất bại');
         }
     }
+    const handleCopy = () => {
+        // Copy text from the div
+        navigator.clipboard.writeText(user.username)
+            .then(() => {
+                message.success('Đã sao chép!');
+            })
+            .catch((err) => {
+                console.error('Error copying text: ', err);
+                message.error('Sao chép thất bại!');
+            });
+    };
 
     return (
         <Modal
@@ -162,7 +173,7 @@ function UserCard(props) {
                 <div className="user-card_wrapper">
                     <div className="user-card_cover-image">
                         <Image
-                            src={user?.coverImage}
+                            src={user?.coverImage? user?.coverImage : coverImage}
                             preview={false}
                             style={UserCardStyle.CoverImageStyle}
                         />
@@ -190,6 +201,19 @@ function UserCard(props) {
 
                     <div className="user-card-name">
                         {user.name}
+                    </div>
+                    <div style={{ textAlign: 'center' }}>
+                        {user.username}
+                        <Tooltip title="Sao chép nội dung">
+                            <Button
+                                icon={<CopyOutlined />}
+                                onClick={handleCopy}
+                                type="primary"
+                                shape="default"
+                                size="small"
+                                style={{marginLeft: '5px'}}
+                            />
+                        </Tooltip>
                     </div>
 
                     <div className="user-card-button">
@@ -255,7 +279,7 @@ function UserCard(props) {
 
                         <div className={`user-card-button--message ${(status === 'FRIEND') ? 'user-card-button--no-margin' : ''}`}>
                             <Button
-                                onClick={()=>{console.log('chat')}}
+                                onClick={() => { console.log('chat') }}
                                 type="default"
                                 style={(status === 'FOLLOWER') ? UserCardStyle.buttonStyle_2 : UserCardStyle.buttonStyle_1}
                             >Nhắn tin
@@ -283,7 +307,7 @@ function UserCard(props) {
                             </div>
 
                             <div className="user-card-infomation__text">
-                                
+
                                 {dateUtils.transferDateString(user.dateOfBirth?.day, user.dateOfBirth?.month, user.dateOfBirth?.year)}
                             </div>
                         </div>

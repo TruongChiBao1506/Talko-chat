@@ -1,15 +1,15 @@
-import React, { useState } from "react";
-import { Modal, Input } from "antd";
+import React, { useEffect, useRef, useState } from "react";
+import { Modal, Input,Typography } from "antd";
 import PropTypes from "prop-types";
 import "./style.css";
 
+const { Text } = Typography;
 ModalAddFriend.propTypes = {
     isVisible: PropTypes.bool.isRequired,
     onCancel: PropTypes.func,
     onSearch: PropTypes.func,
     onEnter: PropTypes.func,
 };
-
 
 
 function ModalAddFriend({ isVisible, onCancel = null, onSearch = null, onEnter = null }) {
@@ -25,6 +25,7 @@ function ModalAddFriend({ isVisible, onCancel = null, onSearch = null, onEnter =
         }
     }
     const handleCancel = () => {
+        setValue('');
         if (onCancel) {
             onCancel();
         }
@@ -51,7 +52,11 @@ function ModalAddFriend({ isVisible, onCancel = null, onSearch = null, onEnter =
                     onChange={handleInputChange}
                     onPressEnter={handleOnPressEnter}
                     className="input-add-friend"
+                    autoFocus
                 />
+                <Text type="secondary" className="search-hint">
+                    Nhập đầy đủ ký tự để tìm kiếm
+                </Text>
             </div>
 
         </Modal>

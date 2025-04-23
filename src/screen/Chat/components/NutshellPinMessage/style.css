@@ -60,21 +60,21 @@
 }
 
 .nutshell-pin-container_icon {
-    font-size: 32px;
+    font-size: 26px;
 }
 
 .nutshell-pin-container_title {
     font-weight: 500;
-    font-size: 20.8px;
+    font-size: 16px;
 }
 
 .nutshell-pin-container_detail {
-    font-size: 20.8px;
+    font-size: 14px;
 }
 
 .nutshell-pin-container_button-interact {
-    height: 48px;
-    width: 48px;
+    height: 24px;
+    width: 24px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -84,7 +84,7 @@
 }
 
 .nutshell-pin-container_button-interact svg {
-    font-size: 32px;
+    font-size: 24px;
 }
 
 .nutshell-pin-container_button-interact:hover {

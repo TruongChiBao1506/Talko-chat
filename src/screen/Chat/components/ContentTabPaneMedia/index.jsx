@@ -10,7 +10,7 @@ ContentTabPaneMedia.propTypes = {
     type: PropTypes.string,
 };
 
-function ContentTabPaneMedia(items = [], type = 'image') {
+function ContentTabPaneMedia({items = [], type = 'image'}) {
     const [visible, setVisible] = useState(false);
     const [currentVideo, setCurrentVideo] = useState('');
 

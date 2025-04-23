@@ -65,7 +65,7 @@ function NutshellPinMessage({ isItem, onOpenDrawer, message, quantity, isHover }
     const menu = (
         <Menu onClick={handleOnClickMenu} >
             <Menu.Item key="1" danger>
-                <span style={NutshellPinMessageStyle.MENU_ITEM}>Bỏ gim</span>
+                <span style={NutshellPinMessageStyle.MENU_ITEM}>Bỏ ghim</span>
             </Menu.Item>
 
         </Menu>

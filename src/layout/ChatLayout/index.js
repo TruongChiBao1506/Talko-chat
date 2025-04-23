@@ -156,7 +156,7 @@ function ChatLayout() {
                 setIdNewMessage(message._id);
             }
         );
-
+        socket.off('create-conversation');
         socket.on('create-conversation', (conversationId) => {
             console.log('tạo nhóm', conversationId);
             dispatch(fetchConversationById({ conversationId }));

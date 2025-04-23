@@ -4,7 +4,9 @@ import ConversationAvatar from '../../screen/Chat/components/ConservationAvatar'
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { Empty } from 'antd';
-import { fetchListMessages, setCurrentConversation } from '../../screen/Chat/slices/chatSlice';
+import { fetchListMessages, setCurrentConversation,fetchChannels,
+    getLastViewOfMembers,getMembersConversation,
+    setTypeOfConversation } from '../../screen/Chat/slices/chatSlice';
 
 ConverMutipleSearch.propTypes = {
     data: PropTypes.array,
@@ -22,7 +24,10 @@ function ConverMutipleSearch({ data }) {
     const handleClickItem = (value) => {
         dispatch(fetchListMessages({ conversationId: value._id, size: 10 }));
         dispatch(setCurrentConversation(value._id));
-
+        dispatch(getMembersConversation({ conversationId: value._id }));   
+        dispatch(setTypeOfConversation(value._id));
+        dispatch(fetchChannels({ conversationId: value._id}));
+        dispatch(getLastViewOfMembers({ conversationId: value._id }));
         navigate(`/chat`);
     }
 

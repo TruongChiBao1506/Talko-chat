@@ -1,11 +1,12 @@
-import { TagFilled } from '@ant-design/icons';
-import {Menu } from 'antd';
+import { TagFilled, ExclamationCircleOutlined } from '@ant-design/icons';
+import {Menu, message, Modal } from 'antd';
 import PropTypes from 'prop-types';
 import React, { useState } from 'react';
 import ClassifyApi from '../../apis/classifyApi';
 import ModalClassify from '../../modals/ModalClassify';
-import {fetchListClassify} from '../../screen/Chat/slices/chatSlice'
+import {fetchListClassify, fetchListMessages} from '../../screen/Chat/slices/chatSlice'
 import { useDispatch } from 'react-redux';
+import conversationApi from '../../apis/conversationApi';
 
 SubMenuClassify.propTypes = {
     data: PropTypes.array,
@@ -23,6 +24,23 @@ function SubMenuClassify({ data, idConver }) {
         await ClassifyApi.addClassifyForConversation(id, idConver);
         dispatch(fetchListClassify());
     }
+
+    const handleDeleteConversation = async (id) => {
+        const { confirm } = Modal;
+        confirm({
+            title: "Xóa hội thoại",
+            icon: <ExclamationCircleOutlined />,
+            content: "Bạn có chắc chắn muốn xóa hội thoại này không?",
+            okText: "Có",
+            cancelText: "Không",
+            onOk: async () => {
+                await conversationApi.deleteAllMessage(idConver);
+                message.success("Xóa hội thoại thành công");
+                window.location.reload();
+            },
+        });
+    }
+
     const items = [
         {
           key: "sub-1",
@@ -45,6 +63,14 @@ function SubMenuClassify({ data, idConver }) {
             },
           ],
         },
+        {
+          key: "sub-2",
+          label: <span className="menu-item--highlight" style={{color:'red'}}>Xóa hội thoại</span>,
+          onClick: () => {
+            handleDeleteConversation(idConver);
+          },
+
+        }
       ];
     return (
         <>

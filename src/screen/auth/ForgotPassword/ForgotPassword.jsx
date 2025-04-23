@@ -28,7 +28,7 @@ const ForgotPassword = () => {
                     <p className="instruction">
                         Nhập tài khoản để nhận mã xác thực
                     </p>
-                    <Input ref={inputRef} type="text" placeholder="Email hoặc số điện thoại" value={account} onChange={(value) => setAccount(value)} />
+                    <Input ref={inputRef} type="text" placeholder="Email đã đăng ký" value={account} onChange={(value) => setAccount(value)} />
                     <button className="continue-button" onClick={handleOpenModal}>
                         Tiếp tục
                     </button>

@@ -1,4 +1,4 @@
-import { CaretDownOutlined, DeleteOutlined, ExclamationCircleOutlined, ExportOutlined } from '@ant-design/icons';
+import { CaretDownOutlined, DeleteOutlined, ExclamationCircleOutlined, LogoutOutlined } from '@ant-design/icons';
 import { message, Modal } from 'antd';
 import conversationApi from '../../../../apis/conversationApi';
 import PropTypes from 'prop-types';
@@ -120,7 +120,7 @@ function AnotherSetting({ socket}) {
                         ) : (
                             <div className="info_setting-interact-amount danger" onClick={confirm}>
                                 <div className="info_setting-interact-amount-icon">
-                                    <ExportOutlined />
+                                    <LogoutOutlined />
                                 </div>
 
                                 <div className="info_setting-interact-amount-text">

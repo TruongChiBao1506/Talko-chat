@@ -91,6 +91,9 @@ const conversationApi = {
             },
         });
     },
+    deleteAllMessage: (conversationId) => {
+        return axiosClient.delete(`${API_URL}/${conversationId}/messages`);
+    },
 };
 
 export default conversationApi;

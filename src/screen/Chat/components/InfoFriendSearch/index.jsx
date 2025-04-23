@@ -162,8 +162,8 @@ function InfoFriendSearch({onBack = null, members = [], onChoseUser = null}) {
                         <div className="info_friend-search-title">
                             <strong>{`Danh sách thành viên (${members.length})`}</strong>
                         </div>
-                        {/* 
-                        <div className="info_friend-searchbar">
+                        
+                        {/* <div className="info_friend-searchbar">
                             <Input placeholder="Tìm kiếm thành viên" prefix={<SearchOutlined />} />
                         </div> */}
 

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import CheckLink, { replaceConentWithouLink, replaceContentToLink } from '../../../../../utils/linkHelper';
 import { LinkPreview } from "@dhaiwat10/react-link-preview";
@@ -15,6 +15,7 @@ TextMessage.propTypes = {
 };
 
 function TextMessage({ content, children, dateAt = null, isSeen = false, replyMessage = null, tags = [] }) {
+    const isLinkPresent = CheckLink(content);
     const handleOnClickTag = () => {
         console.log("tag");
     }
@@ -44,8 +45,12 @@ function TextMessage({ content, children, dateAt = null, isSeen = false, replyMe
         }
         return parse(tempContent);
     }
+    // const extractURLs = (text) => {
+    //     const pattern = /https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-z]{2,6}\b(?:[-a-zA-Z0-9@:%_+.~#?&//=]*)/g;
+    //     return text.match(pattern) || [];
+    // };
 
-    const matchesLink = CheckLink(content);
+    const matchesLink = isLinkPresent;
 
     const renderMessageText = (contentMes) => {
 
@@ -61,7 +66,7 @@ function TextMessage({ content, children, dateAt = null, isSeen = false, replyMe
             )
 
         } else {
-            if (matchesLink.length === 1) {
+            if (matchesLink) {
                 return (
                     <>
                         <div
@@ -70,17 +75,16 @@ function TextMessage({ content, children, dateAt = null, isSeen = false, replyMe
                             {
                                 tags.length > 0 ? (
                                     tranferTextToTagUser(replaceConentWithouLink(contentMes, matchesLink[0]), tags)
-                                ) : (
-                                    replaceConentWithouLink(contentMes, matchesLink[0])
-                                )
+                                ) : contentMes
 
                             }
                         </div>
                         <LinkPreview
-                            url={matchesLink[0]}
+                            url={content}
                             imageHeight="20vh"
                             className='link-preview-custom'
-
+                            fallback={<p>Không thể tải preview cho: {content}</p>}
+                            onError={(e) => console.error('Link preview error:', e)}
                         />
                     </>
                 )
@@ -110,7 +114,7 @@ function TextMessage({ content, children, dateAt = null, isSeen = false, replyMe
                 />
 
             )}
-        
+
             {
                 renderMessageText(content)
             }

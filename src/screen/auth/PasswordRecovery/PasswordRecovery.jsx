@@ -74,7 +74,7 @@ export default function PasswordRecovery() {
 
                 <form onSubmit={(e)=>{e.preventDefault(); handleSubmit(account, activationCode, password)}} className="recovery-form">
                     <div className="activation-section">
-                        <p>Mã kích hoạt đã được gửi đến số điện thoại:</p>
+                        <p>Mã kích hoạt đã được gửi đến email</p>
                         <Input type='number'
                             placeholder='Nhập mã kích hoạt'
                             value={activationCode} onChange={(value) => setActivationCode(value)} style={{ textAlign: "center" }} />

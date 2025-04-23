@@ -73,4 +73,20 @@
             visibility: hidden;
         }
     }
+    .copy-button {
+        background-color: #1890ff;
+        color: white;
+        padding: 5px 5px;
+        border: none;
+        border-radius: 5px;
+        margin-left: 5px;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+    
+    .copy-button:hover {
+        background-color: #40a9ff;
+    }
 }

@@ -10,6 +10,7 @@ import UserCard from '../../components/UserCard';
 import userApi from '../../../../apis/userApi';
 import {createGroup} from '../../../../screen/Chat/slices/chatSlice';
 import './style.css';
+import ModalClassify from '../../../../modals/ModalClassify';
 
 
 SearchContainer.propTypes = {
@@ -172,6 +173,11 @@ function SearchContainer ({ valueText='', onSearchChange=null, onSubmitSearch=nu
             user={userIsFind}
             isVisible={visibleModalUserCard}
             onCancel={handleCloseModalUserCard}
+            />
+            <ModalClassify
+            isVisible={visibleModalClassify}
+            onCancel={handleCloseModalClassify}
+            onOpen={handleOpenModalClassify}
             />
         </div>
     )

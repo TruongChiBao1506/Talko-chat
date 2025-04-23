@@ -12,7 +12,7 @@ TabPaneMedia.propTypes = {
 };
 
 
-function TabPaneMedia(members = [], onQueryChange = null) {
+function TabPaneMedia({ members = [], onQueryChange = null }) {
     // const { members, onQueryChange } = props;
     const { Option } = Select;
 
@@ -62,40 +62,36 @@ function TabPaneMedia(members = [], onQueryChange = null) {
                 <Col span={24}>
                     <Select
                         dropdownMatchSelectWidth={false}
-                        optionLabelProp='label'
+                        optionLabelProp="label"
                         showSearch
                         style={{ width: '100%' }}
                         onChange={handleChange}
-                        placeholder='Người gửi'
-                        optionFilterProp='children'
-                        //onSearch={onSearch}
+                        placeholder="Người gửi"
+                        optionFilterProp="children"
                         value={sender}
+                        allowClear
                         filterOption={(input, option) =>
-                            option.value
-                                .toLowerCase()
-                                .indexOf(input.toLowerCase()) >= 0
+                            option?.label?.toLowerCase().includes(input.toLowerCase())
                         }
                         filterSort={(optionA, optionB) =>
-                            optionA.children
-                                .toLowerCase()
-                                .localeCompare(optionB.children.toLowerCase())
+                            optionA.label.toLowerCase().localeCompare(optionB.label.toLowerCase())
                         }
-                        allowClear
                     >
                         {members.map((memberEle, index) => (
-                            <Option key={index} value={memberEle._id}>
-                                <div className='option-item'>
-                                    <div className='icon-user-item'>
+                            <Option
+                                key={index}
+                                value={memberEle._id}
+                                label={memberEle.name} // 🔥 Dùng label để sắp xếp
+                            >
+                                <div className="option-item">
+                                    <div className="icon-user-item">
                                         <PersonalIcon
                                             demention={24}
                                             avatar={memberEle.avatar}
                                             name={memberEle.name}
                                         />
                                     </div>
-
-                                    <div className='name-user-item'>
-                                        {memberEle.name}
-                                    </div>
+                                    <div className="name-user-item">{memberEle.name}</div>
                                 </div>
                             </Option>
                         ))}

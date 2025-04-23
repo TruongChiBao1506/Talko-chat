@@ -125,7 +125,7 @@ function ConversationContainer({ valueClassify, onClickConver }) {
                                                         key="1"
                                                         icon={<DeleteFilled />}
                                                     >
-                                                        Xoá hội thoại
+                                                        Xoá nhóm
                                                     </Menu.Item>
                                                 )}
                                             </Menu>

@@ -8,7 +8,7 @@ ContentTabPaneFile.propTypes = {
 };
 
 
-function ContentTabPaneFile(items = []) {
+function ContentTabPaneFile({items = []}) {
 
     return (
         <div id='conten-tabpane-file'>
