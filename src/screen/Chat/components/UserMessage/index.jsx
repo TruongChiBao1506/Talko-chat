@@ -2,11 +2,14 @@ import {
   DeleteOutlined,
   PushpinOutlined,
   UndoOutlined,
+  EditOutlined,
 } from "@ant-design/icons";
 import { Button, Dropdown, Menu, message as mesageNotify } from "antd";
 import messageApi from "../../../../apis/messageApi";
 import pinMessageApi from "../../../../apis/pinMessageApi";
+import mediaApi from "../../../../apis/mediaApi";
 import ModalChangePinMessage from "../../../../modals/ModalChangePinMessage";
+import EditImageModal from "../../../../modals/EditImageModal";
 import MESSAGE_STYLE from "../../../../constants/messageStyle";
 import PersonalIcon from "../../../Chat/components/PersonalIcon";
 import PropTypes from "prop-types";
@@ -76,6 +79,7 @@ function UserMessage({
   const [listReactionCurrent, setListReactionCurrent] = useState([]);
   const [isLeader, setIsLeader] = useState(false);
   const [isVisbleModal, setVisibleModal] = useState(false);
+  const [isEditImageModalVisible, setEditImageModalVisible] = useState(false);
   const isGroup = conversations.find(
     (ele) => ele._id === currentConversation
   ).type;
@@ -117,6 +121,27 @@ function UserMessage({
     setVisibleModal(false);
   };
 
+  const handleOnCloseEditImageModal = () => {
+    setEditImageModalVisible(false);
+  };
+
+  const handleEditImageSuccess = async (editedImageUrl) => {
+    try {
+      const response = await messageApi.updateImageMessage(_id, editedImageUrl);
+      if (response && response.success) {
+        mesageNotify.success("Đã cập nhật ảnh thành công");
+        console.log("Image updated successfully:", response.data);
+      } else {
+        mesageNotify.error("Có lỗi khi cập nhật ảnh");
+        console.error("Failed to update image:", response);
+      }
+    } catch (error) {
+      console.error("Lỗi khi cập nhật ảnh:", error);
+      mesageNotify.error("Không thể cập nhật ảnh đã chỉnh sửa");
+    }
+    setEditImageModalVisible(false);
+  };
+
   const handleOnClick = async ({ item, key }) => {
     if (key == 1) {
       if (pinMessages.length === 3) {
@@ -142,6 +167,10 @@ function UserMessage({
     if (key == 3) {
       await messageApi.deleteMessageClientSide(_id);
       dispatch(deleteMessageClient(_id));
+    }
+
+    if (key == 4) {
+      setEditImageModalVisible(true);
     }
   };
 
@@ -186,6 +215,16 @@ function UserMessage({
       >
         Chỉ xóa ở phía tôi
       </Menu.Item>
+      {type === "IMAGE" && (
+        <Menu.Item
+          key="4"
+          icon={<EditOutlined />}
+          style={MESSAGE_STYLE.dropDownStyle}
+          title="Chỉnh sửa ảnh"
+        >
+          Chỉnh sửa ảnh
+        </Menu.Item>
+      )}
     </Menu>
   );
 
@@ -328,6 +367,8 @@ function UserMessage({
                                 content={content}
                                 dateAt={dateAt}
                                 isSeen={viewUsers && viewUsers.length > 0}
+                                messageId={_id}
+                                conversationId={currentConversation}
                               >
                                 {type === "IMAGE" && !myReact && (
                                   <ListReaction
@@ -471,6 +512,13 @@ function UserMessage({
         visible={isVisbleModal}
         idMessage={_id}
         onCloseModal={handleOnCloseModal}
+      />
+
+      <EditImageModal
+        visible={isEditImageModalVisible}
+        imageUrl={content}
+        onCancel={handleOnCloseEditImageModal}
+        onSuccess={handleEditImageSuccess}
       />
     </>
   );

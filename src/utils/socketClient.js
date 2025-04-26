@@ -1,4 +1,6 @@
-import io from 'socket.io-client';
+import io from "socket.io-client";
+import Store from "../redux/Store"; // Sử dụng default export
+import { updateImageMessage } from "../redux/globalSlice";
 
 // Biến singleton để lưu trữ kết nối duy nhất
 let socketInstance = null;
@@ -8,45 +10,46 @@ let socketInstance = null;
  * @returns {Object} Socket instance
  */
 export function init() {
-    // Nếu socket đã tồn tại và đang kết nối, trả về instance hiện tại
-    if (socketInstance && socketInstance.connected) {
-        console.log('Socket already connected, reusing existing socket');
-        return socketInstance;
-    }
-
-    // Nếu socket tồn tại nhưng không kết nối, hủy nó
-    if (socketInstance) {
-        console.log('Cleaning up disconnected socket');
-        socketInstance.removeAllListeners();
-        socketInstance.disconnect();
-        socketInstance = null;
-    }
-
-    // Lấy URL từ biến môi trường
-    const SOCKET_URL = process.env.REACT_APP_SOCKET_URL;
-    if (!SOCKET_URL) {
-        console.error('REACT_APP_SOCKET_URL is not defined');
-        return null;
-    }
-
-    // Tạo socket mới với cấu hình tối ưu cho kết nối ổn định
-    socketInstance = io(SOCKET_URL, {
-        transports: ['websocket'],
-        reconnection: true,            // Bật tự động kết nối lại
-        reconnectionAttempts: 10, // Số lần thử kết nối lại không giới hạn
-        reconnectionDelay: 1000,       // Delay giữa các lần thử kết nối lại
-        reconnectionDelayMax: 5000,    // Delay tối đa
-        timeout: 20000,                // Timeout cho kết nối
-        auth: {                        // Thông tin xác thực
-            token: localStorage.getItem('token') || ''
-        }
-    });
-
-    // Thiết lập các event handlers cơ bản
-    _setupEventHandlers(socketInstance);
-
-    console.log('Socket initialized with URL:', SOCKET_URL);
+  // Nếu socket đã tồn tại và đang kết nối, trả về instance hiện tại
+  if (socketInstance && socketInstance.connected) {
+    console.log("Socket already connected, reusing existing socket");
     return socketInstance;
+  }
+
+  // Nếu socket tồn tại nhưng không kết nối, hủy nó
+  if (socketInstance) {
+    console.log("Cleaning up disconnected socket");
+    socketInstance.removeAllListeners();
+    socketInstance.disconnect();
+    socketInstance = null;
+  }
+
+  // Lấy URL từ biến môi trường
+  const SOCKET_URL = process.env.REACT_APP_SOCKET_URL;
+  if (!SOCKET_URL) {
+    console.error("REACT_APP_SOCKET_URL is not defined");
+    return null;
+  }
+
+  // Tạo socket mới với cấu hình tối ưu cho kết nối ổn định
+  socketInstance = io(SOCKET_URL, {
+    transports: ["websocket"],
+    reconnection: true, // Bật tự động kết nối lại
+    reconnectionAttempts: 10, // Số lần thử kết nối lại không giới hạn
+    reconnectionDelay: 1000, // Delay giữa các lần thử kết nối lại
+    reconnectionDelayMax: 5000, // Delay tối đa
+    timeout: 20000, // Timeout cho kết nối
+    auth: {
+      // Thông tin xác thực
+      token: localStorage.getItem("token") || "",
+    },
+  });
+
+  // Thiết lập các event handlers cơ bản
+  _setupEventHandlers(socketInstance);
+
+  console.log("Socket initialized with URL:", SOCKET_URL);
+  return socketInstance;
 }
 
 /**
@@ -55,62 +58,94 @@ export function init() {
  * @private
  */
 function _setupEventHandlers(socket) {
-    // Xử lý sự kiện kết nối thành công
-    socket.on('connect', () => {
-        console.log('Socket connected with ID:', socket.id);
-        
-        // Tự động join với userId nếu có
-        const userId = localStorage.getItem('userId') || sessionStorage.getItem('userId');
-        if (userId) {
-            console.log('Auto-joining with userId:', userId);
-            socket.emit('join', userId);
-        }
-    });
+  // Xử lý sự kiện kết nối thành công
+  socket.on("connect", () => {
+    console.log("Socket connected with ID:", socket.id);
 
-    // Xử lý sự kiện mất kết nối
-    socket.on('disconnect', (reason) => {
-        console.log('Socket disconnected. Reason:', reason);
-        
-        // Xử lý các lý do ngắt kết nối khác nhau
-        if (reason === 'io server disconnect') {
-            // Server chủ động ngắt kết nối - có thể cần làm mới token
-            console.log('Server disconnected the socket, attempting to reconnect...');
-            setTimeout(() => {
-                // Cập nhật token trước khi kết nối lại
-                const token = localStorage.getItem('token') || '';
-                socket.auth = { token };
-                socket.connect();
-            }, 1000);
-        } 
-        else if (reason === 'client namespace disconnect') {
-            // Client namespace disconnect - thường do lỗi xác thực
-            console.log('Client namespace disconnect, attempting to reconnect...');
-            setTimeout(() => {
-                socket.connect();
-            }, 1000);
-        }
-        // Các trường hợp khác sẽ được xử lý tự động bởi Socket.IO
-    });
+    // Tự động join với userId nếu có
+    const userId =
+      localStorage.getItem("userId") || sessionStorage.getItem("userId");
+    if (userId) {
+      console.log("Auto-joining with userId:", userId);
+      socket.emit("join", userId);
+    }
+  });
 
-    // Log các sự kiện tái kết nối
-    socket.io.on('reconnect', (attempt) => {
-        console.log(`Socket reconnected after ${attempt} attempts`);
-    });
+  // Xử lý sự kiện mất kết nối
+  socket.on("disconnect", (reason) => {
+    console.log("Socket disconnected. Reason:", reason);
 
-    socket.io.on('reconnect_attempt', (attempt) => {
-        console.log(`Socket reconnection attempt: ${attempt}`);
-        // Cập nhật token khi tái kết nối
-        const token = localStorage.getItem('token') || '';
+    // Xử lý các lý do ngắt kết nối khác nhau
+    if (reason === "io server disconnect") {
+      // Server chủ động ngắt kết nối - có thể cần làm mới token
+      console.log("Server disconnected the socket, attempting to reconnect...");
+      setTimeout(() => {
+        // Cập nhật token trước khi kết nối lại
+        const token = localStorage.getItem("token") || "";
         socket.auth = { token };
-    });
+        socket.connect();
+      }, 1000);
+    } else if (reason === "client namespace disconnect") {
+      // Client namespace disconnect - thường do lỗi xác thực
+      console.log("Client namespace disconnect, attempting to reconnect...");
+      setTimeout(() => {
+        socket.connect();
+      }, 1000);
+    }
+    // Các trường hợp khác sẽ được xử lý tự động bởi Socket.IO
+  });
 
-    socket.io.on('reconnect_error', (error) => {
-        console.error('Socket reconnection error:', error.message);
-    });
+  // Log các sự kiện tái kết nối
+  socket.io.on("reconnect", (attempt) => {
+    console.log(`Socket reconnected after ${attempt} attempts`);
+  });
 
-    socket.on('connect_error', (error) => {
-        console.error('Socket connection error:', error.message);
-    });
+  socket.io.on("reconnect_attempt", (attempt) => {
+    console.log(`Socket reconnection attempt: ${attempt}`);
+    // Cập nhật token khi tái kết nối
+    const token = localStorage.getItem("token") || "";
+    socket.auth = { token };
+  });
+
+  socket.io.on("reconnect_error", (error) => {
+    console.error("Socket reconnection error:", error.message);
+  });
+
+  socket.on("connect_error", (error) => {
+    console.error("Socket connection error:", error.message);
+  });
+
+  // Cải thiện xử lý sự kiện update-message-image
+  socket.on("update-message-image", (data) => {
+    console.log("Received update-message-image event:", data);
+
+    // Kiểm tra dữ liệu và cấu trúc
+    if (data && data._id && data.content) {
+      // Lưu vào localStorage để giữ sau khi refresh
+      localStorage.setItem(`updatedImage_${data._id}`, data.content);
+      console.log(
+        `Saved updated image to localStorage: messageId=${data._id}, url=${data.content}`
+      );
+
+      // Dispatch action để cập nhật Redux store
+      Store.dispatch(
+        updateImageMessage({
+          messageId: data._id,
+          newImageUrl: data.content,
+        })
+      );
+
+      // Thông báo cho người dùng biết có ảnh mới được cập nhật (tùy chọn)
+      if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+        navigator.serviceWorker.controller.postMessage({
+          type: "IMAGE_UPDATED",
+          messageId: data._id,
+        });
+      }
+    } else {
+      console.error("Invalid data received for update-message-image:", data);
+    }
+  });
 }
 
 /**
@@ -118,21 +153,21 @@ function _setupEventHandlers(socket) {
  * @returns {Object} Socket instance
  */
 export function getSocket() {
-    if (!socketInstance) {
-        return init();
-    }
-    return socketInstance;
+  if (!socketInstance) {
+    return init();
+  }
+  return socketInstance;
 }
 
 /**
  * Đóng kết nối socket - chỉ sử dụng khi cần thiết (đăng xuất, đóng ứng dụng)
  */
 export function closeConnection() {
-    if (socketInstance) {
-        console.log('Closing socket connection');
-        socketInstance.disconnect();
-        socketInstance = null;
-    }
+  if (socketInstance) {
+    console.log("Closing socket connection");
+    socketInstance.disconnect();
+    socketInstance = null;
+  }
 }
 
 // Khởi tạo socket ngay khi import module

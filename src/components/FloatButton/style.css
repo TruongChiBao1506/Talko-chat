@@ -1,0 +1,26 @@
+.float-button-container {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  z-index: 999;
+}
+
+.float-edit-button {
+  width: 56px;
+  height: 56px;
+  background-color: #2883ec;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.float-edit-button:hover {
+  background-color: #1a73e8;
+  transform: scale(1.05);
+  transition: all 0.3s ease;
+}
+
+.float-edit-button .anticon {
+  font-size: 24px;
+}

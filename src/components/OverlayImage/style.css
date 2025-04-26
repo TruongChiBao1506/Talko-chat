@@ -1,13 +1,46 @@
 .overlay-item {
-    background-color: rgba(0, 0, 0, 0.05);
-    border-radius: 5px;
-    opacity: 0;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    transition: 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  background-color: rgba(0, 0, 0, 0.05);
+  border-radius: 5px;
+  opacity: 0;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  transition: 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.overlay-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.overlay-button {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.9);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.overlay-button:hover {
+  transform: scale(1.1);
+  background-color: #fff;
+}
+
+.view-button {
+  color: #1890ff;
+}
+
+.edit-button {
+  color: #2883ec;
 }
