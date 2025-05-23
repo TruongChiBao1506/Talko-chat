@@ -19,6 +19,19 @@ const mediaApi = {
             },
         });
     },
+    // API mới cho chức năng chỉnh sửa ảnh
+    editImage: (imageFile, text) => {
+        const url = "/edit-image";
+        const formData = new FormData();
+        formData.append("image", imageFile);
+        formData.append("text", text);
+
+        return axiosClient.post(url, formData, {
+            headers: {
+                "Content-Type": "multipart/form-data",
+            },
+        });
+    },
 };
 
 export default mediaApi;

@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import './style.css'
 import { useSelector } from 'react-redux';
 import messageApi from '../../../../apis/messageApi';
+import notificationSound from '../../../../utils/notificationSound';
 
 StickerItem.propTypes = {
     data: PropTypes.object,
@@ -32,13 +33,17 @@ function StickerItem({ data, onClose, onScroll }) {
 
         if (currentChannel) {
             newMessage.channelId = currentChannel
-        };
-
-
-        await messageApi
+        };        await messageApi
             .sendTextMessage(newMessage)
             .then((res) => {
                 const { _id } = res;
+                
+                // Đánh dấu tin nhắn sticker đã gửi để tránh phát âm thanh thông báo
+                if (_id) {
+                    console.log('Đánh dấu tin nhắn sticker đã gửi với ID:', _id);
+                    notificationSound.markMessageAsSent(_id);
+                }
+                
                 if (onScroll) {
                     onScroll(_id);
                 }

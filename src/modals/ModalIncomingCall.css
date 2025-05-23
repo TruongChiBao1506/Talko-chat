@@ -1,0 +1,57 @@
+.incoming-call-modal .ant-modal-content {
+    background-color: #f9f9f9;
+    border-radius: 16px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+    border: 1px solid #eaeaea;
+    overflow: hidden;
+}
+
+.incoming-call-modal .ant-btn {
+    width: 56px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.incoming-call-modal .ant-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.incoming-call-modal .ant-btn .anticon {
+    font-size: 24px;
+}
+
+/* Nút nhận cuộc gọi */
+.incoming-call-modal .ant-btn-circle[style*="color: #52c41a"]:hover {
+    background-color: #d9f7be !important;
+    border-color: #52c41a !important;
+}
+
+/* Nút từ chối cuộc gọi */
+.incoming-call-modal .ant-btn-circle[style*="color: #ff4d4f"]:hover {
+    background-color: #ffccc7 !important;
+    border-color: #ff4d4f !important;
+}
+
+/* Hiệu ứng nhấp nháy cho cuộc gọi đến */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.incoming-call-modal .ant-avatar {
+    animation: pulse 1.5s infinite;
+    box-shadow: 0 0 15px rgba(24, 144, 255, 0.3);
+}
+
+/* Thời gian cuộc gọi */
+.incoming-call-modal .call-duration {
+    font-family: monospace;
+    font-size: 16px;
+    color: #52c41a;
+    font-weight: 500;
+}

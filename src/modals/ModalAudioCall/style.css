@@ -1,0 +1,163 @@
+.audio-call-modal .ant-modal-content {
+    background-color: #f9f9f9;
+    border-radius: 16px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+    border: 1px solid #eaeaea;
+    overflow: hidden;
+}
+
+.audio-call-container {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.call-header {
+    width: 100%;
+    text-align: center;
+}
+
+.call-header h2 {
+    font-size: 20px;
+    margin-bottom: 5px;
+    color: #1890ff;
+}
+
+.call-duration {
+    font-size: 16px;
+    color: #52c41a;
+    font-weight: 600;
+    font-family: monospace;
+}
+
+.caller-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.caller-info h3 {
+    margin-top: 10px;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.caller-info p {
+    color: #666;
+    margin-bottom: 0;
+}
+
+.call-controls {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin-top: 20px;
+}
+
+.audio-call-modal .ant-btn {
+    width: 56px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.audio-call-modal .ant-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.audio-call-modal .ant-btn .anticon {
+    font-size: 24px;
+}
+
+/* Nút microphone */
+.audio-call-modal .ant-btn-circle[title="Tắt micro"]:hover,
+.audio-call-modal .ant-btn-circle[title="Bật micro"]:hover {
+    background-color: #e6f7ff;
+    border-color: #1890ff;
+}
+
+/* Nút nhận cuộc gọi */
+.audio-call-modal .ant-btn-circle[style*="color: #52c41a"]:hover {
+    background-color: #d9f7be;
+    border-color: #52c41a;
+}
+
+/* Nút từ chối/kết thúc cuộc gọi */
+.audio-call-modal .ant-btn-circle[style*="color: #ff4d4f"]:hover {
+    background-color: #ffccc7;
+    border-color: #ff4d4f;
+}
+
+/* Hiệu ứng nhấp nháy cho cuộc gọi đến */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.audio-call-modal[data-incoming="true"] .ant-avatar {
+    animation: pulse 1.5s infinite;
+    box-shadow: 0 0 15px rgba(24, 144, 255, 0.3);
+}
+
+/* Thêm hiệu ứng sóng âm thanh khi đang trong cuộc gọi */
+@keyframes soundWave {
+    0% { box-shadow: 0 0 0 0 rgba(82, 196, 26, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(82, 196, 26, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(82, 196, 26, 0); }
+}
+
+.audio-call-modal[data-active="true"] .ant-avatar {
+    animation: soundWave 2s infinite;
+}
+.audio-call-modal audio,
+.incoming-call-modal audio {
+    display: none;
+}
+.audio-call-modal {
+  /* Styles hiện có */
+}
+
+/* Hiệu ứng sóng âm thanh - hiển thị khi micro được bật */
+.audio-wave {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 20px;
+  width: 40px;
+  margin-top: 4px;
+}
+
+.audio-wave span {
+  display: inline-block;
+  width: 3px;
+  height: 100%;
+  margin: 0 1px;
+  background-color: #52c41a;
+  animation: audio-wave 1.2s infinite ease-in-out;
+  border-radius: 2px;
+}
+
+.audio-wave span:nth-child(1) { animation-delay: 0s; }
+.audio-wave span:nth-child(2) { animation-delay: 0.2s; }
+.audio-wave span:nth-child(3) { animation-delay: 0.4s; }
+.audio-wave span:nth-child(4) { animation-delay: 0.6s; }
+.audio-wave span:nth-child(5) { animation-delay: 0.8s; }
+
+@keyframes audio-wave {
+  0%, 100% { transform: scaleY(0.3); }
+  50% { transform: scaleY(1); }
+}
+
+/* Khi chỉ báo âm thanh bị tắt */
+.audio-muted .audio-wave span {
+  background-color: #ff4d4f;
+  animation: none;
+  height: 3px;
+}

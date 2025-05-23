@@ -36,6 +36,24 @@ const messageApi = {
         return axiosClient.post(`${API_URL}/files`, file, config);
     },
 
+    sendMultipleImageMessage: (formData, textContent, conversationId, channelId, cb) => {
+        const config = {
+            params: {
+                conversationId,
+                channelId,
+                textContent
+            },
+            onUploadProgress: function (progressEvent) {
+                let percentCompleted = Math.round(
+                    (progressEvent.loaded * 100) / progressEvent.total
+                );
+                cb(percentCompleted);
+            },
+        };
+
+        return axiosClient.post(`${API_URL}/multi-images`, formData, config);
+    },
+
     redoMessage: (idMessage) => {
         return axiosClient.delete(`${API_URL}/${idMessage}`);
     },

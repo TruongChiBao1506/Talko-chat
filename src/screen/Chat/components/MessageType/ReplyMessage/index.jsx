@@ -76,6 +76,34 @@ function ReplyMessage({ replyMessage }) {
                                         src={replyMessage.content}
                                     />
                                 </div>
+                            ) : replyMessage.type === 'MULTI_IMAGE' ? (
+                                (() => {
+                                    let contentObj = {};
+                                    try {
+                                        contentObj = typeof replyMessage.content === 'string' ? JSON.parse(replyMessage.content) : replyMessage.content;
+                                    } catch (e) {
+                                        contentObj = { images: [], text: '' };
+                                    }
+                                    return (
+                                        <div className="reply-message_logo multi-image-reply">
+                                            {Array.isArray(contentObj.images) && contentObj.images.length > 0 && (
+                                                <div className="multi-image-thumbnails">
+                                                    {contentObj.images.slice(0, 2).map((img, idx) => (
+                                                        <img key={idx} src={img} alt="reply-img" style={{ width: 32, height: 32, objectFit: 'cover', marginRight: 4, borderRadius: 4 }} />
+                                                    ))}
+                                                    {contentObj.images.length > 2 && (
+                                                        <span style={{ fontSize: 12, color: '#888' }}>+{contentObj.images.length - 2}</span>
+                                                    )}
+                                                </div>
+                                            )}
+                                            {contentObj.text && (
+                                                <div className="multi-image-reply-text" style={{ fontSize: 12, color: '#333', marginTop: 2 }}>
+                                                    {contentObj.text}
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                })()
                             ) : (
                                 <div />
                             )
@@ -98,6 +126,21 @@ function ReplyMessage({ replyMessage }) {
                                         <span>[Stikcer]</span>
                                     ) : replyMessage.type === 'HTML' ? (
                                         <span>[Văn bản]</span>
+                                    ) : replyMessage.type === 'MULTI_IMAGE' ? (
+                                        (() => {
+                                            let contentObj = {};
+                                            try {
+                                                contentObj = typeof replyMessage.content === 'string' ? JSON.parse(replyMessage.content) : replyMessage.content;
+                                            } catch (e) {
+                                                contentObj = { images: [], text: '' };
+                                            }
+                                            return (
+                                                <span>
+                                                    [Hình ảnh]
+                                                    {contentObj.text ? `: ${contentObj.text}` : ''}
+                                                </span>
+                                            );
+                                        })()
                                     ) : (
                                         replyMessage.content
                                     )

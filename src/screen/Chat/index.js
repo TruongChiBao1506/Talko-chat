@@ -61,14 +61,18 @@ import './style.css';
 Chat.propTypes = {
     socket: PropTypes.object,
     idNewMessage: PropTypes.string,
+    onStartCall: PropTypes.func,
+    onStartVideoCall: PropTypes.func,
 };
 
 Chat.defaultProps = {
     socket: {},
     idNewMessage: '',
+    onStartCall: null,
+    onStartVideoCall: null,
 };
 
-function Chat({ socket, idNewMessage }) {
+function Chat({ socket, idNewMessage, onStartCall, onStartVideoCall }) {
     const dispatch = useDispatch();
     const {
         conversations,
@@ -641,13 +645,17 @@ function Chat({ socket, idNewMessage }) {
                                 xs={{ span: currentConversation ? 24 : 0 }}
                             >
                                 <div className="main_chat">
-                                    <div className="main_chat-header">
+                                    <div className="main_chat-header">                                        
                                         <HeaderChatContainer
                                             onPopUpInfo={() =>
                                                 setIsOpenInfo(!isOpenInfo)
                                             }
                                             onOpenDrawer={() =>
                                                 setOpenDrawerInfo(true)
+                                            }
+                                            onStartCall={onStartCall}
+                                            onStartVideoCall={
+                                                onStartVideoCall
                                             }
                                         />
                                     </div>

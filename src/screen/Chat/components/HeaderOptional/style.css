@@ -3,6 +3,26 @@
     background-color: #ffffff;
 }
 
+.icon-header.video-call {
+    color: #1890ff;
+    cursor: pointer;
+}
+
+.icon-header.video-call:hover {
+    color: #40a9ff;
+    background-color: rgba(24, 144, 255, 0.1);
+}
+
+.icon-header.audio-call {
+    color: #52c41a;
+    cursor: pointer;
+}
+
+.icon-header.audio-call:hover {
+    color: #73d13d;
+    background-color: rgba(82, 196, 26, 0.1);
+}
+
 @media only screen and (min-width: 992px) and (max-width: 1199px),
 only screen and (min-width: 768px) and (max-width: 991px),
 only screen and (min-width: 577px) and (max-width: 767px),
@@ -146,4 +166,12 @@ only screen and (max-width: 576px) {
 
 .header_wrapper .header_rightside .pop-up-responsive {
     display: none;
+}
+.header_rightside .video-call {
+    margin-right: 8px;
+    color: #1890ff;
+}
+
+.header_rightside .video-call:hover {
+    background-color: rgba(24, 144, 255, 0.1);
 }

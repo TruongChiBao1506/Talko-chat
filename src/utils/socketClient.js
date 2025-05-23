@@ -1,4 +1,6 @@
 import io from 'socket.io-client';
+import Store from "../redux/Store"; // Sử dụng default export
+import { updateImageMessage } from "../redux/globalSlice";
 
 // Biến singleton để lưu trữ kết nối duy nhất
 let socketInstance = null;
@@ -58,7 +60,7 @@ function _setupEventHandlers(socket) {
     // Xử lý sự kiện kết nối thành công
     socket.on('connect', () => {
         console.log('Socket connected with ID:', socket.id);
-        
+
         // Tự động join với userId nếu có
         const userId = localStorage.getItem('userId') || sessionStorage.getItem('userId');
         if (userId) {
@@ -70,7 +72,7 @@ function _setupEventHandlers(socket) {
     // Xử lý sự kiện mất kết nối
     socket.on('disconnect', (reason) => {
         console.log('Socket disconnected. Reason:', reason);
-        
+
         // Xử lý các lý do ngắt kết nối khác nhau
         if (reason === 'io server disconnect') {
             // Server chủ động ngắt kết nối - có thể cần làm mới token
@@ -81,7 +83,7 @@ function _setupEventHandlers(socket) {
                 socket.auth = { token };
                 socket.connect();
             }, 1000);
-        } 
+        }
         else if (reason === 'client namespace disconnect') {
             // Client namespace disconnect - thường do lỗi xác thực
             console.log('Client namespace disconnect, attempting to reconnect...');
@@ -111,7 +113,40 @@ function _setupEventHandlers(socket) {
     socket.on('connect_error', (error) => {
         console.error('Socket connection error:', error.message);
     });
+
+    // Cải thiện xử lý sự kiện update-message-image
+    socket.on("update-message-image", (data) => {
+        console.log("Received update-message-image event:", data);
+
+        // Kiểm tra dữ liệu và cấu trúc
+        if (data && data._id && data.content) {
+            // Lưu vào localStorage để giữ sau khi refresh
+            localStorage.setItem(`updatedImage_${data._id}`, data.content);
+            console.log(
+                `Saved updated image to localStorage: messageId=${data._id}, url=${data.content}`
+            );
+
+            // Dispatch action để cập nhật Redux store
+            Store.dispatch(
+                updateImageMessage({
+                    messageId: data._id,
+                    newImageUrl: data.content,
+                })
+            );
+
+            // Thông báo cho người dùng biết có ảnh mới được cập nhật (tùy chọn)
+            if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+                navigator.serviceWorker.controller.postMessage({
+                    type: "IMAGE_UPDATED",
+                    messageId: data._id,
+                });
+            }
+        } else {
+            console.error("Invalid data received for update-message-image:", data);
+        }
+    });
 }
+
 
 /**
  * Lấy socket instance hiện tại hoặc khởi tạo mới nếu chưa tồn tại

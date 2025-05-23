@@ -1,9 +1,11 @@
 import {
     LeftOutlined,
-    NumberOutlined,
+    NumberOutlined, PhoneOutlined,
     RollbackOutlined, SplitCellsOutlined, UsergroupAddOutlined,
-    UserOutlined
+    UserOutlined, VideoCameraOutlined
 } from '@ant-design/icons';
+import { useNavigate } from 'react-router-dom';
+import { Modal } from 'antd';
 import conversationApi from '../../../../apis/conversationApi';
 import { createGroup, fetchListMessages, getLastViewOfMembers, setCurrentChannel, setCurrentConversation } from '../../slices/chatSlice';
 import useWindowDimensions from '../../../../hook/useWindowDimensions';
@@ -13,13 +15,15 @@ import { useDispatch, useSelector } from 'react-redux';
 import dateUtils from '../../../../utils/dateUtils';
 import ConversationAvatar from '../../components/ConservationAvatar';
 import ModalAddMemberToConver from '../../../../modals/ModalAddMemberToConver';
+import ModalAudioCall from '../../../../modals/ModalAudioCall';
+import ModalIncomingCall from '../../../../modals/ModalIncomingCall';
+import socket from '../../../../utils/socketClient';
 import './style.css';
 
 HeaderOptional.propTypes = {
     avatar: PropTypes.oneOfType([
         PropTypes.string,
         PropTypes.array,
-
     ]),
     totalMembers: PropTypes.number,
     name: PropTypes.string,
@@ -29,6 +33,8 @@ HeaderOptional.propTypes = {
     avatarColor: PropTypes.string,
     onPopUpInfo: PropTypes.func,
     onOpenDrawer: PropTypes.func,
+    onStartCall: PropTypes.func, // Thêm prop onStartCall
+    onStartVideoCall: PropTypes.func
 };
 
 HeaderOptional.defaultProps = {
@@ -38,18 +44,21 @@ HeaderOptional.defaultProps = {
     lastLogin: null,
     avatarColor: '',
     onPopUpInfo: null,
-    onOpenDrawer: null
+    onOpenDrawer: null,
+    onStartCall: null, // Giá trị mặc định cho onStartCall
+    onStartVideoCall: null
 };
 
 function HeaderOptional(props) {
-    const { avatar, totalMembers, name, typeConver, isLogin, lastLogin, avatarColor, onPopUpInfo, onOpenDrawer } = props;
+    const { avatar, totalMembers, name, typeConver, isLogin, lastLogin, avatarColor, onPopUpInfo, onOpenDrawer, memberInConversation = [], onStartCall, onStartVideoCall } = props;
     const type = typeof avatar;
-    const { currentConversation, currentChannel, channels, } = useSelector((state) => state.chat);
+    const { currentConversation, currentChannel, channels } = useSelector((state) => state.chat);
     const [isVisible, setIsvisible] = useState(false);
     const [confirmLoading, setConfirmLoading] = useState(false);
     const [typeModal, setTypeModal] = useState(1);
     const dispatch = useDispatch();
     const { width } = useWindowDimensions();
+    const { user } = useSelector((state) => state.global);
 
 
     const handleCutText = (text) => {
@@ -127,11 +136,30 @@ function HeaderOptional(props) {
             onOpenDrawer();
         }
     }
-
     const handleBackToListConver = () => {
-        dispatch(setCurrentConversation(''))
-    }
+        dispatch(setCurrentConversation(''));
+    };
+    // Chỉ giữ lại hàm handleVoiceCall để khởi tạo cuộc gọi
+    const handleVoiceCall = () => {
+        if (onStartCall) {
+            console.log('Bắt đầu gọi với conversationId:', currentConversation);
+            // currentConversation đã là ID, không cần truy cập _id nữa
+            onStartCall(currentConversation, name, avatar);
+        }
+    };
 
+    const handleVideoCall = () => {
+        console.log('Click nút gọi video!');
+        console.log('onStartVideoCall:', onStartVideoCall);
+        console.log('currentConversation:', currentConversation);
+
+        if (onStartVideoCall) {
+            console.log('Bắt đầu gọi video với conversationId:', currentConversation);
+            onStartVideoCall(currentConversation, name, avatar);
+        } else {
+            console.log('onStartVideoCall không được truyền xuống đúng!');
+        }
+    };
 
     return (
         <div id='header-optional'>
@@ -211,15 +239,27 @@ function HeaderOptional(props) {
                         >
                             <RollbackOutlined />
                         </div>
-                    ) : (
-                        <>
-                            <div
-                                className='icon-header create-group'
-                                onClick={handleAddMemberToGroup}>
-                                <UsergroupAddOutlined />
-                            </div>
-
-                        </>
+                    ) : (<>
+                        <div
+                            className='icon-header create-group'
+                            onClick={handleAddMemberToGroup}>
+                            <UsergroupAddOutlined />
+                        </div>
+                        <div
+                            className='icon-header voice-call'
+                            title='Gọi thoại'
+                            onClick={handleVoiceCall} // Thêm sự kiện click
+                        >
+                            <PhoneOutlined />
+                        </div>
+                        <div
+                            className='icon-header video-call'
+                            title='Gọi video'
+                            onClick={handleVideoCall}
+                        >
+                            <VideoCameraOutlined />
+                        </div>
+                    </>
                     )}
 
                     <div className='icon-header pop-up-layout'>
@@ -231,8 +271,7 @@ function HeaderOptional(props) {
                     </div>
 
 
-                </div>
-            </div>
+                </div>            </div>
 
             <ModalAddMemberToConver
                 isVisible={isVisible}
@@ -241,6 +280,9 @@ function HeaderOptional(props) {
                 loading={confirmLoading}
                 typeModal={typeModal}
             />
+
+            {/* Chỉ sử dụng modals ở đây để debug hoặc khi chuyển đổi sang ChatLayout */}
+            {/* Modal đã được chuyển sang ChatLayout để quản lý tập trung */}
         </div>
     );
 }

@@ -7,18 +7,17 @@ import HeaderOptional from '../../components/HeaderOptional';
 HeaderChatContainer.propTypes = {
     onPopUpInfo: PropTypes.func,
     onOpenDrawer: PropTypes.func,
+    onStartCall: PropTypes.func,
+    onStartVideoCall: PropTypes.func,
 };
 
-function HeaderChatContainer({ onPopUpInfo = null, onOpenDrawer = null}) {
-
+function HeaderChatContainer({ onPopUpInfo = null, onOpenDrawer = null, onStartCall = null, onStartVideoCall = null }) {
     const [detailConver, setDetailConver] = useState({})
     const { currentConversation, conversations, memberInConversation } = useSelector(
         (state) => state.chat
     );
-
     useEffect(() => {
-        console.log("currentConversation", currentConversation);
-        
+
         if (currentConversation) {
             const tempConver = conversations.find(
                 (conver) => conver._id === currentConversation
@@ -27,8 +26,7 @@ function HeaderChatContainer({ onPopUpInfo = null, onOpenDrawer = null}) {
                 setDetailConver(tempConver);
             }
         }
-    }, [currentConversation, conversations])
-
+    }, [currentConversation, conversations]);
 
     return (
         <div id='header-main'>
@@ -38,10 +36,13 @@ function HeaderChatContainer({ onPopUpInfo = null, onOpenDrawer = null}) {
                 name={detailConver.name}
                 typeConver={detailConver.type}
                 isLogin={detailConver?.isOnline}
-                lastLogin={detailConver?.lastLogin}
+                lastLogin={detailConver?.lastLogin} 
                 avatarColor={detailConver?.avatarColor}
                 onPopUpInfo={onPopUpInfo}
                 onOpenDrawer={onOpenDrawer}
+                memberInConversation={memberInConversation} // Truyền thêm danh sách thành viên
+                onStartCall={onStartCall} // Truyền hàm xử lý cuộc gọi
+                onStartVideoCall={onStartVideoCall} // Truyền hàm xử lý cuộc gọi video
             />
         </div>
     );

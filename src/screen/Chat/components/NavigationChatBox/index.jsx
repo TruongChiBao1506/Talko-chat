@@ -1,7 +1,7 @@
 import {
     DashOutlined, FileImageOutlined,
     FontColorsOutlined,
-    LinkOutlined, SmileOutlined
+    LinkOutlined, SmileOutlined, PictureOutlined
 } from '@ant-design/icons';
 import { Button, Dropdown, Menu, Popover } from 'antd';
 import UploadFile from '../../../../customfields/upLoadFile';
@@ -21,7 +21,8 @@ NavigationChatBox.propTypes = {
     onScroll: PropTypes.func,
     onViewVotes: PropTypes.func,
     onOpenInfoBlock: PropTypes.func,
-    onEmojiClick: PropTypes.func
+    onEmojiClick: PropTypes.func,
+    onMultiImageClick: PropTypes.func
 };
 
 NavigationChatBox.defaultProps = {
@@ -30,7 +31,8 @@ NavigationChatBox.defaultProps = {
     onScroll: null,
     onViewVotes: null,
     onOpenInfoBlock: null,
-    onEmojiClick: null
+    onEmojiClick: null,
+    onMultiImageClick: null
 };
 
 const styleBorder = {
@@ -48,7 +50,7 @@ const styleButton = {
 
 
 function NavigationChatBox(props) {
-    const { onClickTextFormat, isFocus, onScroll, onViewVotes, onOpenInfoBlock, onEmojiClick } = props;
+    const { onClickTextFormat, isFocus, onScroll, onViewVotes, onOpenInfoBlock, onEmojiClick, onMultiImageClick } = props;
     const [visiblePop, setVisiblePop] = useState(false);
     const { stickers, currentConversation, conversations } = useSelector(state => state.chat);
     const [isVisibleVote, setIsVisibleVote] = useState(false);
@@ -137,10 +139,17 @@ function NavigationChatBox(props) {
                         >
                             <FileImageOutlined style={{fontSize: 20}}/>
                         </Button>
-                    </UploadFile>
+                    </UploadFile>                </li>
 
+
+                <li className='item-chat-box'>
+                    <div 
+                        title='Gửi nhiều hình ảnh'
+                        onClick={onMultiImageClick}
+                    >
+                        <PictureOutlined />
+                    </div>
                 </li>
-
 
                 <li className='item-chat-box'>
                     <UploadFile

@@ -2,6 +2,7 @@ import { SearchOutlined } from '@ant-design/icons';
 import { Checkbox, Col, Divider, Input, message, Modal, Row } from 'antd';
 import conversationApi from '../../apis/conversationApi';
 import messageApi from '../../apis/messageApi';
+import notificationSound from '../../utils/notificationSound';
 import PropTypes from 'prop-types';
 import React, { useEffect, useState } from 'react';
 import ConversationAvatar from '../../screen/Chat/components/ConservationAvatar';
@@ -54,17 +55,32 @@ function ModalShareMessage({ visible, onCancel, idMessage }) {
         if (onCancel) {
             onCancel();
         }
-    }
-
+    }    
     const handleOk = async () => {
         setLoading(true);
         try {
-            itemSelected.forEach(async (ele) => {
-                await messageApi.forwardMessage(idMessage, ele._id);
-            })
+            // Sử dụng Promise.all để đảm bảo tất cả đều hoàn thành
+            const sharePromises = itemSelected.map(async (ele) => {
+                try {
+                    const response = await messageApi.forwardMessage(idMessage, ele._id);
+                    
+                    // Đánh dấu tin nhắn chuyển tiếp đã gửi để tránh phát âm thanh thông báo
+                    if (response && response._id) {
+                        console.log('Đánh dấu tin nhắn chuyển tiếp với ID:', response._id);
+                        notificationSound.markMessageAsSent(response._id);
+                    }
+                    return response;
+                } catch (err) {
+                    console.error('Lỗi khi chuyển tiếp tin nhắn:', err);
+                    return null;
+                }
+            });
+            
+            await Promise.all(sharePromises);
             message.success('Chuyển tiếp tin nhắn thành công');
 
         } catch (error) {
+            console.error('Lỗi tổng thể khi chuyển tiếp tin nhắn:', error);
             message.error('Đã có lỗi xảy ra');
 
         }

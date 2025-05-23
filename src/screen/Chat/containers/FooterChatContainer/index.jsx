@@ -1,14 +1,16 @@
 import { LikeTwoTone, SendOutlined, SmileOutlined } from '@ant-design/icons';
-import { Mentions } from 'antd';
+import { Mentions, Modal } from 'antd';
 import messageApi from '../../../../apis/messageApi';
 import NavigationChatBox from '../../components/NavigationChatBox';
 import PersonalIcon from '../../components/PersonalIcon';
 import ReplyBlock from '../../components/ReplyBlock';
 import TextEditor from '../../components/TextEditor';
+import notificationSound from '../../../../utils/notificationSound';
 import PropTypes from 'prop-types';
 import React, { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import MENTION_STYLE from './MentionStyle';
+import MultipleImageUpload from '../../../../customfields/MultipleImageUpload';
 import './style.css';
 
 FooterChatContainer.propTypes = {
@@ -62,6 +64,7 @@ function FooterChatContainer({ onScrollWhenSentText, socket, replyMessage, onClo
     const [mentionList, setMentionsList] = useState([]);
     const [mentionSelect, setMentionSelect] = useState([]);
     const preMention = useRef();
+    const [showMultiImageUpload, setShowMultiImageUpload] = useState(false);
 
     const checkIsExistInSelect = (userMen) => {
         if (mentionSelect.length > 0) {
@@ -145,10 +148,10 @@ function FooterChatContainer({ onScrollWhenSentText, socket, replyMessage, onClo
 
 
     const handleClickTextFormat = () => {
-        setShowTextFormat(!showTextFormat);
+    setShowTextFormat(!showTextFormat);
         setValueText('');
-    };
-
+    };    
+    
     async function sendMessage(value, type) {
         const listId = mentionSelect.map(ele => ele._id);
 
@@ -173,6 +176,14 @@ function FooterChatContainer({ onScrollWhenSentText, socket, replyMessage, onClo
             .sendTextMessage(newMessage)
             .then((res) => {
                 const { _id } = res;
+                
+                // Quan trọng: Đánh dấu tin nhắn này là vừa được gửi
+                // để không phát âm thanh thông báo khi nhận lại từ server
+                if (_id) {
+                    console.log('Đánh dấu tin nhắn đã gửi với ID:', _id);
+                    notificationSound.markMessageAsSent(_id);
+                }
+                
                 handleOnScroll(_id);
                 console.log('Send Message Success');
             })
@@ -291,11 +302,18 @@ function FooterChatContainer({ onScrollWhenSentText, socket, replyMessage, onClo
     };
     const handleSetEmojiEditor = (emoji) => {
         setValueText((prev) => prev + emoji);
-    };
-    const handleSelectMention = ({ object }, _) => {
+    };    const handleSelectMention = ({ object }, _) => {
         setMentionSelect([...mentionSelect, object]);
         setMentionsList(mentionList.filter(ele => ele._id !== object._id));
-
+    }
+    
+    const handleMultiImageClick = () => {
+        setShowMultiImageUpload(true);
+    }
+    
+    const handleMultiImagesSent = () => {
+        setShowMultiImageUpload(false);
+        handleOnScroll();
     }
 
     return (
@@ -308,6 +326,7 @@ function FooterChatContainer({ onScrollWhenSentText, socket, replyMessage, onClo
                     onViewVotes={onViewVotes}
                     onOpenInfoBlock={onOpenInfoBlock}
                     onEmojiClick={handleSetEmojiEditor}
+                    onMultiImageClick={handleMultiImageClick}
                 />
             </div>
             {
@@ -419,7 +438,20 @@ function FooterChatContainer({ onScrollWhenSentText, socket, replyMessage, onClo
                     }
 
                 </div>
-            </div>
+            </div>            <Modal
+                title="Gửi nhiều hình ảnh"
+                open={showMultiImageUpload}
+                onCancel={() => setShowMultiImageUpload(false)}
+                footer={null}
+                width={600}
+                destroyOnClose={true}
+            >
+                <MultipleImageUpload 
+                    conversationId={currentConversation}
+                    channelId={currentChannel}
+                    onImagesSent={handleMultiImagesSent}
+                />
+            </Modal>
         </div>
     );
 }

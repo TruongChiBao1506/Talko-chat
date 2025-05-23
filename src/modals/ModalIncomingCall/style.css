@@ -1,0 +1,91 @@
+.audio-call-modal .ant-modal-content {
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #fff;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+.audio-call-modal .ant-modal-body {
+    padding: 0;
+}
+
+.incoming-call-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px;
+}
+
+.incoming-call-avatar {
+    margin-bottom: 16px;
+    position: relative;
+}
+
+.incoming-call-avatar-active {
+    animation: pulse 1.5s infinite;
+}
+
+.incoming-call-name {
+    font-weight: 600;
+    font-size: 18px;
+    margin-bottom: 8px;
+    text-align: center;
+}
+
+.incoming-call-status {
+    margin-bottom: 24px;
+    text-align: center;
+}
+
+.incoming-call-status.calling {
+    color: #1890ff;
+}
+
+.incoming-call-status.connecting {
+    color: #52c41a;
+}
+
+.incoming-call-status.rejected {
+    color: #ff4d4f;
+    font-weight: 500;
+}
+
+.incoming-call-actions {
+    display: flex;
+    gap: 24px;
+}
+
+.incoming-call-button-accept {
+    background: #e6fffb;
+    color: #52c41a;
+    border: none;
+}
+
+.incoming-call-button-accept:hover {
+    background: #b5f5ec;
+    color: #08979c;
+}
+
+.incoming-call-button-reject {
+    background: #ffd6d6;
+    color: #ff4d4f;
+    border: none;
+}
+
+.incoming-call-button-reject:hover {
+    background: #ffccc7;
+    color: #cf1322;
+}
+
+/* Thêm animation hiệu ứng nhấp nháy khi đang gọi */
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(24, 144, 255, 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(24, 144, 255, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(24, 144, 255, 0);
+    }
+}
