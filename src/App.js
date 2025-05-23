@@ -1,6 +1,6 @@
 import './App.css';
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import Auth from './screen/Deploy';
+import Auth from './screen/Auth';
 import Home from './screen/Home';
 import NotFoundPage from './components/NotFoundPage/NotFoundPage';
 import ChatLayout from './layout/ChatLayout';
