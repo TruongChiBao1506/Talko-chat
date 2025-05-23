@@ -1,0 +1,137 @@
+.channel {
+    background: #ffffff;
+    padding: 16px 0;
+}
+
+.channel-header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    padding: 12.8px 19.2px;
+}
+
+.channel-header-title {
+    font-weight: 600;
+    font-size: 16px;
+}
+
+.channel-header-title .total-channel-notify {
+    color: #de433e;
+}
+
+.channel-header-title .total-channel-notify::before {
+    content: " - ";
+    color: initial;
+}
+
+.channel-header-icon {
+    transition: 0.2s;
+    font-size: 16px;
+    color: #72808e;
+}
+
+.channel-interact {
+    position: relative;
+    overflow-y: hidden;
+    max-height: 300px;
+    transition: max-height 0.2s ease;
+    overflow: hidden;
+    position: relative;
+}
+
+.channel-interact .notify-amount {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background: #de433e;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    right: 22.4px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 19.2px;
+    transition: 0.2s;
+}
+
+.channel-interact-button {
+    margin: 0 22.4px;
+    margin-top: 16px;
+}
+
+.channel-interact-button button {
+    width: 100%;
+    font-weight: 600;
+    border: none;
+    outline: none;
+    padding: 8px 0;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.channel-interact-button button:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.channel-interact-amount.active {
+    background: rgba(88, 174, 255, 0.3);
+    color: #396edd;
+}
+
+.channel-interact-amount.active:hover {
+    background: rgba(88, 174, 255, 0.3);
+}
+
+.channel-interact-amount {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 12.8px 22.4px;
+    cursor: pointer;
+    position: relative;
+}
+
+.channel-interact-amount .notify-amount {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background: #de433e;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    right: 22.4px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 19.2px;
+    transition: 0.2s;
+}
+
+.channel-interact-amount-text {
+    width: 100%;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    word-wrap: break-word;
+    margin-left: 22.4px;
+    font-style: italic;
+    font-weight: 500;
+}
+
+.channel-interact-amount-icon {
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6.4px;
+    transition: 0.2s;
+}
+
+.channel-interact-amount:hover {
+    background: #eeeff2;
+}

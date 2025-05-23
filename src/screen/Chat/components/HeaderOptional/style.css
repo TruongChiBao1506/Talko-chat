@@ -1,0 +1,177 @@
+#header-optional {
+    flex: 1;
+    background-color: #ffffff;
+}
+
+.icon-header.video-call {
+    color: #1890ff;
+    cursor: pointer;
+}
+
+.icon-header.video-call:hover {
+    color: #40a9ff;
+    background-color: rgba(24, 144, 255, 0.1);
+}
+
+.icon-header.audio-call {
+    color: #52c41a;
+    cursor: pointer;
+}
+
+.icon-header.audio-call:hover {
+    color: #73d13d;
+    background-color: rgba(82, 196, 26, 0.1);
+}
+
+@media only screen and (min-width: 992px) and (max-width: 1199px),
+only screen and (min-width: 768px) and (max-width: 991px),
+only screen and (min-width: 577px) and (max-width: 767px),
+only screen and (max-width: 576px) {
+    .header_rightside .pop-up-layout {
+        display: none;
+    }
+    .pop-up-responsive {
+        display: inline-block;
+    }
+}
+
+@media only screen and (min-width: 577px) and (max-width: 767px),
+only screen and (max-width: 576px) {
+    .icon-header.back-list {
+        display: block;
+    }
+}
+
+.header_wrapper {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    height: 68px;
+    overflow: hidden;
+}
+
+.header_wrapper .header_leftside {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-left: 16px;
+}
+
+.header_wrapper .header_leftside .icon_user {
+    cursor: pointer;
+}
+
+.header_wrapper .header_leftside .info_user {
+    margin-left: 22px;
+}
+
+.header_wrapper .header_leftside .info_user .channel_info {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    word-wrap: break-word;
+    color: #000;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.header_wrapper .header_leftside .info_user .lastime-access {
+    display: flex;
+}
+
+.header_wrapper .header_leftside .info_user .lastime-access > span {
+    font-size: 14px;
+    color: #87929e;
+}
+
+.header_wrapper .header_leftside .info_user .lastime-access .member-hover {
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.header_wrapper .header_leftside .info_user .lastime-access .member-hover:hover {
+    color: #58aeff;
+}
+
+.header_wrapper .header_leftside .info_user .info_user-name {
+    font-weight: 600;
+    font-size: 18px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    word-wrap: break-word;
+}
+
+.header_wrapper .header_leftside .info_user .small-bar {
+    width: 0.16px;
+    background-color: black;
+    color: #87929e;
+    height: 14px;
+    margin: auto 13px;
+}
+
+.header_wrapper .header_leftside .icon-header.back-list {
+    cursor: pointer;
+    padding: 0 9px;
+    transition: 0.2s;
+    border-radius: 4px;
+    font-size: 20px;
+    margin-right: 16px;
+    display: none;
+}
+
+.header_wrapper .header_leftside .icon-header.back-list:hover {
+    background-color: #e8eaef;
+}
+
+.header_wrapper .classify-object {
+    cursor: pointer;
+}
+
+.header_wrapper .header_rightside {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+}
+
+.header_wrapper .header_rightside .icon-header {
+    margin: 0 8px;
+}
+
+.header_wrapper .header_rightside .search-message,
+.header_wrapper .header_rightside .pop-up-layout,
+.header_wrapper .header_rightside .create-group,
+.header_wrapper .header_rightside .call-video,
+.header_wrapper .header_rightside .back-channel,
+.header_wrapper .header_rightside .pop-up-responsive {
+    cursor: pointer;
+    padding: 0 9px;
+    transition: 0.2s;
+    border-radius: 4px;
+}
+
+.header_wrapper .header_rightside .search-message:hover,
+.header_wrapper .header_rightside .pop-up-layout:hover,
+.header_wrapper .header_rightside .create-group:hover,
+.header_wrapper .header_rightside .call-video:hover,
+.header_wrapper .header_rightside .back-channel:hover,
+.header_wrapper .header_rightside .pop-up-responsive:hover {
+    background-color: #c2d8f2;
+}
+
+.header_wrapper .header_rightside .pop-up-responsive {
+    display: none;
+}
+.header_rightside .video-call {
+    margin-right: 8px;
+    color: #1890ff;
+}
+
+.header_rightside .video-call:hover {
+    background-color: rgba(24, 144, 255, 0.1);
+}

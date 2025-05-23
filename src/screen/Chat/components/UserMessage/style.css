@@ -1,0 +1,292 @@
+.bg-white {
+    background: #fff;
+}
+
+.user-name-strong {
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.user-name-strong .blue {
+    color: #4c92ff;
+}
+
+.user-name-strong .blue:hover {
+    text-decoration: underline;
+}
+
+.user-message.hidden {
+    display: none;
+}
+
+.user-message {
+    padding: 0 32px;
+}
+
+.user-message.top {
+    margin-top: 64px;
+}
+
+.user-message.bottom {
+    margin-bottom: 64px;
+}
+
+.last-view-avatar.center {
+    justify-content: center;
+    display: flex;
+    padding: 16px 0;
+}
+
+.user-message {
+    transition: visibility 0.4s;
+    visibility: visible;
+    opacity: 1;
+    transition: opacity 0.4s;
+}
+
+.user-message .time-and-last_view {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.user-message .last-view-avatar {
+    display: flex;
+}
+
+.user-message .last-view-avatar.reverse {
+    width: 95%;
+    flex-direction: row-reverse;
+}
+
+.user-message .interact-conversation {
+    display: flex;
+    flex-direction: row;
+}
+
+.user-message .interact-conversation .avatar-user.hidden {
+    visibility: hidden;
+}
+
+.user-message .reverse {
+    flex-direction: row-reverse !important;
+}
+
+.user-message .list-conversation {
+    display: flex;
+    flex-direction: column;
+    width: calc(100% - 40px);
+}
+
+.user-message .list-conversation .message .sub-message.same-user {
+    margin-top: 0;
+}
+
+.user-message .list-conversation .message .sub-message {
+    display: flex;
+    flex-direction: row;
+    margin: 14px;
+    align-items: center;
+    position: relative;
+}
+
+.user-message .list-conversation .message .sub-message .content-message.content-media {
+    padding: 0;
+    background: none;
+    box-shadow: none;
+}
+
+.user-message .list-conversation .message .sub-message .content-message.my-message-bg {
+    background: #e5efff;
+}
+
+.user-message .list-conversation .message .sub-message .content-message {
+    font-size: 14px;
+    background: #ffffff;
+    padding: 10px 10px;
+    display: flex;
+    flex-direction: column;
+    border-radius: 12.8px;
+    box-shadow: 0 1px 0 0 rgba(0, 0, 0, 0.18);
+    position: relative;
+    white-space: pre;
+    max-width: 75%;
+}
+
+.user-message .list-conversation .message .sub-message .content-message-description {
+    white-space: normal;
+    word-break: break-word;
+}
+
+.user-message .list-conversation .message .sub-message .content-message-description .undo-message {
+    color: #b3bbc8;
+}
+
+.user-message .list-conversation .message .sub-message .content-message-description .messsage-image-wrapper,
+.user-message .list-conversation .message .sub-message .content-message-description .message-video-wrapper {
+    position: relative;
+}
+
+.user-message .list-conversation .message .sub-message .content-message .reacted-block.media {
+    position: absolute;
+    bottom: 0;
+    transform: translateY(-50%);
+}
+
+.user-message .list-conversation .message .sub-message .content-message .reacted-block.media .list-user-react,
+.user-message .list-conversation .message .sub-message .content-message .reacted-block.media .your-react {
+    background: #fff;
+}
+
+.user-message .list-conversation .message .sub-message .content-message .reacted-block.right {
+    right: 16px;
+}
+
+.user-message .list-conversation .message .sub-message .content-message .reacted-block.left {
+    left: 16px;
+}
+
+.user-message .list-conversation .message .sub-message .content-message-description {
+    word-break: break-all;
+}
+
+.user-message .list-conversation .message .sub-message .content-message .reacted-block {
+    margin-top: 6px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.user-message .list-conversation .message .sub-message .content-message .reacted-block .list-user-react-icon > div {
+    display: flex;
+    align-items: center;
+}
+
+.user-message .list-conversation .message .sub-message .content-message .reacted-block .list-user-react-icon {
+    position: relative;
+}
+
+.user-message .list-conversation .message .sub-message .content-message .reacted-block .list-user-react {
+    padding: 6.4px 12.8px;
+    border: 0.8px solid #e1e4ea;
+    border-radius: 14px;
+}
+
+.user-message .list-conversation .message .sub-message .content-message .reacted-block .list-user-react .list-user-detail {
+    position: absolute;
+    background: #1f4060;
+    color: #ffffff;
+    top: 0;
+    left: 0;
+    transform: translate(-40%, -150%);
+    font-size: 13px;
+    display: none;
+    flex-direction: column;
+    padding: 6.4px 16px;
+    border-radius: 4px;
+    white-space: nowrap;
+    transition: 0.2s;
+}
+
+.user-message .list-conversation .message .sub-message .content-message .reacted-block .list-user-react .list-user-detail::before {
+    position: absolute;
+    content: "";
+    height: 10px;
+    width: 10px;
+    background: #1f4060;
+    bottom: -4px;
+    left: 50%;
+    transform: translateX(-50%) rotate(45deg);
+}
+
+.user-message .list-conversation .message .sub-message .content-message .reacted-block .your-react {
+    margin-left: 9.6px;
+    padding: 4.8px;
+    border-radius: 50%;
+    border: 0.8px solid #e1e4ea;
+    position: relative;
+}
+
+.user-message .list-conversation .message .sub-message .content-message .reacted-block .list-user-react:hover .list-user-detail {
+    display: flex;
+}
+
+.user-message .list-conversation .message .sub-message .content-message .reaction.reaction-reverse {
+    right: initial;
+    left: 10%;
+}
+
+.user-message .list-conversation .message .sub-message .content-message .author-message {
+    font-size: 16px;
+    color: #606c7a;
+    padding-bottom: 6.4px;
+}
+
+.user-message .list-conversation .message .sub-message .content-message .time-send {
+    font-size: 12px;
+    color: #87929e;
+}
+
+.user-message .list-conversation .interaction {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    background: #fafafb;
+    margin-left: 16px;
+    margin-right: 16px;
+    justify-content: center;
+    max-width: 25%;
+    border-radius: 6px;
+    visibility: hidden;
+    box-shadow: 0 0.5px 0 0 rgba(0, 0, 0, 0.18);
+    flex-wrap: wrap;
+}
+
+.user-message .list-conversation .interaction .ant-btn:hover,
+.user-message .list-conversation .interaction .ant-btn:focus {
+    color: #58aeff !important;
+}
+
+.user-message .list-conversation .interaction.hidden {
+    display: none;
+}
+
+.user-message .list-conversation .icon-interact {
+    color: #606c7a;
+    font-size: 15px;
+    width: 48px;
+    height: 38px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.user-message .list-conversation .icon-interact:hover {
+    color: #58aeff;
+}
+
+.user-message .list-conversation .message .sub-message:hover .interaction,
+.user-message .list-conversation .message .sub-message:hover .reaction,
+.user-message .list-conversation .message .sub-message:hover .reaction-reverse {
+    visibility: visible;
+}
+
+.user-message .list-conversation .message .sub-message .reaction-reverse:hover + .list_icon-reaction,
+.user-message .list-conversation .message .sub-message .content-message .reaction .reaction-thumbnail:hover .list_icon-reaction {
+    display: flex;
+}
+
+.user-message .list-conversation .message .sub-message .content-message .reacted-block .your-react:hover .list_icon-reaction {
+    display: flex;
+}
+
+.user-message .last-message {
+    padding-bottom: 48px;
+}
+
+.user-message .is-seen-message {
+    font-size: 12px;
+    color: #87929e;
+    padding-left: 16px;
+}

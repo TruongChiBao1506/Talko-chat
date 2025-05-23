@@ -3,6 +3,8 @@
     border: 1px solid #ddd;
     border-radius: 8px;
     overflow: hidden;
+    position: relative;
+    align-items: center;
   }
   
   .country-code {
@@ -20,6 +22,7 @@
   }
   
   .input {
+    width: 100%;
     flex: 1;
     padding: 8px 16px;
     border: none;

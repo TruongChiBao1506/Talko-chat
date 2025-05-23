@@ -1,0 +1,60 @@
+.reply-message {
+    /* min-width: 180px; */ /* Commented out as in the original */
+    height: 60px;
+    overflow: hidden;
+    background: #c8deff;
+    flex-direction: row;
+    align-items: center;
+    padding: 0 32px;
+    position: relative;
+    display: flex;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.reply-message .vertical-bar {
+    position: absolute;
+    height: 40px;
+    width: 2px;
+    background: #0068ff;
+    transform: translateX(-16px);
+}
+
+.reply-message_info--user {
+    font-weight: 500;
+}
+
+.reply-message_info {
+    margin-left: 12px;
+    font-size: 16px;
+    width: 100%;
+}
+
+.reply-message_logo {
+    width: 36px;
+    height: 36px;
+    overflow: hidden;
+    border-radius: 2px;
+    cursor: pointer;
+}
+
+.reply-message_logo svg {
+    height: 36px;
+    width: 36px;
+}
+
+.reply-message_logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    background-position: center center;
+}
+
+.reply-message_info--bottom {
+    display: block;
+    color: #72808e;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    word-wrap: break-word;
+}

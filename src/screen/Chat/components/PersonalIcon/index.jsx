@@ -32,17 +32,17 @@ function PersonalIcon({ avatar, isActive, demention, common, isHost, name, color
     const className = `user-icon ${common ? 'common' : ''} ${isActive ? '' : 'no-online'}`;
 
     // Xác định vị trí Badge (trạng thái hoạt động hoặc chủ phòng)
-    const badgeOffset = isHost ? [-5, 32] : [-5, 40];
+    const badgeOffset = isHost ? [-5, 36] : [-5, 40];
 
     // Xác định nội dung của Badge (biểu tượng chủ phòng)
     const badgeContent = isHost ? (
         <KeyOutlined
             style={{
                 backgroundColor: 'rgba(0,0,0,0.3)',
-                padding: '0.24rem',
+                padding: '3.84px',
                 borderRadius: '50%',
                 color: 'yellow',
-                fontSize: '1.2rem',
+                fontSize: '14px',
             }}
         />
     ) : null;

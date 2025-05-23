@@ -1,0 +1,93 @@
+.nutshell-pin-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    background: #ffffff;
+    border-bottom: 0.05px solid rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: 0.2s;
+    position: relative;
+}
+
+.nutshell-pin-container.select:hover {
+    background: #eeeff2;
+}
+
+.nutshell-pin-container.no-hover:hover {
+    background: #ffffff;
+}
+
+.nutshell-pin-container.select:hover .nutshell-pin-container_right {
+    background: #eeeff2;
+    display: block;
+}
+
+.nutshell-pin-container {
+    z-index: 2;
+}
+
+.nutshell-pin-container_left {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 4.8px 32px;
+    width: 100%;
+}
+
+.nutshell-pin-container_messsage {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-left: 16px;
+}
+
+.nutshell-pin-container_right {
+    position: absolute;
+    right: 32px;
+    transition: 0.2s;
+    border-radius: 50%;
+}
+
+.nutshell-pin-container_right button .nutshell-pin-container_button-interact {
+    font-size: 20.8px;
+    padding: 3.2px 16px;
+    border-radius: 50%;
+}
+
+.nutshell-pin-container_right.no-display {
+    display: none;
+}
+
+.nutshell-pin-container_icon {
+    font-size: 26px;
+}
+
+.nutshell-pin-container_title {
+    font-weight: 500;
+    font-size: 16px;
+}
+
+.nutshell-pin-container_detail {
+    font-size: 14px;
+}
+
+.nutshell-pin-container_button-interact {
+    height: 24px;
+    width: 24px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    transition: 0.2s;
+    border: none;
+}
+
+.nutshell-pin-container_button-interact svg {
+    font-size: 24px;
+}
+
+.nutshell-pin-container_button-interact:hover {
+    background: #e1e4ea;
+    cursor: pointer;
+}

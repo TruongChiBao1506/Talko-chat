@@ -1,0 +1,20 @@
+.list-filter_single-conver .single-conver_item {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 16px 8px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.list-filter_single-conver .single-conver_name {
+    margin-left: 16px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    word-wrap: break-word;
+}
+
+.list-filter_single-conver .single-conver_item:hover {
+    background: #f4f5f7;
+}

@@ -1,0 +1,52 @@
+.modal-detail-message-pin {
+    height: 0;
+    width: 0;
+    overflow: hidden;
+}
+
+.file_info {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    flex: 1;
+    cursor: pointer;
+}
+
+.file_info-name {
+    margin-left: 16px;
+    font-weight: 500;
+}
+
+.file_info-icon {
+    max-height: 96px;
+    max-width: 96px;
+}
+
+.file_info-icon svg {
+    width: 80px;
+}
+
+.file_info-wrapper-pin {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    min-width: 480px;
+    padding: 16px;
+    border-radius: 5px;
+    background: #eeeff2;
+}
+
+.file_info-wrapper-pin .icon-download {
+    cursor: pointer;
+    margin-left: 16px;
+    font-size: 32px;
+    height: 30px;
+    width: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #ffffff;
+    border-radius: 5px;
+    border: 1px solid #e1e4ea;
+}

@@ -1,0 +1,31 @@
+.thumbnail-video_custom {
+    position: relative;
+    width: 128px;
+    height: 128px;
+    border-radius: 5px;
+    background: black;
+    margin-right: 4.8px;
+    margin-top: 4.8px;
+    cursor: pointer;
+}
+
+.thumbnail-video_custom video {
+    width: 100%;
+    height: 100%;
+}
+
+.thumbnail-video_custom .overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.thumbnail-video_custom .overlay span {
+    color: #ffffff;
+}

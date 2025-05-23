@@ -1,0 +1,31 @@
+.menu-item {
+    font-weight: 500;
+  }
+  
+  #sticker .ant-tabs-nav-wrap {
+    padding: 0;
+  }
+  .emoji-container {
+    padding: 10px;
+}
+
+.emoji-category {
+    margin-bottom: 20px;
+}
+
+.emoji-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.emoji-item {
+    font-size: 24px;
+    cursor: pointer;
+    user-select: none;
+    transition: transform 0.1s;
+}
+
+.emoji-item:hover {
+    transform: scale(1.2);
+}

@@ -1,0 +1,98 @@
+.multiple-image-upload {
+  padding: 15px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+
+.image-preview-container {
+  margin-bottom: 15px;
+}
+
+.selected-images {
+  margin-bottom: 15px;
+  border: 1px solid #eaeaea;
+  padding: 15px;
+  border-radius: 8px;
+  background-color: white;
+}
+
+.selected-images h4 {
+  margin-bottom: 12px;
+  font-size: 15px;
+  color: #555;
+  font-weight: 500;
+}
+
+.image-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.image-preview-item {
+  position: relative;
+  height: 100px;
+  overflow: hidden;
+  border-radius: 6px;
+  border: 1px solid #eee;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.image-preview {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.image-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.image-preview img:hover {
+  transform: scale(1.03);
+}
+
+.remove-image-btn {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  padding: 2px;
+  background-color: rgba(255, 255, 255, 0.8);
+  border: none;
+  font-size: 12px;
+  cursor: pointer;
+  opacity: 0.7;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.remove-image-btn:hover {
+  opacity: 1;
+  background-color: #fff;
+  transform: scale(1.1);
+}
+
+.text-content-input {
+  margin-top: 15px;
+  border: 1px solid #eaeaea;
+  padding: 15px;
+  border-radius: 8px;
+  background-color: white;
+}
+
+.upload-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 15px;
+}
+
+.upload-progress {
+  margin-top: 10px;
+  text-align: center;
+}

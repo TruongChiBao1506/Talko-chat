@@ -1,0 +1,42 @@
+.info_name-and-thumbnail {
+    padding: 12px 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    background-color: #ffffff;
+}
+
+.info_name-and-thumbnail .info-name-and-button {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
+.info_name-and-thumbnail .info-name-and-button .info-name {
+    font-weight: 600;
+    font-size: 18px;
+    padding: 0 16px;
+}
+
+.info_name-and-thumbnail .info-name-and-button .info-button {
+    flex-direction: row;
+    font-size: 16px;
+    border-radius: 50%;
+    background: #e8eaef;
+    height: 28px;
+    width: 28px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    padding: 0 16px;
+}
+
+.update-profile_upload {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 16px;
+}

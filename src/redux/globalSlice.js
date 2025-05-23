@@ -20,6 +20,7 @@ const globalSlice = createSlice({
         isJoinChatLayout: false,
         isJoinFriendLayout: false,
         tabActive: 0,
+        updatedImages: {},
     },
 
     reducers: {
@@ -41,6 +42,13 @@ const globalSlice = createSlice({
         setAvatarProfile: (state, action) => {
             state.user.avatar = action.payload;
         },
+        updateImageMessage: (state, action) => {
+            const { messageId, newImageUrl } = action.payload;
+            state.updatedImages[messageId] = newImageUrl;
+            console.log(
+                `Image updated in redux store: messageId=${messageId}, newUrl=${newImageUrl}`
+            );
+        },
     },
 
     extraReducers: (builder) => {
@@ -49,7 +57,7 @@ const globalSlice = createSlice({
             state.isLoading = false;
         });
         builder.addCase(fetchUserProfile.fulfilled, (state, action) => {
-            console.log('fulfilled');         
+            console.log('fulfilled');
             state.isLoading = true;
             state.isLogin = true;
             state.user = action.payload;
@@ -71,5 +79,6 @@ export const {
     setJoinFriendLayout,
     setTabActive,
     setAvatarProfile,
+    updateImageMessage,
 } = actions;
 export default reducer;

@@ -1,0 +1,49 @@
+#tabpane-vote {
+    margin: 16px 25.6px;
+}
+
+#tabpane-vote .tabpane-vote-item {
+    margin: 32px 0;
+    border: 1px solid #c6c6c6;
+    border-radius: 6.4px;
+}
+
+@media only screen and (min-width: 1200px) and (max-width: 1530px) {
+    #tabpane-vote .vote-message {
+        min-width: 387.2px;
+    }
+    #tabpane-vote .vote-message_item {
+        width: 384px;
+    }
+}
+
+@media only screen and (min-width: 992px) and (max-width: 1199px) {
+    #tabpane-vote .vote-message {
+        min-width: 451.2px;
+    }
+    #tabpane-vote .vote-message_item {
+        width: 448px;
+    }
+}
+
+@media only screen and (min-width: 768px) and (max-width: 991px) {
+    
+}
+
+@media only screen and (min-width: 577px) and (max-width: 767px) {
+    #tabpane-vote .vote-message {
+        min-width: 451.2px;
+    }
+    #tabpane-vote .vote-message_item {
+        width: 448px;
+    }
+}
+
+@media only screen and (max-width: 576px) {
+    #tabpane-vote .vote-message {
+        min-width: 451.2px;
+    }
+    #tabpane-vote .vote-message_item {
+        width: 448px;
+    }
+}

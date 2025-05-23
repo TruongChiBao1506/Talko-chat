@@ -1,0 +1,21 @@
+.pin-item_top {
+    display: flex;
+    align-items: center;
+}
+
+.pin-item_name {
+    font-weight: 500;
+}
+
+.pin-item_info {
+    margin-left: 16px;
+}
+
+.pin-item_bottom,
+.pin-item_icon {
+    color: #72808e;
+}
+
+.pin-item_body {
+    padding: 16px 0;
+}

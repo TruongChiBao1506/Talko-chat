@@ -1,0 +1,96 @@
+.type-pin-message .text-pin {
+    max-width: 30vw;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    word-wrap: break-word;
+}
+
+.type-pin-message_HTML,
+.type-pin-message_IMAGE,
+.type-pin-message_VIDEO,
+.type-pin-message_FILE {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.type-pin-message_des_FILE {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.type-pin-message_des_FILE .file_info-icon {
+    height: 32px;
+    width: 32px;
+}
+
+.type-pin-message_des_FILE .file_info-icon svg {
+    height: 32px;
+    width: 32px;
+}
+
+.type-pin-message_des_FILE .file_info-name {
+    max-width: 30vw;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    word-wrap: break-word;
+}
+
+@media only screen and (min-width: 992px) and (max-width: 1199px) {
+    .type-pin-message_des_FILE .file_info-name {
+        max-width: 25vw;
+    }
+    .type-pin-message_des_FILE .file_info-icon {
+        height: 30.4px;
+        width: 30.4px;
+    }
+    .type-pin-message_des_FILE .file_info-icon svg {
+        height: 30.4px;
+        width: 30.4px;
+    }
+}
+
+@media only screen and (min-width: 768px) and (max-width: 991px) {
+    .type-pin-message_des_FILE .file_info-name {
+        max-width: 20vw;
+    }
+    .type-pin-message_des_FILE .file_info-icon {
+        height: 28.8px;
+        width: 28.8px;
+    }
+    .type-pin-message_des_FILE .file_info-icon svg {
+        height: 28.8px;
+        width: 28.8px;
+    }
+}
+
+@media only screen and (min-width: 577px) and (max-width: 767px) {
+    .type-pin-message_des_FILE .file_info-name {
+        max-width: 16vw;
+    }
+    .type-pin-message_des_FILE .file_info-icon {
+        height: 27.2px;
+        width: 27.2px;
+    }
+    .type-pin-message_des_FILE .file_info-icon svg {
+        height: 27.2px;
+        width: 27.2px;
+    }
+}
+
+@media only screen and (max-width: 576px) {
+    .type-pin-message_des_FILE .file_info-name {
+        max-width: 12vw;
+    }
+    .type-pin-message_des_FILE .file_info-icon {
+        height: 24px;
+        width: 24px;
+    }
+    .type-pin-message_des_FILE .file_info-icon svg {
+        height: 24px;
+        width: 24px;
+    }
+}

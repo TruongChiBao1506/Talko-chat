@@ -22,7 +22,7 @@ const Home = () => {
   }, [dispatch]);
   return (
     <Spin indicator={<LoadingOutlined style={{fontSize : 68}} spin/>} spinning={isLoading}>
-      <div className="zalo-homepage">
+      <div className="talko-homepage">
         <Header />
         <main>
           <Features />

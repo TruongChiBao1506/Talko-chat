@@ -11,6 +11,7 @@ import TermsOfUse from './TermsOfUse/TermsOfUse';
 import { LoadingOutlined } from '@ant-design/icons';
 const Auth = () => {
     const { isLoading } = useSelector(state => state.auth);
+    
     return (
         <Spin indicator={<LoadingOutlined style={{fontSize : 38}}/>} spinning={isLoading}>
             <Routes>

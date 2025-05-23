@@ -22,6 +22,8 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    const regexAccount =
+    /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     const regexPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/;
     if (!name || !account || !password || !confirmPassword) {
       setError('Vui lòng điền đầy đủ thông tin');
@@ -39,16 +41,19 @@ export default function RegisterPage() {
       setError('Mật khẩu không khớp');
       return;
     }
+    if(!regexAccount.test(account)){
+      setError('Email không hợp lệ');
+      return;
+    }
     await authApi.fetchUser(account)
       .then(
         (res) => {
-          console.log('Email hoặc số điện thoại đã được đăng ký');
-          setError('Số điện thoại đã tồn tại');
+          console.log('Email này đã được đăng ký');
+          setError('Email này đã tồn tại');
           return;
         }
       )
       .catch(async () => {
-        console.log('Số điện thoại chưa được đăng ký');
         dispatch(setLoading(true));
         const res = await authApi.registry(name, account, password);
         if (res) {
@@ -80,7 +85,7 @@ export default function RegisterPage() {
 
           <div className="form-group">
             <label>Tài khoản</label>
-            <Input type="text" placeholder="Email hoặc số điện thoại" value={account} onChange={(value)=>setAccount(value)} />
+            <Input type="text" placeholder="Email" value={account} onChange={(value)=>setAccount(value)} />
           </div>
 
           <div className="form-group">

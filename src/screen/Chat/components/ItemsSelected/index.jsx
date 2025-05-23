@@ -27,8 +27,8 @@ function ItemsSelected({ items, onRemove }) {
 
                 items && items.length > 0 &&
                 items.map((item, index) => (
-                    <div className="item-selected_wrapper">
-                        <div className='item-selected--text' key={index}>
+                    <div className="item-selected_wrapper" key={index}>
+                        <div className='item-selected--text' >
                             <div className='item-selected-avatar'>
 
 

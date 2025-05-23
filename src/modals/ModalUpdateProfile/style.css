@@ -1,4 +1,4 @@
-.modal-update-profile .ant-modal-content {
+/* .modal-update-profile .ant-modal-content {
     border-radius: 12px;
     overflow: hidden;
   }
@@ -86,4 +86,24 @@
   }
   .modal-update-profile .ant-modal-content{
     padding: 10px 10px;
-  }
+  } */
+
+  .profile-update_cover-image {
+    position: relative;
+}
+
+.profile-update_upload {
+    height: 288px;
+}
+
+.profile-update_avatar {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translate(-50%, 50%);
+}
+
+.profile-update_info {
+    margin-top: 80px;
+    padding: 32px 25.6px;
+}

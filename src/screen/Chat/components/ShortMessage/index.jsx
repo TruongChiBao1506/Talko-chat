@@ -26,9 +26,9 @@ ShortMessage.defaultsProps = {
     type: Protypes.bool
 };
 
-const ShortMessage = ({ message, type }) => {
+function ShortMessage ({ message, type }){
 
-    const { user } = useSelector(state => state.user);
+    const { user } = useSelector(state => state.global);
     const { content, isDeleted } = message;
 
     const renderName = () => {
@@ -175,6 +175,27 @@ const ShortMessage = ({ message, type }) => {
                         (message.type === 'NOTIFY' && (message.content === 'DELETE_MANAGERS')) && (
                             <span>{renderName()}<KeyOutlined />&nbsp;đã xóa phó nhóm</span>
                         )
+                    }
+
+                    {
+                        message.type === 'MULTI_IMAGE' && (() => {
+                            let previewText = '';
+                            try {
+                                const parsedContent = JSON.parse(message.content);
+                                if (parsedContent.text && parsedContent.text.trim() !== '') {
+                                    previewText = parsedContent.text;
+                                } else if (parsedContent.images && parsedContent.images.length > 1) {
+                                    previewText = 'đã gửi nhiều ảnh';
+                                } else {
+                                    previewText = 'đã gửi một ảnh';
+                                }
+                            } catch {
+                                previewText = 'đã gửi nhiều ảnh';
+                            }
+                            return (
+                                <span>{renderName()}<FileImageOutlined />&nbsp;{previewText}</span>
+                            );
+                        })()
                     }
                 </>
             )}

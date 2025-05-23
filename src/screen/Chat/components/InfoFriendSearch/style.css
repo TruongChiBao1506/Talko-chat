@@ -1,0 +1,91 @@
+#info_friend-search {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background-color: #ffffff;
+}
+
+#info_friend-search .info_friend-search-content {
+    height: calc(100vh - 68px);
+    padding: 19.2px 0;
+    display: flex;
+    flex-direction: column;
+}
+
+#info_friend-search .info_friend-search-content .info_friend-add-member {
+    padding: 0 25.6px;
+}
+
+#info_friend-search .info_friend-search-content .info_friend-add-member button {
+    width: 100%;
+    padding: 9.6px 0;
+    cursor: pointer;
+    border: none;
+    outline: none;
+    color: #282a35;
+    background: #e8eaef;
+    font-weight: 500;
+    transition: 0.2s;
+}
+
+#info_friend-search .info_friend-search-content .info_friend-add-member button:hover {
+    background: #e1e4ea;
+}
+
+#info_friend-search .info_friend-search-content .info_friend-searchbar-and-title {
+    flex-direction: column;
+}
+
+#info_friend-search .info_friend-search-content .info_friend-searchbar-and-title .info_friend-search-title {
+    padding: 16px 25.6px;
+}
+
+#info_friend-search .info_friend-search-content .info_friend-searchbar-and-title .info_friend-searchbar {
+    padding: 0 25.6px;
+}
+
+#info_friend-search .info_friend-search-content .info_friend-searchbar-and-title .info_friend-list {
+    padding: 32px 0;
+}
+
+#info_friend-search .info_friend-search-content .info_friend-searchbar-and-title .info_friend-list .info_friend-item {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    transition: 0.2s;
+    padding: 16px 25.6px;
+}
+
+#info_friend-search .info_friend-search-content .info_friend-searchbar-and-title .info_friend-list .info_friend-item-leftside {
+    display: flex;
+    flex-direction: row;
+}
+
+#info_friend-search .info_friend-search-content .info_friend-searchbar-and-title .info_friend-list .info_friend-item-leftside-name {
+    display: flex;
+    flex-direction: column;
+    font-size: 14px;
+    margin-left: 16px;
+    align-items: center;
+    justify-content: center;
+}
+
+#info_friend-search .info_friend-search-content .info_friend-searchbar-and-title .info_friend-list .info_friend-item-leftside-name strong {
+    font-weight: 500;
+}
+
+#info_friend-search .info_friend-search-content .info_friend-searchbar-and-title .info_friend-list .info_friend-item-rightside.hidden {
+    visibility: hidden;
+}
+
+#info_friend-search .info_friend-search-content .info_friend-searchbar-and-title .info_friend-list .info_friend-item:hover {
+    background: #f4f5f7;
+    cursor: pointer;
+}
+
+.menu-icon {
+    font-size: 12px;
+    font-weight: 500;
+}

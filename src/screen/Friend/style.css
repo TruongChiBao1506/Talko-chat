@@ -1,0 +1,109 @@
+#main-friend_wrapper .divider-layout {
+    height: 0.2vh;
+    padding: 0 16px;
+    display: flex;
+    align-items: flex-end;
+}
+
+#main-friend_wrapper .divider-layout > div {
+    height: 0.1px;
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+#main-friend_wrapper .main-friend_sidebar {
+    border-right: 0.05px solid rgba(0, 0, 0, 0.2);
+}
+
+#main-friend_wrapper .main-friend_sidebar_search-bar {
+    height: 10vh;
+}
+
+#main-friend_wrapper .main-friend_sidebar_bottom {
+    background-color: #ffffff;
+    height: 88vh;
+}
+
+#main-friend_wrapper .main-friend_sidebar_bottom .main-friend_sidebar_option {
+    cursor: pointer;
+    padding: 0 22.4px;
+    height: 72px;
+    transition: 0.2s;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+#main-friend_wrapper .main-friend_sidebar_bottom .main-friend_sidebar_option_img img {
+    width: 30px;
+    height: 30px;
+}
+
+#main-friend_wrapper .main-friend_sidebar_bottom .main-friend_sidebar_option_text {
+    font-size: 16px;
+    font-weight: 400;
+    margin-left: 16px;
+}
+
+#main-friend_wrapper .main-friend_sidebar_bottom .main-friend_sidebar_list-friend_title {
+    padding: 0 22.4px;
+    height: 4vh;
+    display: flex;
+    align-items: center;
+}
+
+#main-friend_wrapper .main-friend_sidebar_bottom .main-friend_sidebar_list-friend {
+    height: calc(80vh - 2vh - 4vh - 72px - 72px - 72px);
+}
+
+#main-friend_wrapper .main-friend_sidebar_bottom .main-friend_sidebar_option:hover {
+    background: #eeeff2;
+}
+
+#main-friend_wrapper .main-friend_body {
+    background: #fafafb; 
+}
+
+#main-friend_wrapper .main-friend_body__filter {
+    height: 50px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 80px;
+}
+
+#main-friend_wrapper .main-friend_body__filter--left,
+#main-friend_wrapper .main-friend_body__filter--right {
+    cursor: pointer;
+}
+
+#main-friend_wrapper .main-friend_body_item {
+    height: calc(100vh - 68px);
+}
+
+#main-friend_wrapper .main-friend_body_title-list {
+    font-weight: 500;
+    margin: 24px 80px;
+}
+
+#main-friend_wrapper .main-friend_body__list-group {
+    padding: 0 80px;
+}
+
+@media only screen and (max-width: 576px) {
+    #main-friend_wrapper .main-friend_body__filter {
+        padding-left: 32px; 
+        padding-right: 32px;
+        flex-direction: column;
+        align-items: flex-start;
+        height: auto;
+    }
+    #main-friend_wrapper .main-friend_body_title-list {
+        margin-left: 32px; 
+        margin-right: 32px;
+    }
+    #main-friend_wrapper .main-friend_body__list-group {
+        padding: 0 32px; 
+    }
+}

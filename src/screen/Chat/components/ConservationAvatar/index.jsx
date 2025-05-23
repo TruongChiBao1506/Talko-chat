@@ -1,89 +1,14 @@
 import { UserOutlined } from '@ant-design/icons';
 import { Avatar, Badge, Tooltip } from 'antd';
 import DEFAULT_AVATAR from '../../../../assets/images/user.png';
-import AvatarCustom from 'components/AvatarCustom';
+import AvatarCustom from '../../../../components/avatarCustom';
 import PropTypes from 'prop-types';
-import React, { useMemo } from 'react';
-import COVERSATION_STYLE from './ConversationAvatarStyle';
-import './style.scss';
-
-const ConversationAvatar = ({
-    avatar,
-    demension = 28,
-    isGroupCard = false,
-    totalMembers,
-    type,
-    name,
-    isActived = false,
-    sizeAvatar = 48,
-    frameSize = 48,
-    avatarColor = '',
-}) => {
-    // Hàm tạo style cho avatar
-    const getAvatarStyle = (index) => ({
-        ...(totalMembers === 3 && index === 2 ? COVERSATION_STYLE.styleGroup3(demension) : {}),
-        backgroundColor: avatar[index]?.avatarColor || '',
-    });
-
-    // Tạo danh sách avatar nhóm
-    const avatars = useMemo(() => {
-        return Array.from({ length: Math.min(totalMembers, 3) }, (_, index) => (
-            <Avatar
-                key={index}
-                style={getAvatarStyle(index)}
-                size={demension}
-                src={avatar[index]?.avatar || DEFAULT_AVATAR}
-                icon={!avatar[index]?.avatar && <UserOutlined />}
-            />
-        ));
-    }, [totalMembers, avatar, demension]);
-
-    // Tạo avatar nhóm lớn (>3 thành viên)
-    const groupAvatars = useMemo(() => (
-        <>
-            {avatars.map((avt, index) => (
-                <div className="per-user" key={index}>{avt}</div>
-            ))}
-            <div className="per-user">
-                <Tooltip placement="top">
-                    <Avatar style={{ backgroundColor: '#7562d8', color: '#fff' }} size={demension}>
-                        {totalMembers - 3}
-                    </Avatar>
-                </Tooltip>
-            </div>
-        </>
-    ), [avatars, totalMembers, demension]);
-
-    return (
-        <div className="avatar_conversation">
-            {typeof avatar === 'string' ? (
-                <Badge dot={isActived} offset={[-5, 40]} color="green">
-                    <AvatarCustom size={sizeAvatar} src={avatar} color={avatarColor} name={name} />
-                </Badge>
-            ) : (
-                <div className="conversation-item_box">
-                    <div className="left-side-box">
-                        <div
-                            className="icon-users-group"
-                            style={{ width: `${frameSize}px`, height: `${frameSize}px` }}
-                        >
-                            {totalMembers > 3 ? (
-                                <div id="group-many-user">{groupAvatars}</div>
-                            ) : (
-                                <Avatar.Group maxCount={3} maxPopoverPlacement="none">
-                                    {avatars}
-                                </Avatar.Group>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            )}
-        </div>
-    );
-};
+import React from 'react';
+import COVERSATION_STYLE from './ConservationAvatarStyle';
+import './style.css';
 
 ConversationAvatar.propTypes = {
-    demension: PropTypes.number,
+    dimension: PropTypes.number,
     isGroupCard: PropTypes.bool,
     totalMembers: PropTypes.number.isRequired,
     type: PropTypes.bool.isRequired,
@@ -94,5 +19,113 @@ ConversationAvatar.propTypes = {
     frameSize: PropTypes.number,
     avatarColor: PropTypes.string,
 };
+
+ConversationAvatar.defaultProps = {
+    dimension: 28,
+    isGroupCard: false,
+    isActived: false,
+    avatar: '',
+    sizeAvatar: 48,
+    frameSize: 48,
+    avatarColor: '',
+};
+
+function ConversationAvatar({
+    avatar,
+    dimension,
+    isGroupCard,
+    totalMembers,
+    type,
+    name,
+    isActived,
+    sizeAvatar,
+    frameSize,
+    avatarColor,
+}) {
+    const renderAvatar = () => {
+        if (!Array.isArray(avatar) || totalMembers < 1) return null;
+        return avatar.slice(0, totalMembers).map((user, index) => (
+            <Avatar
+                key={index}
+                size={dimension}
+                src={user?.avatar || undefined}
+                icon={!user?.avatar ? <UserOutlined /> : undefined}
+                style={{
+                    backgroundColor: user?.avatar ? 'transparent' : user?.avatarColor,
+                    ...(totalMembers === 3 && index === 2 ? COVERSATION_STYLE.styleGroup3(dimension) : {}),
+                }}
+            />
+        ));
+    };
+
+    const renderGroupManyUser = () => {
+        if (!Array.isArray(avatar) || totalMembers < 4) return null;
+        return (
+            <>
+                {avatar.slice(0, 3).map((user, index) => (
+                    <div key={index} className="per-user">
+                        <Avatar
+                            size={dimension}
+                            src={user?.avatar || undefined}
+                            icon={!user?.avatar ? <UserOutlined /> : undefined}
+                            style={{
+                                backgroundColor: user?.avatar ? 'transparent' : user?.avatarColor,
+                                marginTop: index === 2 ? (dimension / 6) * -1 : 0,
+                            }}
+                        />
+                    </div>
+                ))}
+                <div className="per-user">
+                    <Tooltip placement="top">
+                        <Avatar
+                            size={dimension}
+                            style={{
+                                fontSize: 12,
+                                backgroundColor: '#e2e5e9',
+                                borderColor: '#cdd4de',
+                                borderWidth: 1,
+                                color: '#788395',
+                                marginTop: (dimension / 6) * -1,
+                            }}
+                        >
+                            {(totalMembers - 3) >= 100 ? `${totalMembers - 3}+` : totalMembers - 3}
+                        </Avatar>
+                    </Tooltip>
+                </div>
+            </>
+        );
+    };
+
+    return (
+        <div className="avatar_conversation">
+            {typeof avatar === 'string' ? (
+                <Badge dot={isActived} offset={[-5, 40]} color="green">
+                    <AvatarCustom size={sizeAvatar} src={avatar || DEFAULT_AVATAR} color={avatarColor} name={name} />
+                </Badge>
+            ) : (
+                <div className="conversation-item_box">
+                    <div className="left-side-box">
+                        <div
+                            className="icon-users-group"
+                            style={{
+                                width: `${frameSize}px`,
+                                height: `${frameSize}px`,
+                                ...(isGroupCard ? COVERSATION_STYLE.friendCardAvatar(dimension) : {}),
+                            }}
+                        >
+                            {totalMembers > 3 ? (
+                                <div id="group-many-user">{renderGroupManyUser()}</div>
+                            ) : (
+                                <Avatar.Group maxCount={3} maxPopoverPlacement="none">
+                                    {renderAvatar()}
+                                </Avatar.Group>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}
 
 export default ConversationAvatar;

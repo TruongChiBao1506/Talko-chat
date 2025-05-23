@@ -1,0 +1,92 @@
+#user-card {
+
+    /* padding-bottom: 80px; */
+    .user-card_wrapper {
+        .user-card_cover-image {
+            position: relative;
+        }
+
+        .user-card_avatar {
+            border-radius: 50%;
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translate(-50%, 50%);
+        }
+
+        .user-card_avatar .ant-image-mask {
+            border-radius: 50%;
+        }
+
+        .user-card-name {
+            margin-top: 108px;
+            font-size: 20px;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            white-space: nowrap;
+            text-align: center;
+        }
+
+        .user-card-button {
+            display: flex;
+            margin-top: 16px;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .user-card-button--addFriend {
+            margin-right: 16px;
+        }
+
+        .user-card-button--message {
+            margin-left: 16px;
+        }
+
+        .user-card-button--no-margin {
+            margin-left: 0;
+        }
+
+        .user-card-infomation--flex {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+        }
+
+        .user-card-infomation {
+            margin-top: 32px;
+            padding: 0 69px;
+        }
+
+        .user-card-infomation__label {
+            width: 120px;
+            color: #72808e;
+        }
+
+        .user-card-button-optional {
+            padding: 0 48px;
+            margin-top: 64px;
+            padding-bottom: 32px;
+        }
+
+        .user-card-button-optional--hidden {
+            visibility: hidden;
+        }
+    }
+    .copy-button {
+        background-color: #1890ff;
+        color: white;
+        padding: 5px 5px;
+        border: none;
+        border-radius: 5px;
+        margin-left: 5px;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+    
+    .copy-button:hover {
+        background-color: #40a9ff;
+    }
+}

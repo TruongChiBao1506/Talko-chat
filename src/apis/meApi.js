@@ -12,7 +12,28 @@ const meApi = {
         return axiosClient.put(url, {
             name, dateOfBirth, gender
         });
-    }
+    },
+    changePasswod: (oldPassword, newPassword) => {
+        return axiosClient.patch(`${API_URL}/password`, {
+            oldPassword,
+            newPassword,
+        });
+    },
+    revokeToken: (password, key) => {
+        return axiosClient.delete(`${API_URL}/revoke-token`, {
+            data: {
+                password,
+                key,
+            },
+        });
+    },
+    updateAvatar: (file) => {
+        return axiosClient.patch(`${API_URL}/avatar`, file);
+    },
+
+    updateCoverImage: (file) => {
+        return axiosClient.patch(`${API_URL}/cover-image`, file);
+    },
 }
 
 export default meApi;

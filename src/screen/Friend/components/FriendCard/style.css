@@ -1,0 +1,69 @@
+.friend-card {
+    margin-left: 80px;
+    margin-right: 80px;
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 24px 32px;
+    border: 0.5px solid rgba(0, 0, 0, 0.2);
+    background: #fff;
+    border-radius: 3px;
+}
+
+.friend-card_info-user {
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.friend-card_name {
+    margin-left: 16px;
+    font-size: 25.6px;
+}
+
+.friend-card_interact {
+    display: flex;
+    align-items: center;
+}
+
+.friend-card_button--accept {
+    margin-left: 16px;
+}
+
+.friend-card_interact-mobile {
+    display: none;
+}
+
+@media only screen and (max-width: 576px) {
+    .friend-card {
+        margin-left: 32px;
+        margin-right: 32px;
+    }
+    
+    .friend-card_interact-mobile {
+        display: flex;
+        margin-top: 16px;
+    }
+    
+    .friend-card_button--accept {
+        margin-left: 16px;
+    }
+    
+    .friend-card_cancel-request {
+        margin-left: 0;
+    }
+    
+    .friend-card_interact {
+        display: none;
+    }
+}
+
+.friend-card:first-child,
+.friend-card:last-child {
+    margin-top: 32px;
+}
+
+.friend-card:nth-child(n + 1) {
+    margin-top: 16px;
+}

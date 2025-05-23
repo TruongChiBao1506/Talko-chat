@@ -1,85 +1,44 @@
-.avatar_conversation {
+.avatar_conversation .conversation-item_box #group-many-user {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+}
+
+.avatar_conversation .conversation-item_box #group-many-user .per-user:nth-child(2),
+.avatar_conversation .conversation-item_box #group-many-user .per-user:nth-child(4) {
+    margin-left: -8px;
+}
+
+.avatar_conversation .conversation-item_box #group-many-user .per-user:nth-child(3),
+.avatar_conversation .conversation-item_box #group-many-user .per-user:nth-child(4) {
+    margin-top: -4px;
+}
+
+.avatar_conversation .conversation-item_box {
+    width: 100%;
+    display: flex;
+}
+
+.avatar_conversation .conversation-item_box .left-side-box .icon-users-group {
     display: flex;
     align-items: center;
+}
 
-    .conversation-item_box {
-        display: flex;
-        align-items: center;
-        width: 100%;
+.avatar_conversation .conversation-item_box .ant-avatar-group .ant-avatar:nth-child(1),
+.avatar_conversation .conversation-item_box .ant-avatar-group .ant-avatar:nth-child(3) {
+    margin-left: 0 !important;
+}
 
-        .left-side-box {
-            .icon-users-group {
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                position: relative;
-                width: 100%;
-            }
-        }
+.avatar_conversation .conversation-item_box .ant-avatar-group .ant-avatar:nth-child(3),
+.avatar_conversation .conversation-item_box .ant-avatar-group .ant-avatar:nth-child(4) {
+    margin-top: -4px;
+}
 
-        /* Nhóm nhiều người (Từ 4 thành viên trở lên) */
-        #group-many-user {
-            display: flex;
-            flex-wrap: wrap;
-            flex-direction: row;
-            position: relative;
-            width: fit-content;
-            max-width: 100%;
+.avatar_conversation .conversation-item_box .ant-avatar-group {
+    display: flex;
+    flex-wrap: wrap;
+}
 
-            .per-user {
-                position: relative;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-
-            /* Căn chỉnh khoảng cách giữa các avatar trong nhóm */
-            .per-user:nth-child(2),
-            .per-user:nth-child(4) {
-                margin-left: -8px;
-            }
-
-            .per-user:nth-child(3),
-            .per-user:nth-child(4) {
-                margin-top: -4px;
-            }
-
-            /* Avatar hiển thị tổng số người còn lại */
-            .per-user:last-child {
-                background-color: #7562d8;
-                color: #fff;
-                font-size: 14px;
-                font-weight: bold;
-            }
-        }
-
-        /* Nhóm tối đa 3 người (dùng Avatar.Group của Ant Design) */
-        .ant-avatar-group {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            align-items: center;
-
-            .ant-avatar {
-                border: 2px solid #fff; /* Viền trắng giữa các avatar */
-            }
-
-            .ant-avatar:nth-child(1),
-            .ant-avatar:nth-child(3) {
-                margin-left: 0 !important;
-            }
-
-            .ant-avatar:nth-child(3),
-            .ant-avatar:nth-child(4) {
-                margin-top: -4px;
-            }
-        }
-
-        /* Điều chỉnh vị trí huy hiệu trạng thái (Badge) */
-        .ant-badge-dot {
-            width: 10px !important;
-            height: 10px !important;
-            border: 1px solid white;
-        }
-    }
+.avatar_conversation .conversation-item_box .line-group .second-line-group {
+    margin-top: -4px;
 }

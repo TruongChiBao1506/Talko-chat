@@ -1,0 +1,27 @@
+.link-preview-custom .LowerContainer .Title {
+    font-size: 22.4px;
+}
+
+.link-preview-custom .LowerContainer .Description {
+    font-size: 20.8px;
+}
+
+.link-preview-custom .LowerContainer .SiteDetails {
+    font-size: 20.8px;
+}
+
+.text-message-item .tag-user {
+    color: #61a7ff;
+}
+
+.text-message-item .tag-user:hover {
+    cursor: pointer;
+}
+
+.text-message-item .content-single-link {
+    margin-bottom: 16px;
+}
+
+.text-message-item .content-mutiple-link a:hover {
+    text-decoration: underline;
+}

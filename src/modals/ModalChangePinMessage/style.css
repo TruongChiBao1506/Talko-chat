@@ -1,0 +1,35 @@
+.modal-change-pin_wapper {
+    border: 0.5px solid #e1e4ea;
+    border-radius: 5px;
+    margin-top: 16px;
+}
+
+.modal-change-pin {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    padding: 6.4px 16px;
+}
+
+.modal-change-pin_icon {
+    font-size: 32px;
+}
+
+.modal-change-pin_title {
+    font-weight: 500;
+}
+
+.modal-change-pin_messsage {
+    margin-left: 16px;
+}
+
+.modal-change-pin_left {
+    display: flex;
+    align-items: center;
+}
+
+.modal-change-pin:hover {
+    background: #eeeff2;
+}

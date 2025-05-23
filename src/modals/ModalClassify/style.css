@@ -1,0 +1,130 @@
+.modal-classify_wrapper {
+    .modal-classify_add {
+        font-size: 16px;
+        display: inline-flex;
+        align-items: center;
+        color: var(--blue-zelo);
+        cursor: pointer;
+        margin-top: 10px;
+        padding: 4px 8px;
+        transition: 0.2s;
+        border-radius: 5px;
+    }
+    .modal-classify_add:hover {
+        background: var(--blue-700);
+    }
+    .modal-classify_title {
+        font-size: 13px;
+        font-weight: 500;
+    }
+    .modal-classify_list-classify {
+        margin-top: 10px;
+    }
+    .modal-classify-item:hover .icon-classify {
+        visibility: visible;
+    }
+    .modal-classify-item:hover .modal-classify-item-amount {
+        visibility: hidden;
+    }
+    .modal-classify-item {
+        padding: 8px 8px;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        background: var(--white-smoke);
+        border-radius: 5px;
+        margin-bottom: 10px;
+        position: relative;
+    }
+    .modal-classify-item--left,
+    .modal-classify-item--right {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+    }
+    .icon-classify {
+        cursor: pointer;
+        width: 28px;
+        height: 28px;
+        font-size: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 4px;
+        transition: background 0.2s;
+        border-radius: 3px;
+        visibility: hidden;
+    }
+    .icon-classify:hover {
+        background: var(--grey-300);
+    }
+    .classify-item-tag {
+        font-size: 18px;
+    }
+    .classify-item-name {
+        margin-left: 10px;
+        font-size: 16px;
+    }
+    .modal-classify-item-amount {
+        position: absolute;
+        right: 10px;
+        top: 0;
+        transform: translateY(50%);
+        font-weight: 500;
+        visibility: visible;
+    }
+}
+.modal-add_header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+.modal-add_header--icon {
+    height: 30px;
+    width: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    margin-right: 10px;
+    transition: 0.2s;
+    cursor: pointer;
+}
+.modal-add_header--icon:hover {
+    background: var(--grey-300);
+}
+.modal-add-classify_wrapper .modal-add-classify--title {
+    font-size: 14px;
+    font-weight: 500;
+}
+.modal-add-classify_wrapper .modal-add-classify--input {
+    margin-top: 10px;
+}
+.tag-select-icon {
+    font-size: 18px;
+    cursor: pointer;
+}
+.check-name-classify {
+    margin-top: 10px;
+}
+.popup-change-color {
+    display: flex;
+    flex-direction: column;
+}
+.popup-change-color > span {
+    font-size: 13px;
+    font-weight: 500;
+}
+.list-color {
+    display: flex;
+    flex-direction: row;
+    padding: 5px 0;
+}
+.popup-color-item {
+    width: 25px;
+    height: 25px;
+    cursor: pointer;
+}
+.popup-color-item ~ .popup-color-item {
+    margin-left: 4px;
+}

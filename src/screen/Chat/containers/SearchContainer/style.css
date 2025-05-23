@@ -30,14 +30,14 @@
     width: 32px;
     height: 32px;
     text-align: center;
-    border-radius: 20px;
+    border-radius: 4px;
     transition: 0.2s;
     color: #5c7795;
 }
 
 #search-wrapper .search-top_add-friend:hover,
 #search-wrapper .search-top_create-group:hover {
-    background-color: #f0f0f0; 
+    background-color: #c2d8f2; 
 }
 
 #search-wrapper .search-top_input-search {
@@ -64,7 +64,7 @@
 #search-wrapper .search-bottom .add-classify {
     width: 32px;
     font-size: 20px;
-    border-radius: 20px;
+    border-radius: 4px;
     height: 32px;
     text-align: center;
     cursor: pointer;
@@ -72,5 +72,5 @@
 }
 
 #search-wrapper .search-bottom .add-classify:hover {
-    background-color: #f0f0f0;
+    background-color: #c2d8f2;
 }

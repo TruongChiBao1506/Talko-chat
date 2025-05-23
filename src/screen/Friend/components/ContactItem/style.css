@@ -1,0 +1,45 @@
+.contact-card {
+    margin-left: 80px;
+    margin-right: 80px;
+    padding: 24px 32px;
+    border: 0.5px solid rgba(0, 0, 0, 0.2);
+    background: #fff;
+    border-radius: 3px;
+    cursor: pointer;
+    position: relative;
+}
+
+.contact-card_info-user {
+    display: flex;
+    align-items: center;
+}
+
+.contact-card_info {
+    margin-left: 16px;
+    display: flex;
+    flex-direction: column;
+}
+
+.contact-card_name {
+    font-size: 25.6px;
+}
+
+.contact-card_interact {
+    position: absolute;
+    right: 32px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.contact-card_button--accept {
+    margin-left: 16px;
+}
+
+.contact-card:first-child,
+.contact-card:last-child {
+    margin-top: 32px;
+}
+
+.contact-card:nth-child(n + 1) {
+    margin-top: 16px;
+}
