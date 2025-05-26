@@ -1,291 +1,59 @@
+.video-call-modal .ant-modal-body {
+  padding: 0;
+  height: 70vh;
+  overflow: hidden;
+}
+
 .video-call-modal .ant-modal-content {
-    border-radius: 12px;
-    overflow: hidden;
+  background: #1a1a1a;
+  border-radius: 10px;
 }
 
-.remote-video-container {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    background-color: #000;
-    overflow: hidden;
+.video-call-modal .ant-modal-header {
+  background: #2a2a2a;
+  border-bottom: 1px solid #3a3a3a;
+  border-radius: 10px 10px 0 0;
 }
 
-.remote-video {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    background-color: #222;
+.video-call-modal .ant-modal-title {
+  color: white;
 }
 
-.local-video-container {
-    position: absolute;
-    bottom: 70px;
-    right: 10px;
-    width: 120px;
-    height: 180px;
-    border-radius: 8px;
-    overflow: hidden;
-    border: 2px solid white;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-    z-index: 10;
+.video-call-modal .ant-modal-close {
+  color: white;
+}
+/* Thêm vào cuối file */
+.mute-btn {
+  background: #4080ff;
+  color: white;
+  border: none;
+  border-radius: 50px;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 5px;
 }
 
-.local-video {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    background-color: #333;
+.mute-btn.muted {
+  background: #ff4d4f;
 }
 
-.switch-camera-button {
-    position: absolute;
-    bottom: 5px;
-    right: 5px;
-    z-index: 11;
-    background-color: rgba(0, 0, 0, 0.6);
-    color: white;
+.mute-btn.muted:before {
+  content: "🔇";
 }
 
-.video-call-controls {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    padding: 15px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 20px;
-    background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
-    z-index: 5;
+.mute-btn:not(.muted):before {
+  content: "🔊";
 }
 
-.control-button {
-    background-color: rgba(255, 255, 255, 0.2);
-    color: white;
-    border: none;
-    width: 44px;
-    height: 44px;
-}
-
-.control-button-active {
-    background-color: #1890ff;
-    color: white;
-    border: none;
-    width: 44px;
-    height: 44px;
-}
-
-.end-call-button {
-    background-color: #ff4d4f;
-    color: white;
-    border: none;
-    width: 44px;
-    height: 44px;
-}
-
-.volume-control {
-    position: absolute;
-    right: 15px;
-    width: 100px;
-}
-
-.remote-user-info {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    padding: 5px 10px;
-    background-color: rgba(0, 0, 0, 0.6);
-    color: white;
-    border-radius: 4px;
-    display: flex;
-    gap: 10px;
-    align-items: center;
-}
-
-.call-status {
-    position: absolute;
-    top: 50%;
-    left: 0;
-    right: 0;
-    text-align: center;
-    transform: translateY(-50%);
-    padding: 10px;
-    font-size: 18px;
-    font-weight: 500;
-    background-color: rgba(0, 0, 0, 0.7);
-    color: white;
-}
-
-.call-status.error {
-    color: #ff4d4f;
-}
-
-.call-status.connecting {
-    color: #faad14;
-}
-
-.call-status.ending {
-    color: #ff4d4f;
-}
-
-.camera-off {
-    background-color: #333;
-}
-
-.camera-off-indicator {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    background-color: rgba(0, 0, 0, 0.6);
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.remote-camera-off-indicator {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    background-color: rgba(0, 0, 0, 0.6);
-    border-radius: 50%;
-    width: 80px;
-    height: 80px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.video-call-modal .audio-mode-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 24px;
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: #fff;
-    z-index: 5;
-}
-
-.video-call-modal .avatar-container {
-    margin-bottom: 16px;
-}
-
-.video-call-modal .user-name {
-    font-weight: 600;
-    font-size: 18px;
-    margin-bottom: 8px;
-}
-
-.video-call-modal .call-status-text {
-    margin-bottom: 24px;
-}
-
-.video-call-modal .call-status-text.connected {
-    color: #52c41a;
-}
-
-.video-call-modal .call-status-text.connecting {
-    color: #faad14;
-}
-
-.video-call-modal .call-status-text.error {
-    color: #ff4d4f;
-}
-
-.video-call-modal .controls-container {
-    display: flex;
-    gap: 24px;
-    align-items: center;
-}
-
-.video-call-modal .control-button {
-    background-color: #f0f0f0;
-}
-
-.video-call-modal .control-button-active {
-    background-color: #e6f7ff;
-    color: #1890ff;
-}
-
-.video-call-modal .end-call-button {
-    background-color: #ffd6d6;
-    color: #ff4d4f;
-}
-
-/* Ẩn/hiện chế độ video và âm thanh */
-.video-call-modal .video-mode {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-}
-
-.video-call-modal .audio-mode {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    height: 100%;
-    background-color: #fff;
-}
-
-.video-call-modal .switch-to-video-button {
-    margin-top: 16px;
-}
-
-@keyframes sound-wave {
-    0% {
-        height: 10px;
-    }
-
-    50% {
-        height: 30px;
-    }
-
-    100% {
-        height: 10px;
-    }
-}
-
-.video-activation-button {
-    background-color: #1890ff;
-    color: white;
-    border: none;
-    position: relative;
-    overflow: hidden;
-}
-
-.video-activation-button:hover {
-    background-color: #40a9ff;
-    color: white;
-}
-
-.video-activation-button:after {
-    content: '';
-    position: absolute;
-    top: -50%;
-    right: -50%;
-    bottom: -50%;
-    left: -50%;
-    background: linear-gradient(to bottom, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0));
-    transform: rotate(30deg) translate(0, -100%);
-    animation: shine 2s infinite;
-}
-
-@keyframes shine {
-    to {
-        transform: rotate(30deg) translate(0, 200%);
-    }
+.audio-status {
+  color: white;
+  font-size: 14px;
+  margin-top: 8px;
+  padding: 4px 8px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
 }

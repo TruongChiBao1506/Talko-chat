@@ -15,8 +15,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import dateUtils from '../../../../utils/dateUtils';
 import ConversationAvatar from '../../components/ConservationAvatar';
 import ModalAddMemberToConver from '../../../../modals/ModalAddMemberToConver';
-import ModalAudioCall from '../../../../modals/ModalAudioCall';
-import ModalIncomingCall from '../../../../modals/ModalIncomingCall';
 import socket from '../../../../utils/socketClient';
 import './style.css';
 
@@ -139,27 +137,20 @@ function HeaderOptional(props) {
     const handleBackToListConver = () => {
         dispatch(setCurrentConversation(''));
     };
-    // Chỉ giữ lại hàm handleVoiceCall để khởi tạo cuộc gọi
     const handleVoiceCall = () => {
+        console.log('🔊 Voice call button clicked');
         if (onStartCall) {
-            console.log('Bắt đầu gọi với conversationId:', currentConversation);
-            // currentConversation đã là ID, không cần truy cập _id nữa
             onStartCall(currentConversation, name, avatar);
         }
     };
 
     const handleVideoCall = () => {
-        console.log('Click nút gọi video!');
-        console.log('onStartVideoCall:', onStartVideoCall);
-        console.log('currentConversation:', currentConversation);
-
+        console.log('📹 Video call button clicked');
         if (onStartVideoCall) {
-            console.log('Bắt đầu gọi video với conversationId:', currentConversation);
             onStartVideoCall(currentConversation, name, avatar);
-        } else {
-            console.log('onStartVideoCall không được truyền xuống đúng!');
         }
     };
+
 
     return (
         <div id='header-optional'>
