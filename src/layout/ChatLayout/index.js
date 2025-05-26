@@ -69,8 +69,8 @@ function ChatLayout() {
     const videoCallRef = useRef(null);
 
     const callTimeoutRef = useRef(null);
-    const CALL_TIMEOUT_DURATION = 10000;
-
+    const CALL_TIMEOUT_DURATION = 30000;
+    const rejectedMembersRef = useRef(new Set());
     // ========== SOCKET CONNECTION SETUP ==========
     useEffect(() => {
         socket.on('connect', () => {
@@ -418,46 +418,194 @@ function ChatLayout() {
         });
         // THÊM: Xử lý khi cuộc gọi thoại bị từ chối
         socket.on('voice-call-rejected', async (data) => {
+            // console.log('❌ Cuộc gọi thoại bị từ chối:', data);
+            // const { rejectedBy } = data;
+
+            // clearCallTimeout();
+
+            // if (voiceCallRef.current && voiceCallRef.current.cleanup) {
+            //     await voiceCallRef.current.cleanup();
+            // }
+
+            // setRejectionMessage(`${rejectedBy.name} đã từ chối cuộc gọi`);
+            // setCallRejected(true);
+
+            // // Tự động đóng modal sau 2 giây
+            // setTimeout(() => {
+            //     setVoiceCallVisible(false);
+            //     setCallRejected(false);
+            //     setRejectionMessage('');
+            // }, 2000);
             console.log('❌ Cuộc gọi thoại bị từ chối:', data);
-            const { rejectedBy } = data;
+            const { rejectedBy, conversationId } = data;
 
-            clearCallTimeout();
-
-            if (voiceCallRef.current && voiceCallRef.current.cleanup) {
-                await voiceCallRef.current.cleanup();
+            // Kiểm tra xem có phải cuộc gọi hiện tại không
+            if (callInfo._id !== conversationId) {
+                console.log('❌ Rejection không phải cho cuộc gọi hiện tại');
+                return;
             }
 
-            setRejectionMessage(`${rejectedBy.name} đã từ chối cuộc gọi`);
-            setCallRejected(true);
+            // Tìm conversation để check loại cuộc gọi
+            const conversation = conversations.find(conv => conv._id === conversationId);
+            const isGroupCall = conversation && (conversation.type === true || conversation.totalMembers > 2);
 
-            // Tự động đóng modal sau 2 giây
-            setTimeout(() => {
-                setVoiceCallVisible(false);
-                setCallRejected(false);
-                setRejectionMessage('');
-            }, 2000);
+            if (isGroupCall) {
+                // ✅ GROUP CALL: Chỉ hiển thị thông báo, KHÔNG đóng modal
+                console.log('👥 Group call rejection - showing notification only');
+
+                // Track rejected member
+                rejectedMembersRef.current.add(rejectedBy.userId);
+
+                // Hiển thị thông báo ngắn
+                message.info(`${rejectedBy.name} đã từ chối cuộc gọi nhóm`);
+
+                // Check xem có phải tất cả members đã từ chối chưa
+                const totalOtherMembers = conversation.totalMembers - 1; // Trừ người gọi
+                const rejectedCount = rejectedMembersRef.current.size;
+
+                console.log('📊 Group call rejection status:', {
+                    totalOtherMembers,
+                    rejectedCount,
+                    rejectedMembers: Array.from(rejectedMembersRef.current)
+                });
+
+                // Chỉ đóng modal nếu TẤT CẢ thành viên khác đã từ chối
+                if (rejectedCount >= totalOtherMembers) {
+                    console.log('❌ All group members rejected - ending call');
+
+                    clearCallTimeout();
+
+                    if (voiceCallRef.current && voiceCallRef.current.cleanup) {
+                        await voiceCallRef.current.cleanup();
+                    }
+
+                    setRejectionMessage('Tất cả thành viên đã từ chối cuộc gọi nhóm');
+                    setCallRejected(true);
+
+                    // Reset rejected members
+                    rejectedMembersRef.current.clear();
+
+                    // Đóng modal sau 3 giây
+                    setTimeout(() => {
+                        setVoiceCallVisible(false);
+                        setCallRejected(false);
+                        setRejectionMessage('');
+                    }, 3000);
+                }
+
+            } else {
+                // ✅ INDIVIDUAL CALL: Đóng modal như cũ
+                console.log('👤 Individual call rejection - closing modal');
+
+                clearCallTimeout();
+
+                if (voiceCallRef.current && voiceCallRef.current.cleanup) {
+                    await voiceCallRef.current.cleanup();
+                }
+
+                setRejectionMessage(`${rejectedBy.name} đã từ chối cuộc gọi`);
+                setCallRejected(true);
+
+                // Tự động đóng modal sau 2 giây
+                setTimeout(() => {
+                    setVoiceCallVisible(false);
+                    setCallRejected(false);
+                    setRejectionMessage('');
+                }, 2000);
+            }
         });
 
-        // THÊM: Xử lý khi cuộc gọi video bị từ chối
+        // Xử lý khi cuộc gọi video bị từ chối
         socket.on('video-call-rejected', async (data) => {
+            // console.log('❌ Cuộc gọi video bị từ chối:', data);
+            // const { rejectedBy } = data;
+
+            // clearCallTimeout();
+
+            // if (voiceCallRef.current && voiceCallRef.current.cleanup) {
+            //     await voiceCallRef.current.cleanup();
+            // }
+
+            // setRejectionMessage(`${rejectedBy.name} đã từ chối cuộc gọi`);
+            // setCallRejected(true);
+
+            // // Tự động đóng modal sau 2 giây
+            // setTimeout(() => {
+            //     setVideoCallVisible(false);
+            //     setCallRejected(false);
+            //     setRejectionMessage('');
+            // }, 2000);
             console.log('❌ Cuộc gọi video bị từ chối:', data);
-            const { rejectedBy } = data;
+            const { rejectedBy, conversationId } = data;
 
-            clearCallTimeout();
-
-            if (voiceCallRef.current && voiceCallRef.current.cleanup) {
-                await voiceCallRef.current.cleanup();
+            // Kiểm tra xem có phải cuộc gọi hiện tại không
+            if (callInfo._id !== conversationId) {
+                console.log('❌ Video rejection không phải cho cuộc gọi hiện tại');
+                return;
             }
 
-            setRejectionMessage(`${rejectedBy.name} đã từ chối cuộc gọi`);
-            setCallRejected(true);
+            // Tìm conversation để check loại cuộc gọi
+            const conversation = conversations.find(conv => conv._id === conversationId);
+            const isGroupCall = conversation && (conversation.type === true || conversation.totalMembers > 2);
 
-            // Tự động đóng modal sau 2 giây
-            setTimeout(() => {
-                setVideoCallVisible(false);
-                setCallRejected(false);
-                setRejectionMessage('');
-            }, 2000);
+            if (isGroupCall) {
+                // ✅ GROUP CALL: Chỉ hiển thị thông báo, KHÔNG đóng modal
+                console.log('👥 Group video call rejection - showing notification only');
+
+                // Track rejected member
+                rejectedMembersRef.current.add(rejectedBy.userId);
+
+                // Hiển thị thông báo ngắn
+                message.info(`${rejectedBy.name} đã từ chối cuộc gọi video nhóm`);
+
+                // Check xem có phải tất cả members đã từ chối chưa
+                const totalOtherMembers = conversation.totalMembers - 1; // Trừ người gọi
+                const rejectedCount = rejectedMembersRef.current.size;
+
+                // Chỉ đóng modal nếu TẤT CẢ thành viên khác đã từ chối
+                if (rejectedCount >= totalOtherMembers) {
+                    console.log('❌ All group members rejected video call - ending call');
+
+                    clearCallTimeout();
+
+                    if (videoCallRef.current && videoCallRef.current.cleanup) {
+                        await videoCallRef.current.cleanup();
+                    }
+
+                    setRejectionMessage('Tất cả thành viên đã từ chối cuộc gọi video nhóm');
+                    setCallRejected(true);
+
+                    // Reset rejected members
+                    rejectedMembersRef.current.clear();
+
+                    // Đóng modal sau 3 giây
+                    setTimeout(() => {
+                        setVideoCallVisible(false);
+                        setCallRejected(false);
+                        setRejectionMessage('');
+                    }, 3000);
+                }
+
+            } else {
+                // ✅ INDIVIDUAL CALL: Đóng modal như cũ
+                console.log('👤 Individual video call rejection - closing modal');
+
+                clearCallTimeout();
+
+                if (voiceCallRef.current && voiceCallRef.current.cleanup) {
+                    await voiceCallRef.current.cleanup();
+                }
+
+                setRejectionMessage(`${rejectedBy.name} đã từ chối cuộc gọi`);
+                setCallRejected(true);
+
+                // Tự động đóng modal sau 2 giây
+                setTimeout(() => {
+                    setVideoCallVisible(false);
+                    setCallRejected(false);
+                    setRejectionMessage('');
+                }, 2000);
+            }
         });
 
         // socket.off('call-answered-notification');
@@ -465,6 +613,7 @@ function ChatLayout() {
         socket.on('call-answered-notification', (data) => {
             console.log('📞 Call answered notification received:', data);
             const { conversationId, isGroupCall, userId } = data;
+            rejectedMembersRef.current.clear();
             clearCallTimeout();
             // Clear timeout nếu là cuộc gọi hiện tại
             // if (callInfo._id === conversationId) {
@@ -491,6 +640,7 @@ function ChatLayout() {
         socket.on('group-call-participants-updated', (data) => {
             console.log('👥 Group call participants updated:', data);
             const { conversationId, newParticipant } = data;
+            rejectedMembersRef.current.clear();
             clearCallTimeout();
             // if (callInfo._id === conversationId && newParticipant) {
             //     console.log('✅ New participant joined group call - clearing timeout');
@@ -501,6 +651,8 @@ function ChatLayout() {
                 clearCallTimeout();
             }
         });
+
+
 
         // Cleanup
         return () => {
@@ -666,6 +818,9 @@ function ChatLayout() {
     const startCallTimeout = (callType, conversationId) => {
         console.log(`⏰ Bắt đầu timeout ${callType} cho conversation:`, conversationId);
 
+        // Reset rejected members khi bắt đầu cuộc gọi mới
+        rejectedMembersRef.current.clear();
+
         // Clear timeout cũ nếu có
         if (callTimeoutRef.current) {
             clearTimeout(callTimeoutRef.current);
@@ -674,6 +829,8 @@ function ChatLayout() {
         callTimeoutRef.current = setTimeout(() => {
             console.log(`⏰ ${callType} timeout - người nhận không phản hồi`);
 
+
+            rejectedMembersRef.current.clear();
             // Dừng âm thanh chuông
             callRingtone.stop();
 
@@ -837,6 +994,8 @@ function ChatLayout() {
     const handleEndVideoCall = async () => {
         console.log('🔚 Kết thúc cuộc gọi video');
 
+
+        rejectedMembersRef.current.clear();
         clearCallTimeout();
 
         // Cleanup trước khi gửi cancel signal
@@ -866,6 +1025,7 @@ function ChatLayout() {
     const handleEndVoiceCall = async () => {
         console.log('🔚 Kết thúc cuộc gọi thoại');
 
+        rejectedMembersRef.current.clear();
         clearCallTimeout();
 
         // Cleanup trước khi gửi cancel signal
