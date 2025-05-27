@@ -1,197 +1,2789 @@
-import React, { useEffect, useRef, useState } from 'react';
-import AgoraRTC from "agora-rtc-sdk-ng";
-import { APP_ID, fetchToken } from '../../utils/agoraConfig';
+import React, { useState, useRef, useEffect, forwardRef, useImperativeHandle, useCallback, useMemo } from 'react';
+import AgoraRTC from 'agora-rtc-sdk-ng';
+import { Button, Avatar, Typography, Space, Row, Col, message } from 'antd';
+import Icon, {
+  AudioMutedOutlined,
+  AudioOutlined,
+  VideoCameraOutlined,
+  VideoCameraFilled,
+  StopOutlined,
+  PhoneOutlined,
+  UserOutlined
+} from '@ant-design/icons';
+import { APP_ID, generateChannelId } from '../../utils/agoraConfig';
+import socket from '../../utils/socketClient';
 import './style.css';
 
-const AgoraVideoCall = ({
+const { Text } = Typography;
+
+const AgoraVideoCall = forwardRef(({
   channelName,
   token = null,
   uid = null,
-  isVideo = true,
-  onEndCall
-}) => {
-  const [localStream, setLocalStream] = useState(null);
-  const [remoteStreams, setRemoteStreams] = useState([]);
+  onEndCall,
+  currentUser = {},
+  conversation = {},
+  isRejected = false,
+  rejectionMessage = '',
+  onCallEnded = null,
+}, ref) => {
+  const [localVideoTrack, setLocalVideoTrack] = useState(null);
+  const [localAudioTrack, setLocalAudioTrack] = useState(null);
+  const [remoteUsers, setRemoteUsers] = useState([]);
   const [client, setClient] = useState(null);
+  const [isAudioMuted, setIsAudioMuted] = useState(false);
+  const [isVideoMuted, setIsVideoMuted] = useState(false);
+  const [callDuration, setCallDuration] = useState(0);
+  const [callEnded, setCallEnded] = useState(false);
+  const [endCallMessage, setEndCallMessage] = useState('');
+  const [groupParticipants, setGroupParticipants] = useState([]);
+
   const joinInProgress = useRef(false);
+  const localVideoTrackRef = useRef(null);
+  const localAudioTrackRef = useRef(null);
+  const clientRef = useRef(null);
+  const cleanupInProgress = useRef(false);
+  const callDurationTimerRef = useRef(null);
+  const isComponentMounted = useRef(true);
+  const localVideoContainerRef = useRef(null);
+  const updateTimeouts = useRef(new Map());
+  const lastUpdateTime = useRef(new Map());
 
-  useEffect(() => {
-    // Tạo Agora client
-    const rtcClient = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
-    setClient(rtcClient);
+  // Determine if this is a group call
+  const isGroupCall = conversation.type === true || conversation.totalMembers > 2;
+  const [videoDisplayMode, setVideoDisplayMode] = useState('cover'); // 'cover' or 'contain'
+  const IS_DEV = process.env.NODE_ENV === 'development';
 
-    const init = async () => {
-      try {
-        // Với dự án không xác thực, không cần lấy token
-        const dynamicToken = null;
 
-        // Tạo numericUid nếu uid là chuỗi
-        const numericUid = typeof uid === 'string' ? Math.floor(Math.random() * 100000) : uid || null;
+  const logInfo = (message, ...args) => {
+    if (IS_DEV) console.log(message, ...args);
+  };
 
-        // Tham gia kênh mà không cần token
-        await rtcClient.join(APP_ID, channelName, null, numericUid);
-        console.log('📱 Đã tham gia kênh Agora:', channelName);
+  const logError = (message, ...args) => {
+    console.error(message, ...args); // Always log errors
+  };
 
-        // Tạo và publish local stream
-        const localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
-        let localVideoTrack = null;
+  // useImperativeHandle(ref, () => ({
+  //   cleanup: async () => {
+  //     console.log('🧹 Video Call cleanup called via ref');
+  //     await cleanup();
+  //   },
+  //   getRemoteUsers: () => remoteUsers,
+  //   getCallDuration: () => callDuration,
+  //   isCallActive: () => !callEnded && remoteUsers.length > 0
+  // }));
 
-        if (isVideo) {
-          localVideoTrack = await AgoraRTC.createCameraVideoTrack();
-        }
-
-        // Lưu local stream để hiển thị
-        setLocalStream({
-          uid: rtcClient.uid,
-          audioTrack: localAudioTrack,
-          videoTrack: localVideoTrack,
-        });
-
-        // Publish tracks
-        if (isVideo) {
-          await rtcClient.publish([localAudioTrack, localVideoTrack]);
-        } else {
-          await rtcClient.publish([localAudioTrack]);
-        }
-
-        // Bắt sự kiện user mới
-        rtcClient.on('user-published', async (user, mediaType) => {
-          await rtcClient.subscribe(user, mediaType);
-
-          if (mediaType === 'video') {
-            setRemoteStreams(prev => {
-              const existingUser = prev.find(stream => stream.uid === user.uid);
-              if (existingUser) {
-                return prev.map(stream =>
-                  stream.uid === user.uid
-                    ? { ...stream, videoTrack: user.videoTrack }
-                    : stream
-                );
-              } else {
-                return [...prev, {
-                  uid: user.uid,
-                  audioTrack: null,
-                  videoTrack: user.videoTrack
-                }];
-              }
-            });
-          }
-
-          if (mediaType === 'audio') {
-            user.audioTrack.play();
-            setRemoteStreams(prev => {
-              const existingUser = prev.find(stream => stream.uid === user.uid);
-              if (existingUser) {
-                return prev.map(stream =>
-                  stream.uid === user.uid
-                    ? { ...stream, audioTrack: user.audioTrack }
-                    : stream
-                );
-              } else {
-                return [...prev, {
-                  uid: user.uid,
-                  audioTrack: user.audioTrack,
-                  videoTrack: null
-                }];
-              }
-            });
-          }
-        });
-
-        // Xử lý khi user rời đi
-        rtcClient.on('user-unpublished', (user, mediaType) => {
-          if (mediaType === 'video') {
-            setRemoteStreams(prev =>
-              prev.map(stream =>
-                stream.uid === user.uid
-                  ? { ...stream, videoTrack: null }
-                  : stream
-              )
-            );
-          }
-        });
-
-        rtcClient.on('user-left', (user) => {
-          setRemoteStreams(prev =>
-            prev.filter(stream => stream.uid !== user.uid)
-          );
-        });
-
-      } catch (error) {
-        console.error('Lỗi khi tham gia kênh Agora:', error);
+  useImperativeHandle(ref, () => ({
+    cleanup: async () => {
+      if (cleanupInProgress.current) {
+        console.log('🔄 Cleanup already in progress, skipping');
+        return;
       }
-    };
-
-    init();
-
-    // Cleanup khi component unmount
-    return () => {
-      if (localStream) {
-        localStream.audioTrack?.close();
-        localStream.videoTrack?.close();
+      await cleanup();
+    },
+    getRemoteUsers: () => remoteUsers,
+    getCallDuration: () => callDuration,
+    isCallActive: () => !callEnded && remoteUsers.length > 0,
+    // ✅ ADD: Video call specific methods like audio call
+    getGroupParticipants: () => groupParticipants,
+    hasRemoteUsers: () => remoteUsers.length > 0,
+    getTotalParticipants: () => {
+      if (isGroupCall) {
+        return groupParticipants.length;
       }
-
-      if (rtcClient) {
-        rtcClient.removeAllListeners();
-        rtcClient.leave();
-      }
-    };
-  }, [channelName, token, uid, isVideo]);
-
-  // Hiển thị video của người dùng
-  useEffect(() => {
-    if (localStream && localStream.videoTrack && isVideo) {
-      localStream.videoTrack.play(`local-stream-${localStream.uid}`);
+      return remoteUsers.length + 1; // +1 for current user
     }
-  }, [localStream, isVideo]);
+  }));
 
-  // Hiển thị video của người dùng từ xa
+  // Call duration timer
   useEffect(() => {
-    remoteStreams.forEach(stream => {
-      if (stream.videoTrack) {
-        stream.videoTrack.play(`remote-stream-${stream.uid}`);
+    if (remoteUsers.length > 0 && !callEnded) {
+      callDurationTimerRef.current = setInterval(() => {
+        setCallDuration(prev => prev + 1);
+      }, 1000);
+    } else {
+      if (callDurationTimerRef.current) {
+        clearInterval(callDurationTimerRef.current);
+        callDurationTimerRef.current = null;
       }
-    });
-  }, [remoteStreams]);
+    }
 
-  const handleEndCall = () => {
-    if (client) {
-      client.leave();
-      if (onEndCall) onEndCall();
+    return () => {
+      if (callDurationTimerRef.current) {
+        clearInterval(callDurationTimerRef.current);
+      }
+    };
+  }, [remoteUsers.length, callEnded]);
+
+  useEffect(() => {
+    isComponentMounted.current = true;
+    setupVideoCall();
+
+    return () => {
+      console.log('🔄 AgoraVideoCall component unmounting');
+      isComponentMounted.current = false;
+
+      // Force cleanup on unmount
+      const asyncCleanup = async () => {
+        try {
+          await forceCleanupWithRetry();
+        } catch (error) {
+          console.error('❌ Error in unmount cleanup:', error);
+        }
+      };
+
+      asyncCleanup();
+    };
+  }, [channelName, uid]);
+
+  // Thêm useEffect này để đảm bảo local video luôn được play khi có track
+
+  useEffect(() => {
+    // ✅ CRITICAL: Monitor local video track changes and ensure it's playing
+    if (localVideoTrack && localVideoContainerRef.current && !isVideoMuted) {
+      console.log('🎬 Local video track changed, ensuring playback...');
+
+      const ensureLocalVideoPlaying = async () => {
+        try {
+          await localVideoTrack.play(localVideoContainerRef.current);
+          console.log('✅ Local video ensured playing');
+
+          // Apply CSS optimizations
+          const localVideoElement = localVideoContainerRef.current.querySelector('video');
+          if (localVideoElement) {
+            localVideoElement.classList.add('stable-video');
+            localVideoElement.style.transition = 'none';
+            localVideoElement.style.objectFit = 'cover';
+            localVideoElement.style.width = '100%';
+            localVideoElement.style.height = '100%';
+          }
+        } catch (error) {
+          console.warn('⚠️ Failed to ensure local video playing:', error);
+        }
+      };
+
+      // Small delay to ensure container is ready
+      setTimeout(ensureLocalVideoPlaying, 100);
+    }
+  }, [localVideoTrack, isVideoMuted]);
+
+  useEffect(() => {
+    if (isRejected && isComponentMounted.current) {
+      console.log('❌ Video call rejected - IMMEDIATE cleanup in AgoraVideoCall');
+
+      if (callDurationTimerRef.current) {
+        clearInterval(callDurationTimerRef.current);
+        callDurationTimerRef.current = null;
+      }
+
+      cleanup().then(() => {
+        if (isComponentMounted.current && onCallEnded) {
+          onCallEnded({
+            isRejected: true,
+            message: rejectionMessage || 'Cuộc gọi video đã bị từ chối',
+            duration: callDuration
+          });
+        }
+      });
+    }
+  }, [isRejected]);
+
+  useEffect(() => {
+    return () => {
+      updateTimeouts.current.forEach(timeout => clearTimeout(timeout));
+      updateTimeouts.current.clear();
+      lastUpdateTime.current.clear();
+    };
+  }, []);
+
+  const setupVideoCall = async () => {
+    if (joinInProgress.current || !isComponentMounted.current) {
+      console.log('🚫 Setup already in progress or component unmounted');
+      return;
+    }
+
+    joinInProgress.current = true;
+    console.log('🎥 Setting up video call...');
+
+    try {
+      // ✅ CRITICAL: Force cleanup với retry mechanism
+      await forceCleanupWithRetry();
+
+      // Wait a bit for cleanup to complete
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      const consistentUid = generateConsistentUID(currentUser._id);
+      console.log(`🎯 Using consistent UID: ${consistentUid} for user: ${currentUser.name} (${currentUser._id})`);
+
+      // Create fresh Agora client
+      const agoraClient = AgoraRTC.createClient({ mode: 'rtc', codec: 'vp8' });
+      setClient(agoraClient);
+      clientRef.current = agoraClient;
+
+      // ✅ IMPROVED: Better connection state handling - NO AUTO RECONNECTION
+      agoraClient.on('connection-state-change', (curState, revState) => {
+        console.log('🔗 Video connection state changed:', revState, '->', curState);
+
+        if (curState === 'DISCONNECTED') {
+          console.error('❌ Agora video connection lost');
+          if (isComponentMounted.current) {
+            console.warn('⚠️ Connection lost - user may need to rejoin call');
+          }
+        } else if (curState === 'CONNECTED') {
+          console.log('✅ Agora video connection established');
+        } else if (curState === 'CONNECTING') {
+          console.log('🔄 Agora video connecting...');
+        } else if (curState === 'RECONNECTING') {
+          console.log('🔄 Agora video reconnecting...');
+        }
+      });
+
+      // ✅ IMPROVED: Better network quality monitoring with throttling
+      let lastNetworkWarning = 0;
+      agoraClient.on('network-quality', (stats) => {
+        const now = Date.now();
+        if (stats.downlinkNetworkQuality > 4 || stats.uplinkNetworkQuality > 4) {
+          if (now - lastNetworkWarning > 10000) {
+            console.warn('⚠️ Poor network quality detected:', {
+              downlink: stats.downlinkNetworkQuality,
+              uplink: stats.uplinkNetworkQuality
+            });
+            lastNetworkWarning = now;
+          }
+        }
+      });
+
+      // ✅ IMPROVED: Exception handling without excessive logging
+      agoraClient.on('exception', (evt) => {
+        console.error('❌ Agora exception:', evt.code, evt.msg);
+        if (evt.code === 'FRAMERATE_INPUT_TOO_LOW') {
+          console.log('📹 Adjusting frame rate...');
+        } else if (evt.code === 'FRAMERATE_SENT_TOO_LOW') {
+          console.log('📹 Low send frame rate detected');
+        }
+      });
+
+      // ✅ CRITICAL: Setup user-joined handler like audio call
+      agoraClient.on('user-joined', async (user) => {
+        if (!isComponentMounted.current) return;
+        console.log('👤 User joined video call:', user.uid);
+
+        // ✅ CRITICAL: Kiểm tra xem user đã tồn tại chưa
+        const existingUser = remoteUsers.find(u => String(u.uid) === String(user.uid));
+        if (existingUser) {
+          console.log('ℹ️ User already exists, skipping add:', user.uid);
+          return;
+        }
+
+        let memberInfo = null;
+        let userName = `User ${user.uid}`;
+        let userAvatar = null;
+
+        // ✅ IMPROVED: Better user info resolution cho individual call
+        if (!isGroupCall && conversation.totalMembers === 2) {
+          // Individual call: chỉ có 2 người
+          const otherUserInfo = getOtherUserInfo();
+          userName = otherUserInfo.name || `User ${user.uid}`;
+          userAvatar = otherUserInfo.avatar;
+          memberInfo = {
+            _id: conversation.userId || conversation.members?.find(m => m._id !== currentUser._id)?._id,
+            name: userName,
+            avatar: userAvatar
+          };
+        } else if (isGroupCall && conversation.members && conversation.members.length > 0) {
+          memberInfo = findUserByUID(user.uid, conversation.members);
+          if (memberInfo) {
+            userName = memberInfo.name || `User ${user.uid}`;
+            userAvatar = memberInfo.avatar;
+          }
+        }
+
+        console.log('🎬 Adding remote user:', {
+          uid: user.uid,
+          userName,
+          userAvatar,
+          isGroupCall,
+          totalMembers: conversation.totalMembers
+        });
+
+        setRemoteUsers(prev => {
+          // ✅ CRITICAL: Double check không trùng lặp
+          const exists = prev.find(u => String(u.uid) === String(user.uid));
+          if (exists) {
+            console.log('⚠️ User already in remoteUsers, not adding:', user.uid);
+            return prev;
+          }
+
+          const newUser = {
+            uid: user.uid,
+            videoTrack: null,
+            audioTrack: null,
+            hasVideo: false,
+            hasAudio: false,
+            name: userName,
+            avatar: userAvatar,
+            memberId: memberInfo?._id || null
+          };
+
+          console.log('✅ Adding new remote user to state:', newUser);
+          return [...prev, newUser];
+        });
+
+        // ✅ ONLY emit for group calls
+        if (isGroupCall && conversation._id) {
+          socket.emit('user-joined-video-channel', {
+            conversationId: conversation._id,
+            userId: memberInfo?._id || user.uid,
+            agoraUid: user.uid,
+            userName: userName,
+            userAvatar: userAvatar
+          });
+        }
+      });
+
+      // ✅ CRITICAL: Setup user-published handler with better audio handling
+      // agoraClient.on('user-published', async (user, mediaType) => {
+      //   if (!isComponentMounted.current) return;
+
+      //   console.log('👤 User published:', user.uid, mediaType);
+
+      //   try {
+      //     await agoraClient.subscribe(user, mediaType);
+      //     console.log('✅ Successfully subscribed to user:', user.uid, mediaType);
+
+      //     if (mediaType === 'video' && user.videoTrack && isComponentMounted.current) {
+      //       console.log('📹 Remote video track received from:', user.uid);
+
+      //       // ✅ CRITICAL: Chỉ update khi thực sự có thay đổi
+      //       setRemoteUsers(prev => {
+      //         const existingUserIndex = prev.findIndex(u => u.uid === user.uid);
+
+      //         if (existingUserIndex !== -1) {
+      //           // Update existing user
+      //           const updatedUsers = [...prev];
+      //           const existingUser = updatedUsers[existingUserIndex];
+
+      //           // ✅ ONLY update nếu thực sự khác biệt
+      //           if (existingUser.videoTrack !== user.videoTrack || !existingUser.hasVideo) {
+      //             console.log('🔄 Updating existing user with video:', user.uid);
+
+      //             updatedUsers[existingUserIndex] = {
+      //               ...existingUser,
+      //               videoTrack: user.videoTrack,
+      //               hasVideo: true
+      //             };
+
+      //             console.log('📋 Updated remote users after video:', updatedUsers);
+      //             return updatedUsers;
+      //           } else {
+      //             console.log('ℹ️ No video changes needed for user:', user.uid);
+      //             return prev; // ✅ Không thay đổi state nếu không cần
+      //           }
+      //         } else {
+      //           console.warn('⚠️ User not found in remoteUsers for video update:', user.uid);
+      //           return prev;
+      //         }
+      //       });
+
+      //       // ✅ REMOVE: Bỏ force re-render không cần thiết
+      //       // setTimeout(() => {
+      //       //   if (isComponentMounted.current) {
+      //       //     console.log('🔄 Force updating remote users state');
+      //       //     setRemoteUsers(prev => [...prev]);
+      //       //   }
+      //       // }, 100);
+      //     }
+
+      //     if (mediaType === 'audio' && user.audioTrack && isComponentMounted.current) {
+      //       console.log('🎤 Remote audio track received from:', user.uid);
+
+      //       // ✅ IMPROVED: Better audio context management
+      //       try {
+      //         // Check and resume audio context FIRST
+      //         if (window.AudioContext || window.webkitAudioContext) {
+      //           const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+
+      //           if (!window.globalAudioContext) {
+      //             window.globalAudioContext = new AudioContextClass();
+      //           }
+
+      //           const audioContext = window.globalAudioContext;
+
+      //           if (audioContext.state === 'suspended') {
+      //             console.log('🎵 Audio context suspended, trying to resume...');
+      //             try {
+      //               await audioContext.resume();
+      //               console.log('✅ Audio context resumed successfully');
+      //             } catch (resumeError) {
+      //               console.error('❌ Failed to resume audio context:', resumeError);
+      //             }
+      //           }
+      //         }
+
+      //         // ✅ IMPROVED: Play audio with better error handling
+      //         await user.audioTrack.play();
+      //         console.log('✅ Remote audio playing successfully from:', user.uid);
+
+      //       } catch (audioError) {
+      //         console.error('❌ Audio play error:', audioError);
+
+      //         // ✅ IMPROVED: Single retry with delay
+      //         if (audioError.name !== 'NotAllowedError') {
+      //           setTimeout(async () => {
+      //             try {
+      //               if (user.audioTrack && isComponentMounted.current) {
+      //                 await user.audioTrack.play();
+      //                 console.log('✅ Remote audio playing on retry');
+      //               }
+      //             } catch (retryError) {
+      //               console.error('❌ Audio retry failed:', retryError);
+      //             }
+      //           }, 1500);
+      //         }
+      //       }
+
+      //       // ✅ CRITICAL: Chỉ update audio khi thực sự có thay đổi
+      //       setRemoteUsers(prev => {
+      //         const existingUserIndex = prev.findIndex(u => u.uid === user.uid);
+
+      //         if (existingUserIndex !== -1) {
+      //           const updatedUsers = [...prev];
+      //           const existingUser = updatedUsers[existingUserIndex];
+
+      //           // ✅ ONLY update nếu audio track thực sự khác biệt
+      //           if (existingUser.audioTrack !== user.audioTrack || !existingUser.hasAudio) {
+      //             console.log('🔄 Updating existing user with audio:', user.uid);
+
+      //             updatedUsers[existingUserIndex] = {
+      //               ...existingUser,
+      //               audioTrack: user.audioTrack,
+      //               hasAudio: true
+      //             };
+
+      //             console.log('📋 Updated remote users after audio:', updatedUsers);
+      //             return updatedUsers;
+      //           } else {
+      //             console.log('ℹ️ No audio changes needed for user:', user.uid);
+      //             return prev; // ✅ Không thay đổi state nếu không cần
+      //           }
+      //         } else {
+      //           console.warn('⚠️ User not found in remoteUsers for audio update:', user.uid);
+      //           return prev;
+      //         }
+      //       });
+      //     }
+
+      //   } catch (err) {
+      //     console.error('❌ Error subscribing to user:', err);
+
+      //     // ✅ IMPROVED: Better retry mechanism với debounce
+      //     const retryKey = `${user.uid}-${mediaType}`;
+
+      //     // Clear any existing retry for this user/mediaType
+      //     if (window.retryTimeouts && window.retryTimeouts[retryKey]) {
+      //       clearTimeout(window.retryTimeouts[retryKey]);
+      //     }
+
+      //     // Initialize retry timeouts object if not exists
+      //     if (!window.retryTimeouts) {
+      //       window.retryTimeouts = {};
+      //     }
+
+      //     // ✅ DEBOUNCED: Single retry after delay
+      //     window.retryTimeouts[retryKey] = setTimeout(async () => {
+      //       try {
+      //         if (isComponentMounted.current) {
+      //           console.log('🔄 Retrying subscription for:', user.uid, mediaType);
+      //           await agoraClient.subscribe(user, mediaType);
+      //           console.log('✅ Subscription retry successful');
+
+      //           if (mediaType === 'video' && user.videoTrack) {
+      //             setRemoteUsers(prev => {
+      //               const existingUserIndex = prev.findIndex(u => u.uid === user.uid);
+
+      //               if (existingUserIndex !== -1) {
+      //                 const updatedUsers = [...prev];
+      //                 updatedUsers[existingUserIndex] = {
+      //                   ...updatedUsers[existingUserIndex],
+      //                   videoTrack: user.videoTrack,
+      //                   hasVideo: true
+      //                 };
+      //                 return updatedUsers;
+      //               }
+      //               return prev;
+      //             });
+
+      //           } else if (mediaType === 'audio' && user.audioTrack) {
+      //             // Try to play audio on retry
+      //             try {
+      //               await user.audioTrack.play();
+      //               console.log('✅ Audio played successfully on retry');
+      //             } catch (playErr) {
+      //               console.warn('⚠️ Audio play failed on retry:', playErr);
+      //             }
+
+      //             setRemoteUsers(prev => {
+      //               const existingUserIndex = prev.findIndex(u => u.uid === user.uid);
+
+      //               if (existingUserIndex !== -1) {
+      //                 const updatedUsers = [...prev];
+      //                 updatedUsers[existingUserIndex] = {
+      //                   ...updatedUsers[existingUserIndex],
+      //                   audioTrack: user.audioTrack,
+      //                   hasAudio: true
+      //                 };
+      //                 return updatedUsers;
+      //               }
+      //               return prev;
+      //             });
+      //           }
+      //         }
+      //       } catch (retryError) {
+      //         console.error('❌ Subscription retry failed:', retryError);
+      //       } finally {
+      //         // Clean up retry timeout
+      //         if (window.retryTimeouts && window.retryTimeouts[retryKey]) {
+      //           delete window.retryTimeouts[retryKey];
+      //         }
+      //       }
+      //     }, 2000);
+      //   }
+      // });
+      // ✅ CRITICAL: Debounced state updates
+
+      // agoraClient.on('user-published', async (user, mediaType) => {
+      //   if (!isComponentMounted.current) return;
+
+      //   console.log('👤 User published:', user.uid, mediaType);
+
+      //   try {
+      //     await agoraClient.subscribe(user, mediaType);
+
+      //     if (mediaType === 'video' && user.videoTrack && isComponentMounted.current) {
+      //       // ✅ CRITICAL: Debounce video updates
+      //       const videoUpdateKey = `video-${user.uid}`;
+
+      //       if (updateTimeouts.current.has(videoUpdateKey)) {
+      //         clearTimeout(updateTimeouts.current.get(videoUpdateKey));
+      //       }
+
+      //       updateTimeouts.current.set(videoUpdateKey, setTimeout(() => {
+      //         if (!isComponentMounted.current) return;
+
+      //         setRemoteUsers(prev => {
+      //           const existingUserIndex = prev.findIndex(u => u.uid === user.uid);
+
+      //           if (existingUserIndex !== -1) {
+      //             const currentUser = prev[existingUserIndex];
+
+      //             // ✅ ONLY update if actually different
+      //             if (currentUser.videoTrack !== user.videoTrack || !currentUser.hasVideo) {
+      //               const updatedUsers = [...prev];
+      //               updatedUsers[existingUserIndex] = {
+      //                 ...currentUser,
+      //                 videoTrack: user.videoTrack,
+      //                 hasVideo: true
+      //               };
+      //               return updatedUsers;
+      //             }
+      //           }
+
+      //           return prev; // No changes
+      //         });
+
+      //         updateTimeouts.current.delete(videoUpdateKey);
+      //       }, 100)); // Debounce 100ms
+      //     }
+
+      //     if (mediaType === 'audio' && user.audioTrack && isComponentMounted.current) {
+      //       // ✅ CRITICAL: Debounce audio updates
+      //       const audioUpdateKey = `audio-${user.uid}`;
+
+      //       if (updateTimeouts.current.has(audioUpdateKey)) {
+      //         clearTimeout(updateTimeouts.current.get(audioUpdateKey));
+      //       }
+
+      //       try {
+      //         await user.audioTrack.play();
+      //       } catch (audioError) {
+      //         console.error('❌ Audio play error:', audioError);
+      //       }
+
+      //       updateTimeouts.current.set(audioUpdateKey, setTimeout(() => {
+      //         if (!isComponentMounted.current) return;
+
+      //         setRemoteUsers(prev => {
+      //           const existingUserIndex = prev.findIndex(u => u.uid === user.uid);
+
+      //           if (existingUserIndex !== -1) {
+      //             const currentUser = prev[existingUserIndex];
+
+      //             // ✅ ONLY update if actually different
+      //             if (currentUser.audioTrack !== user.audioTrack || !currentUser.hasAudio) {
+      //               const updatedUsers = [...prev];
+      //               updatedUsers[existingUserIndex] = {
+      //                 ...currentUser,
+      //                 audioTrack: user.audioTrack,
+      //                 hasAudio: true
+      //               };
+      //               return updatedUsers;
+      //             }
+      //           }
+
+      //           return prev; // No changes
+      //         });
+
+      //         updateTimeouts.current.delete(audioUpdateKey);
+      //       }, 100)); // Debounce 100ms
+      //     }
+
+      //   } catch (err) {
+      //     console.error('❌ Error subscribing to user:', err);
+      //   }
+      // });
+
+      // // ✅ CRITICAL: Setup user-unpublished handler
+      // agoraClient.on('user-unpublished', (user, mediaType) => {
+      //   if (!isComponentMounted.current) return;
+      //   console.log('👤 User unpublished:', user.uid, mediaType);
+
+      //   if (mediaType === 'video') {
+      //     setRemoteUsers(prev =>
+      //       prev.map(u =>
+      //         u.uid === user.uid
+      //           ? { ...u, videoTrack: null, hasVideo: false }
+      //           : u
+      //       )
+      //     );
+      //   } else if (mediaType === 'audio') {
+      //     setRemoteUsers(prev =>
+      //       prev.map(u =>
+      //         u.uid === user.uid
+      //           ? { ...u, audioTrack: null, hasAudio: false }
+      //           : u
+      //       )
+      //     );
+      //   }
+      // });
+      agoraClient.on('user-published', async (user, mediaType) => {
+        if (!isComponentMounted.current) return;
+
+        console.log('👤 User published:', user.uid, mediaType);
+
+        try {
+          await agoraClient.subscribe(user, mediaType);
+
+          if (mediaType === 'video' && user.videoTrack && isComponentMounted.current) {
+            const updateKey = `video-${user.uid}`;
+
+            // ✅ CRITICAL: Debounce với time check
+            const now = Date.now();
+            const lastUpdate = lastUpdateTime.current.get(updateKey) || 0;
+
+            if (now - lastUpdate < 200) {
+              console.log('🔄 Debouncing video update for UID:', user.uid);
+              return;
+            }
+
+            lastUpdateTime.current.set(updateKey, now);
+
+            // Clear previous timeout
+            if (updateTimeouts.current.has(updateKey)) {
+              clearTimeout(updateTimeouts.current.get(updateKey));
+            }
+
+            // ✅ CRITICAL: Single debounced update
+            updateTimeouts.current.set(updateKey, setTimeout(() => {
+              if (!isComponentMounted.current) return;
+
+              setRemoteUsers(prev => {
+                const existingUserIndex = prev.findIndex(u => u.uid === user.uid);
+
+                if (existingUserIndex !== -1) {
+                  const currentUser = prev[existingUserIndex];
+
+                  // ✅ ONLY update if actually different
+                  if (currentUser.videoTrack !== user.videoTrack || !currentUser.hasVideo) {
+                    console.log('🔄 Updating existing user with video:', user.uid);
+
+                    const updatedUsers = [...prev];
+                    updatedUsers[existingUserIndex] = {
+                      ...currentUser,
+                      videoTrack: user.videoTrack,
+                      hasVideo: true
+                    };
+
+                    return updatedUsers;
+                  } else {
+                    console.log('ℹ️ No video changes needed for user:', user.uid);
+                  }
+                } else {
+                  console.warn('⚠️ User not found in remoteUsers for video update:', user.uid);
+                }
+
+                return prev; // No changes
+              });
+
+              updateTimeouts.current.delete(updateKey);
+              lastUpdateTime.current.delete(updateKey);
+            }, 150)); // Debounce 150ms
+          }
+
+          if (mediaType === 'audio' && user.audioTrack && isComponentMounted.current) {
+            const updateKey = `audio-${user.uid}`;
+
+            // ✅ CRITICAL: Debounce audio updates
+            const now = Date.now();
+            const lastUpdate = lastUpdateTime.current.get(updateKey) || 0;
+
+            if (now - lastUpdate < 200) {
+              console.log('🔄 Debouncing audio update for UID:', user.uid);
+              return;
+            }
+
+            lastUpdateTime.current.set(updateKey, now);
+
+            try {
+              await user.audioTrack.play();
+              console.log('✅ Audio playing for UID:', user.uid);
+            } catch (audioError) {
+              console.error('❌ Audio play error:', audioError);
+            }
+
+            // Clear previous timeout
+            if (updateTimeouts.current.has(updateKey)) {
+              clearTimeout(updateTimeouts.current.get(updateKey));
+            }
+
+            updateTimeouts.current.set(updateKey, setTimeout(() => {
+              if (!isComponentMounted.current) return;
+
+              setRemoteUsers(prev => {
+                const existingUserIndex = prev.findIndex(u => u.uid === user.uid);
+
+                if (existingUserIndex !== -1) {
+                  const currentUser = prev[existingUserIndex];
+
+                  // ✅ ONLY update if actually different
+                  if (currentUser.audioTrack !== user.audioTrack || !currentUser.hasAudio) {
+                    console.log('🔄 Updating existing user with audio:', user.uid);
+
+                    const updatedUsers = [...prev];
+                    updatedUsers[existingUserIndex] = {
+                      ...currentUser,
+                      audioTrack: user.audioTrack,
+                      hasAudio: true
+                    };
+
+                    return updatedUsers;
+                  } else {
+                    console.log('ℹ️ No audio changes needed for user:', user.uid);
+                  }
+                } else {
+                  console.warn('⚠️ User not found in remoteUsers for audio update:', user.uid);
+                }
+
+                return prev; // No changes
+              });
+
+              updateTimeouts.current.delete(updateKey);
+              lastUpdateTime.current.delete(updateKey);
+            }, 150)); // Debounce 150ms
+          }
+
+        } catch (err) {
+          console.error('❌ Error subscribing to user:', err);
+        }
+      });
+
+      // ✅ CRITICAL: Setup user-left handler like audio call
+      agoraClient.on('user-left', (user) => {
+        if (!isComponentMounted.current) return;
+        console.log('👋 User left video call:', user.uid);
+
+        // Emit leave event for group calls
+        if (isGroupCall && conversation._id) {
+          const leftUser = remoteUsers.find(u => u.uid === user.uid);
+          socket.emit('user-left-video-channel', {
+            conversationId: conversation._id,
+            userId: leftUser?.memberId || user.uid,
+            agoraUid: user.uid
+          });
+        }
+
+        setRemoteUsers(prev => prev.filter(u => u.uid !== user.uid));
+
+        if (isGroupCall) {
+          // ✅ GROUP CALL: Just remove user, don't end call
+          const leftUser = remoteUsers.find(u => u.uid === user.uid);
+          const userName = leftUser?.name || `User ${user.uid}`;
+          console.log(`👥 ${userName} đã rời khỏi cuộc gọi video nhóm`);
+        } else {
+          // ✅ INDIVIDUAL CALL: End call when other user leaves
+          const userName = conversation.name || `User ${user.uid}`;
+          const message = `${userName} đã kết thúc cuộc gọi`;
+          setEndCallMessage(message);
+          setCallEnded(true);
+
+          if (onCallEnded && isComponentMounted.current) {
+            onCallEnded({
+              isEnded: true,
+              message: message,
+              duration: callDuration
+            });
+          }
+
+          setTimeout(() => {
+            if (onEndCall && isComponentMounted.current) onEndCall();
+          }, 2000);
+        }
+      });
+
+      // ✅ IMPROVED: Create tracks with better error handling
+      let videoTrack = null;
+      let audioTrack = null;
+      let tracksToPublish = [];
+
+      // Create audio track first
+      try {
+        console.log('🎤 Creating audio track...');
+        audioTrack = await AgoraRTC.createMicrophoneAudioTrack({
+          encoderConfig: {
+            sampleRate: 48000,
+            bitrate: 128,
+            stereo: false
+          },
+          AEC: true,
+          AGC: true,
+          ANS: true
+        });
+
+        localAudioTrackRef.current = audioTrack;
+        setLocalAudioTrack(audioTrack);
+        tracksToPublish.push(audioTrack);
+        console.log('✅ Audio track created successfully');
+      } catch (audioError) {
+        console.error('❌ Failed to create audio track:', audioError);
+        setIsAudioMuted(true);
+        try {
+          console.log('🔄 Retrying audio track with basic config...');
+          audioTrack = await AgoraRTC.createMicrophoneAudioTrack();
+          localAudioTrackRef.current = audioTrack;
+          setLocalAudioTrack(audioTrack);
+          tracksToPublish.push(audioTrack);
+          console.log('✅ Basic audio track created successfully');
+        } catch (basicAudioError) {
+          console.error('❌ Failed to create basic audio track:', basicAudioError);
+        }
+      }
+
+      // Create video track
+      try {
+        console.log('📹 Attempting to create video track...');
+        videoTrack = await AgoraRTC.createCameraVideoTrack({
+          encoderConfig: {
+            width: { ideal: 640, min: 480, max: 960 },
+            height: { ideal: 480, min: 360, max: 720 },
+            frameRate: 15,
+            bitrateMin: 400,
+            bitrateMax: 800,
+          },
+          facingMode: 'user',
+          optimizationMode: 'detail'
+        });
+
+        localVideoTrackRef.current = videoTrack;
+        setLocalVideoTrack(videoTrack);
+        tracksToPublish.push(videoTrack);
+        console.log('✅ Video track created successfully');
+
+        // ✅ CRITICAL: Play local video immediately
+        if (localVideoContainerRef.current && isComponentMounted.current) {
+          try {
+            await videoTrack.play(localVideoContainerRef.current);
+            console.log('✅ Local video playing immediately');
+
+            const localVideoElement = localVideoContainerRef.current.querySelector('video');
+            if (localVideoElement) {
+              localVideoElement.classList.add('stable-video');
+              localVideoElement.style.transition = 'none';
+              localVideoElement.style.objectFit = 'cover';
+              localVideoElement.style.width = '100%';
+              localVideoElement.style.height = '100%';
+            }
+          } catch (playError) {
+            console.warn('⚠️ Failed to play local video immediately:', playError);
+            setTimeout(async () => {
+              if (videoTrack && localVideoContainerRef.current && isComponentMounted.current) {
+                try {
+                  await videoTrack.play(localVideoContainerRef.current);
+                  console.log('✅ Local video playing on retry');
+                  const localVideoElement = localVideoContainerRef.current.querySelector('video');
+                  if (localVideoElement) {
+                    localVideoElement.classList.add('stable-video');
+                    localVideoElement.style.transition = 'none';
+                    localVideoElement.style.objectFit = 'cover';
+                    localVideoElement.style.width = '100%';
+                    localVideoElement.style.height = '100%';
+                  }
+                } catch (retryError) {
+                  console.error('❌ Local video retry failed:', retryError);
+                }
+              }
+            }, 1000);
+          }
+        }
+
+      } catch (videoError) {
+        console.warn('⚠️ Failed to create video track:', videoError);
+        setIsVideoMuted(true);
+        try {
+          console.log('🔄 Retrying video track with basic config...');
+          videoTrack = await AgoraRTC.createCameraVideoTrack({
+            encoderConfig: {
+              width: 640,
+              height: 480,
+              frameRate: 15,
+              bitrateMax: 800,
+            }
+          });
+
+          localVideoTrackRef.current = videoTrack;
+          setLocalVideoTrack(videoTrack);
+          tracksToPublish.push(videoTrack);
+          console.log('✅ Basic video track created successfully');
+
+          if (localVideoContainerRef.current && isComponentMounted.current) {
+            try {
+              await videoTrack.play(localVideoContainerRef.current);
+              console.log('✅ Basic local video playing');
+              const localVideoElement = localVideoContainerRef.current.querySelector('video');
+              if (localVideoElement) {
+                localVideoElement.classList.add('stable-video');
+                localVideoElement.style.transition = 'none';
+                localVideoElement.style.objectFit = 'cover';
+                localVideoElement.style.width = '100%';
+                localVideoElement.style.height = '100%';
+              }
+            } catch (playError) {
+              console.warn('⚠️ Failed to play basic local video:', playError);
+            }
+          }
+        } catch (basicVideoError) {
+          console.error('❌ Failed to create basic video track:', basicVideoError);
+        }
+      }
+
+      // Check if we have at least one track
+      if (tracksToPublish.length === 0) {
+        throw new Error('Không thể truy cập camera và microphone');
+      }
+
+      // ✅ IMPROVED: Join with single attempt (no retry loop)
+      try {
+        console.log('🎥 Joining video channel...');
+        await agoraClient.join(APP_ID, channelName, token, consistentUid);
+        console.log('🎥 Joined video channel:', channelName, 'with UID:', consistentUid);
+      } catch (joinError) {
+        console.error('❌ Join failed:', joinError);
+        if (joinError.code === 'UID_CONFLICT') {
+          const newUid = generateConsistentUID(currentUser._id + Date.now());
+          console.log('🔄 Trying with new UID due to conflict:', newUid);
+          await agoraClient.join(APP_ID, channelName, token, newUid);
+          console.log('🎥 Joined with new UID:', newUid);
+        } else {
+          throw joinError;
+        }
+      }
+
+      // Publish tracks after successful join
+      if (tracksToPublish.length > 0) {
+        try {
+          await agoraClient.publish(tracksToPublish);
+          console.log('🎥 Published video tracks successfully:',
+            tracksToPublish.map(t => t.trackMediaType || t.kind || 'unknown'));
+        } catch (publishError) {
+          console.error('❌ Failed to publish tracks:', publishError);
+          setTimeout(async () => {
+            try {
+              await agoraClient.publish(tracksToPublish);
+              console.log('✅ Tracks published on retry');
+            } catch (retryError) {
+              console.error('❌ Track publish retry failed:', retryError);
+            }
+          }, 2000);
+        }
+      }
+
+      // ✅ CRITICAL: Emit answered notification like audio call
+      setTimeout(() => {
+        if (conversation._id && isComponentMounted.current) {
+          console.log('🎯 Emitting video call answered after join delay');
+
+          socket.emit('video-call-answered-notification', {
+            conversationId: conversation._id,
+            answeredBy: consistentUid,
+            isGroupCall: isGroupCall,
+            userId: currentUser._id
+          });
+
+          socket.emit('call-answered-notification', {
+            conversationId: conversation._id,
+            answeredBy: consistentUid,
+            isGroupCall: isGroupCall,
+            userId: currentUser._id
+          });
+        }
+      }, 2000);
+
+      // ✅ CRITICAL: Emit join event for group calls like audio
+      if (isGroupCall && conversation._id) {
+        socket.emit('user-joined-video-channel', {
+          conversationId: conversation._id,
+          userId: currentUser._id,
+          agoraUid: consistentUid,
+          userName: currentUser.name || currentUser.username,
+          userAvatar: currentUser.avatar
+        });
+        console.log('📡 Đã emit user-joined-video-channel');
+      }
+
+    } catch (error) {
+      console.error('🚫 Error setting up video call:', error);
+
+      let errorMessage = 'Không thể thiết lập cuộc gọi video';
+
+      if (error.code === 'UID_CONFLICT') {
+        errorMessage = 'Cuộc gọi đang được thực hiện từ thiết bị khác. Vui lòng thử lại sau.';
+      } else if (error.message.includes('Device in use')) {
+        errorMessage = 'Camera đang được sử dụng. Cuộc gọi sẽ tiếp tục với âm thanh.';
+      } else if (error.message.includes('Permission denied')) {
+        errorMessage = 'Không có quyền truy cập camera/microphone.';
+      } else if (error.message.includes('network')) {
+        errorMessage = 'Lỗi kết nối mạng. Vui lòng kiểm tra kết nối internet.';
+      }
+
+      setEndCallMessage(errorMessage);
+      setCallEnded(true);
+    } finally {
+      joinInProgress.current = false;
     }
   };
 
-  return (
-    <div className="agora-call-container">
-      <div className="video-container">
-        {isVideo && localStream && (
-          <div className="video-player local-player">
-            <div id={`local-stream-${localStream.uid}`} className="video-element"></div>
-            <div className="user-name">Bạn</div>
+
+  // const forceCleanupWithRetry = async () => {
+  //   console.log('🧹 Force cleanup with retry...');
+
+  //   let cleanupAttempts = 0;
+  //   const maxCleanupAttempts = 3;
+
+  //   while (cleanupAttempts < maxCleanupAttempts) {
+  //     try {
+  //       cleanupAttempts++;
+  //       console.log(`🧹 Cleanup attempt ${cleanupAttempts}/${maxCleanupAttempts}`);
+
+  //       // Stop and close local tracks first
+  //       if (localVideoTrackRef.current) {
+  //         try {
+  //           localVideoTrackRef.current.stop();
+  //           localVideoTrackRef.current.close();
+  //           console.log('✅ Local video track stopped');
+  //         } catch (error) {
+  //           console.warn('⚠️ Error stopping video track:', error);
+  //         }
+  //         localVideoTrackRef.current = null;
+  //       }
+
+  //       if (localAudioTrackRef.current) {
+  //         try {
+  //           localAudioTrackRef.current.stop();
+  //           localAudioTrackRef.current.close();
+  //           console.log('✅ Local audio track stopped');
+  //         } catch (error) {
+  //           console.warn('⚠️ Error stopping audio track:', error);
+  //         }
+  //         localAudioTrackRef.current = null;
+  //       }
+
+  //       // Leave channel if client exists
+  //       if (clientRef.current) {
+  //         try {
+  //           console.log('🚪 Leaving existing channel...');
+
+  //           // Set a timeout for leave operation
+  //           const leavePromise = clientRef.current.leave();
+  //           const timeoutPromise = new Promise((_, reject) =>
+  //             setTimeout(() => reject(new Error('Leave timeout')), 3000)
+  //           );
+
+  //           await Promise.race([leavePromise, timeoutPromise]);
+  //           console.log('✅ Successfully left existing channel');
+
+  //         } catch (leaveError) {
+  //           console.warn(`⚠️ Error leaving channel (attempt ${cleanupAttempts}):`, leaveError);
+
+  //           if (cleanupAttempts < maxCleanupAttempts) {
+  //             // Wait before retry
+  //             await new Promise(resolve => setTimeout(resolve, 1000));
+  //             continue;
+  //           }
+  //         } finally {
+  //           clientRef.current = null;
+  //         }
+  //       }
+
+  //       // Reset states
+  //       setLocalVideoTrack(null);
+  //       setLocalAudioTrack(null);
+  //       setRemoteUsers([]);
+  //       setClient(null);
+
+  //       console.log('✅ Force cleanup completed successfully');
+  //       break; // Success, exit loop
+
+  //     } catch (error) {
+  //       console.error(`❌ Cleanup attempt ${cleanupAttempts} failed:`, error);
+
+  //       if (cleanupAttempts >= maxCleanupAttempts) {
+  //         console.error('❌ All cleanup attempts failed, proceeding anyway');
+  //         // Force reset everything
+  //         localVideoTrackRef.current = null;
+  //         localAudioTrackRef.current = null;
+  //         clientRef.current = null;
+  //         setLocalVideoTrack(null);
+  //         setLocalAudioTrack(null);
+  //         setRemoteUsers([]);
+  //         setClient(null);
+  //       } else {
+  //         // Wait before retry
+  //         await new Promise(resolve => setTimeout(resolve, 1000));
+  //       }
+  //     }
+  //   }
+  // };
+
+  const forceCleanupWithRetry = async () => {
+    console.log('🧹 Force cleanup with retry...');
+
+    let cleanupAttempts = 0;
+    const maxCleanupAttempts = 2; // Reduce attempts
+
+    while (cleanupAttempts < maxCleanupAttempts) {
+      try {
+        cleanupAttempts++;
+        console.log(`🧹 Cleanup attempt ${cleanupAttempts}/${maxCleanupAttempts}`);
+
+        // ✅ IMPROVED: Better track cleanup
+        if (localVideoTrackRef.current) {
+          try {
+            const track = localVideoTrackRef.current;
+
+            // Stop playing first
+            if (track.stop) {
+              track.stop();
+            }
+
+            // Then close
+            if (track.close) {
+              track.close();
+            }
+
+            console.log('✅ Local video track stopped');
+          } catch (error) {
+            console.warn('⚠️ Error stopping video track:', error);
+          }
+          localVideoTrackRef.current = null;
+        }
+
+        if (localAudioTrackRef.current) {
+          try {
+            const track = localAudioTrackRef.current;
+
+            // Stop playing first
+            if (track.stop) {
+              track.stop();
+            }
+
+            // Then close
+            if (track.close) {
+              track.close();
+            }
+
+            console.log('✅ Local audio track stopped');
+          } catch (error) {
+            console.warn('⚠️ Error stopping audio track:', error);
+          }
+          localAudioTrackRef.current = null;
+        }
+
+        // ✅ IMPROVED: Better client cleanup
+        if (clientRef.current) {
+          try {
+            console.log('🚪 Leaving existing channel...');
+
+            const client = clientRef.current;
+
+            // Check connection state before leaving
+            if (client.connectionState === 'CONNECTED' || client.connectionState === 'CONNECTING') {
+              // Set a reasonable timeout for leave operation
+              const leavePromise = client.leave();
+              const timeoutPromise = new Promise((_, reject) =>
+                setTimeout(() => reject(new Error('Leave timeout')), 5000)
+              );
+
+              await Promise.race([leavePromise, timeoutPromise]);
+              console.log('✅ Successfully left existing channel');
+            } else {
+              console.log('✅ Client not connected, skipping leave');
+            }
+
+          } catch (leaveError) {
+            console.warn(`⚠️ Error leaving channel (attempt ${cleanupAttempts}):`, leaveError);
+
+            // For first attempt failure, try once more
+            if (cleanupAttempts < maxCleanupAttempts) {
+              await new Promise(resolve => setTimeout(resolve, 1000));
+              continue;
+            }
+          } finally {
+            // Always clear the client reference
+            clientRef.current = null;
+          }
+        }
+
+        // Reset states
+        setLocalVideoTrack(null);
+        setLocalAudioTrack(null);
+        setRemoteUsers([]);
+        setClient(null);
+
+        console.log('✅ Force cleanup completed successfully');
+        break; // Success, exit loop
+
+      } catch (error) {
+        console.error(`❌ Cleanup attempt ${cleanupAttempts} failed:`, error);
+
+        if (cleanupAttempts >= maxCleanupAttempts) {
+          console.error('❌ All cleanup attempts failed, forcing reset');
+          // Force reset everything
+          localVideoTrackRef.current = null;
+          localAudioTrackRef.current = null;
+          clientRef.current = null;
+          setLocalVideoTrack(null);
+          setLocalAudioTrack(null);
+          setRemoteUsers([]);
+          setClient(null);
+        } else {
+          // Wait before retry
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+      }
+    }
+  };
+
+  // ✅ ADD: Helper function to get other user info
+  const getOtherUserInfo = () => {
+    if (!isGroupCall && conversation.totalMembers === 2) {
+      // Individual conversation logic
+      if (conversation.userId && conversation.userId !== currentUser._id) {
+        return {
+          name: conversation.name,
+          avatar: conversation.avatar
+        };
+      }
+
+      if (conversation.members && conversation.members.length > 0) {
+        const otherMember = conversation.members.find(member =>
+          member._id !== currentUser._id
+        );
+        if (otherMember) {
+          return {
+            name: otherMember.name,
+            avatar: otherMember.avatar
+          };
+        }
+      }
+
+      return {
+        name: conversation.name,
+        avatar: conversation.avatar
+      };
+    }
+
+    // Group conversation
+    return {
+      name: conversation.name,
+      avatar: conversation.avatar
+    };
+  };
+
+  const findUserByUID = (targetUid, members) => {
+    if (!members || !Array.isArray(members)) return null;
+
+    // Try to find member whose generated UID matches targetUid
+    for (const member of members) {
+      const memberUid = generateConsistentUID(member._id);
+      if (memberUid === targetUid) {
+        console.log(`✅ Found member by UID mapping:`, {
+          member: member.name,
+          memberId: member._id,
+          generatedUid: memberUid,
+          targetUid
+        });
+        return member;
+      }
+    }
+
+    console.log(`❌ No member found for UID: ${targetUid}`);
+    return null;
+  };
+
+
+
+  const cleanup = async () => {
+    if (cleanupInProgress.current) {
+      console.log('🧹 Cleanup already in progress');
+      return;
+    }
+
+    cleanupInProgress.current = true;
+    console.log('🧹 Starting video call cleanup...');
+
+    try {
+      // Clear timer
+      if (callDurationTimerRef.current) {
+        clearInterval(callDurationTimerRef.current);
+        callDurationTimerRef.current = null;
+      }
+
+      // ✅ IMPROVED: Better socket event handling
+      if (conversation._id && currentUser._id) {
+        try {
+          const consistentUid = generateConsistentUID(currentUser._id);
+
+          if (isGroupCall) {
+            socket.emit('user-left-video-channel', {
+              conversationId: conversation._id,
+              userId: currentUser._id,
+              agoraUid: consistentUid
+            });
+          }
+        } catch (socketError) {
+          console.warn('⚠️ Error emitting leave events:', socketError);
+        }
+      }
+
+      // Use the force cleanup function
+      await forceCleanupWithRetry();
+
+      console.log('✅ Video call cleanup completed');
+    } catch (error) {
+      console.error('❌ Error during video call cleanup:', error);
+    } finally {
+      cleanupInProgress.current = false;
+    }
+  };
+
+  const toggleAudio = async () => {
+    if (localAudioTrackRef.current) {
+      const newMutedState = !isAudioMuted;
+      await localAudioTrackRef.current.setEnabled(!newMutedState);
+      setIsAudioMuted(newMutedState);
+      console.log('🎤 Audio', newMutedState ? 'muted' : 'unmuted');
+    }
+  };
+
+  // const toggleVideo = async () => {
+  //   if (!localVideoTrackRef.current) {
+  //     console.warn('⚠️ No video track available to toggle');
+  //     // Try to create video track if it doesn't exist
+  //     try {
+  //       console.log('📹 Attempting to create video track...');
+  //       const videoTrack = await AgoraRTC.createCameraVideoTrack({
+  //         encoderConfig: {
+  //           width: 640,
+  //           height: 480,
+  //           frameRate: 15,
+  //           bitrateMax: 1000,
+  //         }
+  //       });
+
+  //       localVideoTrackRef.current = videoTrack;
+  //       setLocalVideoTrack(videoTrack);
+  //       setIsVideoMuted(false);
+
+  //       // Publish the new video track
+  //       if (clientRef.current) {
+  //         await clientRef.current.publish([videoTrack]);
+  //         console.log('✅ Video track created and published');
+  //       }
+
+  //       // Play local video
+  //       if (localVideoContainerRef.current) {
+  //         videoTrack.play(localVideoContainerRef.current);
+  //       }
+
+  //     } catch (error) {
+  //       console.error('❌ Failed to create video track:', error);
+  //       // Show user-friendly message
+  //       alert('Không thể bật camera. Camera có thể đang được sử dụng bởi ứng dụng khác.');
+  //     }
+  //     return;
+  //   }
+
+  //   try {
+  //     const newMutedState = !isVideoMuted;
+  //     await localVideoTrackRef.current.setEnabled(!newMutedState);
+  //     setIsVideoMuted(newMutedState);
+  //     console.log('📹 Video', newMutedState ? 'disabled' : 'enabled');
+  //   } catch (error) {
+  //     console.error('❌ Error toggling video:', error);
+  //   }
+  // };
+  const toggleVideo = async () => {
+    if (!isComponentMounted.current) return;
+
+    try {
+      if (localVideoTrackRef.current) {
+        // ✅ CASE 1: Đã có video track - chỉ toggle enable/disable
+        const currentEnabled = localVideoTrackRef.current.enabled;
+        await localVideoTrackRef.current.setEnabled(!currentEnabled);
+        setIsVideoMuted(currentEnabled);
+        console.log(`📹 Video ${currentEnabled ? 'disabled' : 'enabled'}`);
+
+        // ✅ CRITICAL: Đảm bảo video vẫn được play trong container
+        if (!currentEnabled && localVideoContainerRef.current) {
+          // Khi enable lại, đảm bảo video được play
+          setTimeout(async () => {
+            if (localVideoTrackRef.current && localVideoContainerRef.current) {
+              try {
+                await localVideoTrackRef.current.play(localVideoContainerRef.current);
+                console.log('✅ Local video re-played after enable');
+
+                const localVideoElement = localVideoContainerRef.current.querySelector('video');
+                if (localVideoElement) {
+                  localVideoElement.classList.add('stable-video');
+                  localVideoElement.style.transition = 'none';
+                  localVideoElement.style.objectFit = 'cover';
+                  localVideoElement.style.width = '100%';
+                  localVideoElement.style.height = '100%';
+                }
+              } catch (replayError) {
+                console.warn('⚠️ Failed to replay local video:', replayError);
+              }
+            }
+          }, 100);
+        }
+
+      } else {
+        // ✅ CASE 2: Chưa có video track - tạo mới
+        console.log('📹 Creating new video track...');
+
+        let newVideoTrack;
+        try {
+          newVideoTrack = await AgoraRTC.createCameraVideoTrack({
+            encoderConfig: {
+              width: { ideal: 640, min: 480, max: 960 },
+              height: { ideal: 480, min: 360, max: 720 },
+              frameRate: 15,
+              bitrateMin: 400,
+              bitrateMax: 800,
+            },
+            facingMode: 'user',
+            optimizationMode: 'detail'
+          });
+        } catch (error) {
+          console.warn('⚠️ Failed to create advanced video track, trying basic:', error);
+          newVideoTrack = await AgoraRTC.createCameraVideoTrack();
+        }
+
+        localVideoTrackRef.current = newVideoTrack;
+        setLocalVideoTrack(newVideoTrack);
+        setIsVideoMuted(false);
+
+        // ✅ CRITICAL: Play ngay lập tức khi tạo track mới
+        if (localVideoContainerRef.current) {
+          try {
+            await newVideoTrack.play(localVideoContainerRef.current);
+            console.log('✅ New local video track playing');
+
+            const localVideoElement = localVideoContainerRef.current.querySelector('video');
+            if (localVideoElement) {
+              localVideoElement.classList.add('stable-video');
+              localVideoElement.style.transition = 'none';
+              localVideoElement.style.objectFit = 'cover';
+              localVideoElement.style.width = '100%';
+              localVideoElement.style.height = '100%';
+            }
+          } catch (playError) {
+            console.warn('⚠️ Failed to play new local video:', playError);
+          }
+        }
+
+        // Publish track if client exists
+        if (clientRef.current && clientRef.current.connectionState === 'CONNECTED') {
+          try {
+            await clientRef.current.publish([newVideoTrack]);
+            console.log('✅ New video track published');
+          } catch (publishError) {
+            console.error('❌ Failed to publish new video track:', publishError);
+          }
+        }
+      }
+
+    } catch (error) {
+      console.error('❌ Error toggling video:', error);
+      message.error('Không thể thay đổi trạng thái camera');
+    }
+  };
+
+
+  const handleEndCall = async () => {
+    console.log('🔚 Ending video call');
+    setCallEnded(true);
+    setEndCallMessage('Cuộc gọi đã kết thúc');
+
+    await cleanup();
+
+    if (onEndCall) {
+      onEndCall();
+    }
+  };
+
+  const formatDuration = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  // Handle rejection message
+  useEffect(() => {
+    if (isRejected && rejectionMessage) {
+      setEndCallMessage(rejectionMessage);
+      setCallEnded(true);
+    }
+  }, [isRejected, rejectionMessage]);
+
+  const NetworkMonitor = ({ client }) => {
+    const [networkQuality, setNetworkQuality] = useState({ uplink: 0, downlink: 0 });
+    const [connectionState, setConnectionState] = useState('DISCONNECTED');
+
+    useEffect(() => {
+      if (!client) return;
+
+      const handleNetworkQuality = (stats) => {
+        setNetworkQuality({
+          uplink: stats.uplinkNetworkQuality,
+          downlink: stats.downlinkNetworkQuality
+        });
+      };
+
+      const handleConnectionStateChange = (curState, revState) => {
+        setConnectionState(curState);
+        console.log('🌐 Connection state:', revState, '->', curState);
+      };
+
+      client.on('network-quality', handleNetworkQuality);
+      client.on('connection-state-change', handleConnectionStateChange);
+
+      return () => {
+        client.off('network-quality', handleNetworkQuality);
+        client.off('connection-state-change', handleConnectionStateChange);
+      };
+    }, [client]);
+
+    // Only show in development
+    if (process.env.NODE_ENV !== 'development') return null;
+
+    const getQualityColor = (quality) => {
+      if (quality === 0) return '#666';
+      if (quality <= 2) return '#52c41a';
+      if (quality <= 4) return '#faad14';
+      return '#ff4d4f';
+    };
+
+    const getQualityText = (quality) => {
+      if (quality === 0) return 'Unknown';
+      if (quality <= 2) return 'Excellent';
+      if (quality <= 4) return 'Good';
+      return 'Poor';
+    };
+
+    return (
+      <div style={{
+        position: 'absolute',
+        top: '10px',
+        left: '10px',
+        background: 'rgba(0,0,0,0.8)',
+        color: 'white',
+        padding: '8px',
+        borderRadius: '4px',
+        fontSize: '11px',
+        zIndex: 1000,
+        border: '1px solid #333'
+      }}>
+        <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>
+          🌐 Network Status
+        </div>
+        <div style={{
+          color: connectionState === 'CONNECTED' ? '#52c41a' : '#faad14',
+          marginBottom: '4px'
+        }}>
+          State: {connectionState}
+        </div>
+        <div style={{ color: getQualityColor(networkQuality.uplink) }}>
+          ↑ Upload: {getQualityText(networkQuality.uplink)} ({networkQuality.uplink})
+        </div>
+        <div style={{ color: getQualityColor(networkQuality.downlink) }}>
+          ↓ Download: {getQualityText(networkQuality.downlink)} ({networkQuality.downlink})
+        </div>
+      </div>
+    );
+  };
+
+  const CallDebugInfo = ({ localAudioTrack, localVideoTrack, remoteUsers }) => {
+    const [debugInfo, setDebugInfo] = useState({});
+
+    useEffect(() => {
+      const updateDebugInfo = () => {
+        const info = {
+          localAudio: localAudioTrack ? {
+            enabled: localAudioTrack.enabled,
+            volume: localAudioTrack.getVolumeLevel ? localAudioTrack.getVolumeLevel() : 0,
+            readyState: localAudioTrack.getMediaStreamTrack()?.readyState,
+            trackExists: true
+          } : { trackExists: false },
+          localVideo: localVideoTrack ? {
+            enabled: localVideoTrack.enabled,
+            readyState: localVideoTrack.getMediaStreamTrack()?.readyState,
+            trackExists: true
+          } : { trackExists: false },
+          remoteUsers: remoteUsers.map(user => ({
+            uid: user.uid,
+            name: user.name || `User ${user.uid}`,
+            hasAudio: user.hasAudio,
+            hasVideo: user.hasVideo,
+            audioVolume: user.audioTrack && user.audioTrack.getVolumeLevel ?
+              user.audioTrack.getVolumeLevel() : 0,
+            audioTrackExists: !!user.audioTrack,
+            videoTrackExists: !!user.videoTrack
+          })),
+          totalRemoteUsers: remoteUsers.length,
+          // ✅ ADD: Additional stats
+          connectionStats: {
+            hasLocalTracks: !!(localAudioTrack || localVideoTrack),
+            hasRemoteTracks: remoteUsers.some(u => u.audioTrack || u.videoTrack),
+            totalTracks: {
+              local: [localAudioTrack, localVideoTrack].filter(Boolean).length,
+              remote: remoteUsers.reduce((acc, u) =>
+                acc + [u.audioTrack, u.videoTrack].filter(Boolean).length, 0)
+            }
+          }
+        };
+        setDebugInfo(info);
+      };
+
+      // Update immediately
+      updateDebugInfo();
+
+      // Update every 2 seconds
+      const interval = setInterval(updateDebugInfo, 2000);
+      return () => clearInterval(interval);
+    }, [localAudioTrack, localVideoTrack, remoteUsers]);
+
+    // Only show in development
+    if (process.env.NODE_ENV !== 'development') return null;
+
+    return (
+      <div style={{
+        position: 'absolute',
+        bottom: '10px',
+        right: '10px',
+        background: 'rgba(0,0,0,0.9)',
+        color: 'white',
+        padding: '12px',
+        borderRadius: '8px',
+        fontSize: '11px',
+        maxWidth: '280px',
+        zIndex: 1000,
+        border: '1px solid #333'
+      }}>
+        <div style={{ fontWeight: 'bold', marginBottom: '8px', color: '#1890ff' }}>
+          🔍 Video Call Debug Info
+        </div>
+
+        <div style={{ marginBottom: '6px' }}>
+          <strong>Local Tracks:</strong>
+        </div>
+        <div style={{ marginLeft: '8px', marginBottom: '6px' }}>
+          🎤 Audio: {debugInfo.localAudio?.trackExists ?
+            (debugInfo.localAudio?.enabled ? '✅' : '🔇') : '❌'}
+          {debugInfo.localAudio?.volume !== undefined &&
+            ` (Vol: ${Math.round(debugInfo.localAudio.volume * 100)}%)`}
+        </div>
+        <div style={{ marginLeft: '8px', marginBottom: '8px' }}>
+          📹 Video: {debugInfo.localVideo?.trackExists ?
+            (debugInfo.localVideo?.enabled ? '✅' : '🚫') : '❌'}
+        </div>
+
+        <div style={{ marginBottom: '6px' }}>
+          <strong>Remote Users: {debugInfo.totalRemoteUsers || 0}</strong>
+        </div>
+        {debugInfo.remoteUsers?.map(user => (
+          <div key={user.uid} style={{ marginLeft: '8px', marginBottom: '4px' }}>
+            <div style={{ fontWeight: 'bold' }}>{user.name}:</div>
+            <div style={{ marginLeft: '8px' }}>
+              🎤 {user.hasAudio ? '✅' : '❌'}
+              {user.audioVolume !== undefined && user.hasAudio &&
+                ` (${Math.round(user.audioVolume * 100)}%)`}
+            </div>
+            <div style={{ marginLeft: '8px' }}>
+              📹 {user.hasVideo ? '✅' : '❌'}
+            </div>
+          </div>
+        ))}
+
+        {debugInfo.totalRemoteUsers === 0 && (
+          <div style={{ marginLeft: '8px', color: '#ffaa00' }}>
+            No remote users connected
           </div>
         )}
 
-        {remoteStreams.map(stream => (
-          <div key={stream.uid} className="video-player remote-player">
-            {isVideo && stream.videoTrack ? (
-              <div id={`remote-stream-${stream.uid}`} className="video-element"></div>
-            ) : (
-              <div className="avatar-placeholder">
-                <span>{stream.uid.toString().charAt(0).toUpperCase()}</span>
-              </div>
-            )}
-            <div className="user-name">Người dùng {stream.uid}</div>
+        <div style={{ marginTop: '8px', paddingTop: '6px', borderTop: '1px solid #333' }}>
+          <div>📊 Tracks: L{debugInfo.connectionStats?.totalTracks?.local || 0} /
+            R{debugInfo.connectionStats?.totalTracks?.remote || 0}</div>
+        </div>
+      </div>
+    );
+  };
+
+  const toggleVideoDisplayMode = () => {
+    setVideoDisplayMode(prev => prev === 'cover' ? 'contain' : 'cover');
+
+    // Apply to all video elements
+    const videoElements = document.querySelectorAll('.remote-video-container video, .local-video-player video');
+    videoElements.forEach(video => {
+      video.style.objectFit = videoDisplayMode === 'cover' ? 'contain' : 'cover';
+    });
+  };
+
+
+  const AudioActivationButton = ({ onActivate }) => {
+    const [isActivated, setIsActivated] = useState(false);
+    const [needsActivation, setNeedsActivation] = useState(false);
+    const [hasChecked, setHasChecked] = useState(false);
+    const [isActivating, setIsActivating] = useState(false);
+
+    useEffect(() => {
+      const checkAudioContext = async () => {
+        if (!hasChecked) setHasChecked(true);
+
+        try {
+          if (window.AudioContext || window.webkitAudioContext) {
+            const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+
+            // Use global audio context
+            if (!window.globalAudioContext) {
+              window.globalAudioContext = new AudioContextClass();
+            }
+
+            const audioContext = window.globalAudioContext;
+            console.log('🎵 Audio context state:', audioContext.state);
+
+            if (audioContext.state === 'suspended') {
+              setNeedsActivation(true);
+              setIsActivated(false);
+            } else if (audioContext.state === 'running') {
+              setNeedsActivation(false);
+              setIsActivated(true);
+            }
+          } else {
+            // No audio context available
+            setNeedsActivation(false);
+            setIsActivated(true);
+          }
+        } catch (error) {
+          console.error('Audio context check failed:', error);
+          setNeedsActivation(false);
+          setIsActivated(true);
+        }
+      };
+
+      checkAudioContext();
+
+      // Only check periodically if we have remote users with audio and need activation
+      const hasRemoteAudio = remoteUsers.some(user => user.hasAudio);
+      if (hasRemoteAudio && !isActivated && !isActivating) {
+        const interval = setInterval(checkAudioContext, 5000);
+        return () => clearInterval(interval);
+      }
+    }, [remoteUsers, isActivated, hasChecked, isActivating]);
+
+    const handleActivateAudio = async () => {
+      if (isActivating) return;
+
+      setIsActivating(true);
+
+      try {
+        console.log('🎵 Activating audio context...');
+
+        // ✅ IMPROVED: Better audio context activation
+        if (window.AudioContext || window.webkitAudioContext) {
+          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+
+          if (!window.globalAudioContext) {
+            window.globalAudioContext = new AudioContextClass();
+          }
+
+          const audioContext = window.globalAudioContext;
+
+          if (audioContext.state === 'suspended') {
+            await audioContext.resume();
+            console.log('✅ Audio context activated by user interaction');
+          }
+
+          // Wait a moment for context to be ready
+          await new Promise(resolve => setTimeout(resolve, 500));
+        }
+
+        // ✅ IMPROVED: Better remote audio activation
+        const audioUsers = remoteUsers.filter(user => user.audioTrack);
+        console.log(`🎵 Attempting to activate ${audioUsers.length} remote audio tracks`);
+
+        let successCount = 0;
+
+        for (const user of audioUsers) {
+          try {
+            await user.audioTrack.play();
+            successCount++;
+            console.log(`✅ Remote audio activated for user ${user.uid}`);
+          } catch (err) {
+            console.error(`❌ Failed to activate audio for user ${user.uid}:`, err);
+          }
+        }
+
+        if (successCount > 0) {
+          setIsActivated(true);
+          setNeedsActivation(false);
+
+          if (onActivate) onActivate();
+
+          console.log(`✅ Successfully activated ${successCount}/${audioUsers.length} audio tracks`);
+        } else {
+          console.warn('⚠️ No audio tracks were successfully activated');
+        }
+
+      } catch (error) {
+        console.error('❌ Failed to activate audio context:', error);
+      } finally {
+        setIsActivating(false);
+      }
+    };
+
+    // ✅ IMPROVED: Better conditions for showing button
+    const hasRemoteAudio = remoteUsers.some(user => user.hasAudio);
+    const shouldShow = hasChecked && needsActivation && hasRemoteAudio && !isActivated;
+
+    if (!shouldShow) return null;
+
+    return (
+      <div style={{
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        zIndex: 1001,
+        background: 'rgba(0,0,0,0.9)',
+        padding: '20px',
+        borderRadius: '12px',
+        textAlign: 'center',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+        border: '2px solid #1890ff'
+      }}>
+        <div style={{ color: 'white', marginBottom: '16px' }}>
+          <AudioOutlined style={{ fontSize: '32px', marginBottom: '8px', color: '#1890ff' }} />
+          <div style={{ fontSize: '16px', fontWeight: 'bold' }}>Kích hoạt âm thanh</div>
+          <div style={{ fontSize: '12px', opacity: 0.8, marginTop: '4px' }}>
+            Nhấn để nghe âm thanh từ cuộc gọi
           </div>
-        ))}
+        </div>
+        <Button
+          type="primary"
+          size="large"
+          onClick={handleActivateAudio}
+          icon={<AudioOutlined />}
+          style={{ fontWeight: 'bold' }}
+          loading={isActivating}
+          disabled={isActivating}
+        >
+          {isActivating ? 'Đang kích hoạt...' : 'Kích hoạt âm thanh'}
+        </Button>
+      </div>
+    );
+  };
+
+
+  // const generateConsistentUID = (userId) => {
+  //   if (!userId) return Math.floor(Math.random() * 100000);
+
+  //   // Convert MongoDB ObjectId to consistent number
+  //   let hash = 0;
+  //   const userIdStr = userId.toString();
+
+  //   for (let i = 0; i < userIdStr.length; i++) {
+  //     const char = userIdStr.charCodeAt(i);
+  //     hash = ((hash << 5) - hash) + char;
+  //     hash = hash & hash; // Convert to 32-bit integer
+  //   }
+
+  //   // Ensure positive number within Agora's UID range (1 to 2^32 - 1)
+  //   const consistentUid = Math.abs(hash) % 999999999 + 1;
+
+  //   console.log(`🎯 Generated consistent UID: ${consistentUid} for user: ${userId}`);
+  //   return consistentUid;
+  // };
+
+  // const generateConsistentUID = (userId) => {
+  //   if (!userId) return Math.floor(Math.random() * 100000);
+
+  //   // Convert MongoDB ObjectId to consistent number
+  //   let hash = 0;
+  //   const userIdStr = userId.toString();
+
+  //   for (let i = 0; i < userIdStr.length; i++) {
+  //     const char = userIdStr.charCodeAt(i);
+  //     hash = ((hash << 5) - hash) + char;
+  //     hash = hash & hash; // Convert to 32-bit integer
+  //   }
+
+  //   // ✅ IMPROVED: Add video call specific seed for uniqueness
+  //   const videoCallSeed = 98765; // Different from audio call seed
+  //   hash = hash + videoCallSeed;
+
+  //   // Ensure positive number within Agora's UID range (1 to 2^32 - 1)
+  //   const consistentUid = Math.abs(hash) % 999999999 + 1;
+
+  //   console.log(`🎯 Generated video UID: ${consistentUid} for user: ${userId}`);
+  //   return consistentUid;
+  // };
+
+  const generateConsistentUID = (userId) => {
+    if (!userId) return Math.floor(Math.random() * 100000);
+
+    let hash = 0;
+    const userIdStr = userId.toString();
+
+    for (let i = 0; i < userIdStr.length; i++) {
+      const char = userIdStr.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash;
+    }
+
+    // ✅ CRITICAL: Đảm bảo UID unique và trong range hợp lệ
+    const consistentUid = Math.abs(hash) % 999999999 + 1;
+    console.log(`🎯 Generated consistent UID: ${consistentUid} for user: ${userId}`);
+    return consistentUid;
+  };
+
+  // const RemoteVideoPlayer = React.memo(({ user, isMainView = false }) => {
+  //   const videoContainerRef = useRef(null);
+  //   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
+  //   const [retryCount, setRetryCount] = useState(0);
+  //   const maxRetries = 3;
+
+  //   // ✅ CRITICAL: Stable reference tracking
+  //   const userRef = useRef(user);
+  //   const isFirstRender = useRef(true);
+
+  //   // ✅ CRITICAL: Memoize user để tránh object recreation
+  //   const stableUser = useMemo(() => {
+  //     // Chỉ update khi thực sự có thay đổi
+  //     const hasChanged = !userRef.current ||
+  //       userRef.current.uid !== user.uid ||
+  //       userRef.current.hasVideo !== user.hasVideo ||
+  //       userRef.current.videoTrack !== user.videoTrack ||
+  //       userRef.current.name !== user.name ||
+  //       userRef.current.avatar !== user.avatar;
+
+  //     if (hasChanged || isFirstRender.current) {
+  //       userRef.current = {
+  //         uid: user.uid,
+  //         hasVideo: user.hasVideo,
+  //         videoTrack: user.videoTrack,
+  //         name: user.name,
+  //         avatar: user.avatar
+  //       };
+  //       isFirstRender.current = false;
+  //     }
+
+  //     return userRef.current;
+  //   }, [user.uid, user.hasVideo, user.videoTrack, user.name, user.avatar]);
+
+  //   // ✅ CRITICAL: Memoize overlay condition with debounce
+  //   const shouldShowOverlay = useMemo(() => {
+  //     return !stableUser.hasVideo || !stableUser.videoTrack || !isVideoLoaded;
+  //   }, [stableUser.hasVideo, stableUser.videoTrack, isVideoLoaded]);
+
+  //   // ✅ CRITICAL: Debounced video setup
+  //   const setupVideoRef = useRef(null);
+
+  //   useEffect(() => {
+  //     // Clear previous setup
+  //     if (setupVideoRef.current) {
+  //       clearTimeout(setupVideoRef.current);
+  //     }
+
+  //     // Debounce video setup để tránh multiple calls
+  //     setupVideoRef.current = setTimeout(() => {
+  //       if (stableUser.videoTrack && videoContainerRef.current) {
+  //         setIsVideoLoaded(false);
+
+  //         const playVideo = async () => {
+  //           try {
+  //             if (!videoContainerRef.current || !stableUser.videoTrack) {
+  //               return;
+  //             }
+
+  //             await stableUser.videoTrack.play(videoContainerRef.current);
+
+  //             // ✅ CRITICAL: Single style application với flag
+  //             setTimeout(() => {
+  //               if (stableUser.videoTrack && videoContainerRef.current) {
+  //                 const videoElement = videoContainerRef.current.querySelector('video');
+  //                 if (videoElement && !videoElement.dataset.agoraStyled) {
+  //                   // Mark as styled để không style lại
+  //                   videoElement.dataset.agoraStyled = 'true';
+
+  //                   // Apply styles in one go
+  //                   Object.assign(videoElement.style, {
+  //                     position: 'absolute',
+  //                     top: '0',
+  //                     left: '0',
+  //                     width: '100%',
+  //                     height: '100%',
+  //                     objectFit: 'cover',
+  //                     background: '#000',
+  //                     display: 'block',
+  //                     zIndex: '3',
+  //                     transition: 'none',
+  //                     transform: 'translateZ(0)',
+  //                     backfaceVisibility: 'hidden'
+  //                   });
+
+  //                   setIsVideoLoaded(true);
+  //                   setRetryCount(0);
+  //                 }
+  //               }
+  //             }, 100); // Giảm delay
+
+  //           } catch (playError) {
+  //             console.error('❌ Failed to play remote video:', playError);
+  //             setIsVideoLoaded(false);
+
+  //             if (retryCount < maxRetries) {
+  //               setTimeout(() => {
+  //                 setRetryCount(prev => prev + 1);
+  //               }, Math.pow(2, retryCount) * 1000);
+  //             }
+  //           }
+  //         };
+
+  //         playVideo();
+  //       } else {
+  //         setIsVideoLoaded(false);
+  //         setRetryCount(0);
+  //       }
+  //     }, 50); // Debounce 50ms
+
+  //     return () => {
+  //       if (setupVideoRef.current) {
+  //         clearTimeout(setupVideoRef.current);
+  //       }
+  //     };
+  //   }, [stableUser.videoTrack, stableUser.uid, retryCount]);
+
+  //   return (
+  //     <div
+  //       className="remote-video-player"
+  //       style={{
+  //         position: 'relative',
+  //         width: '100%',
+  //         height: '100%',
+  //         background: '#000',
+  //         borderRadius: '8px',
+  //         overflow: 'hidden'
+  //       }}
+  //     >
+  //       <div
+  //         ref={videoContainerRef}
+  //         className="video-aspect-content"
+  //         style={{
+  //           position: 'absolute',
+  //           top: 0,
+  //           left: 0,
+  //           width: '100%',
+  //           height: '100%',
+  //           background: '#000',
+  //           zIndex: 1
+  //         }}
+  //       />
+
+  //       {shouldShowOverlay && (
+  //         <div className="no-video-overlay">
+  //           <Avatar
+  //             size={80}
+  //             src={stableUser.avatar}
+  //             icon={<UserOutlined />}
+  //             style={{
+  //               marginBottom: '16px',
+  //               border: '2px solid #fff',
+  //               boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
+  //             }}
+  //           />
+  //           <Text style={{
+  //             color: '#666',
+  //             fontSize: '16px',
+  //             fontWeight: '500',
+  //             marginBottom: '8px',
+  //             textAlign: 'center'
+  //           }}>
+  //             {stableUser.name}
+  //           </Text>
+  //           {!stableUser.hasVideo && (
+  //             <Text style={{
+  //               color: '#ff9500',
+  //               fontSize: '14px',
+  //               textAlign: 'center'
+  //             }}>
+  //               Camera đã tắt
+  //             </Text>
+  //           )}
+  //         </div>
+  //       )}
+
+  //       {stableUser.hasVideo && stableUser.videoTrack && isVideoLoaded && (
+  //         <div style={{
+  //           position: 'absolute',
+  //           bottom: '12px',
+  //           left: '12px',
+  //           background: 'rgba(0, 0, 0, 0.7)',
+  //           color: 'white',
+  //           padding: '6px 12px',
+  //           borderRadius: '16px',
+  //           fontSize: '12px',
+  //           fontWeight: '500',
+  //           zIndex: 4,
+  //           maxWidth: 'calc(100% - 24px)',
+  //           overflow: 'hidden',
+  //           textOverflow: 'ellipsis',
+  //           whiteSpace: 'nowrap'
+  //         }}>
+  //           {stableUser.name || `User ${stableUser.uid}`}
+  //         </div>
+  //       )}
+  //     </div>
+  //   );
+  // }, (prevProps, nextProps) => {
+  //   // ✅ CRITICAL: Enhanced comparison
+  //   const prev = prevProps.user;
+  //   const next = nextProps.user;
+
+  //   const isEqual = prev.uid === next.uid &&
+  //     prev.hasVideo === next.hasVideo &&
+  //     prev.videoTrack === next.videoTrack &&
+  //     prev.name === next.name &&
+  //     prev.avatar === next.avatar &&
+  //     prevProps.isMainView === nextProps.isMainView;
+
+  //   return isEqual;
+  // });
+
+  const RemoteVideoPlayer = React.memo(({ user, isMainView = false }) => {
+    const videoContainerRef = useRef(null);
+    const [isVideoLoaded, setIsVideoLoaded] = useState(false);
+    const [retryCount, setRetryCount] = useState(0);
+
+    // ✅ CRITICAL: Refs để track state without causing re-renders
+    const isPlayingRef = useRef(false);
+    const playPromiseRef = useRef(null);
+    const currentTrackRef = useRef(null);
+    const isInitializedRef = useRef(false);
+    const playAttemptCountRef = useRef(0);
+    const lastPlayTimeRef = useRef(0);
+    const maxRetries = 3;
+
+    // ✅ CRITICAL: Deep stable user object với ref comparison
+    const prevUserRef = useRef(user);
+    const stableUser = useMemo(() => {
+      const currentUser = {
+        uid: user.uid,
+        hasVideo: user.hasVideo,
+        videoTrack: user.videoTrack,
+        name: user.name,
+        avatar: user.avatar
+      };
+
+      // ✅ CRITICAL: Only update if actually different
+      const hasChanged = !prevUserRef.current ||
+        prevUserRef.current.uid !== currentUser.uid ||
+        prevUserRef.current.hasVideo !== currentUser.hasVideo ||
+        prevUserRef.current.videoTrack !== currentUser.videoTrack ||
+        prevUserRef.current.name !== currentUser.name ||
+        prevUserRef.current.avatar !== currentUser.avatar;
+
+      if (hasChanged) {
+        console.log('📋 User data changed for UID:', currentUser.uid);
+        prevUserRef.current = currentUser;
+        return currentUser;
+      }
+
+      // Return previous reference if no changes
+      return prevUserRef.current;
+    }, [
+      user.uid,
+      user.hasVideo,
+      user.videoTrack,
+      user.name,
+      user.avatar
+    ]);
+
+    // ✅ CRITICAL: Stable overlay condition
+    const shouldShowOverlay = useMemo(() => {
+      return !stableUser.hasVideo || !stableUser.videoTrack || !isVideoLoaded;
+    }, [stableUser.hasVideo, stableUser.videoTrack, isVideoLoaded]);
+
+    // ✅ CRITICAL: Video track change detection với debounce
+    const trackId = stableUser.videoTrack ?
+      (stableUser.videoTrack.trackMediaType + '-' + stableUser.uid) :
+      null;
+
+    useEffect(() => {
+      // ✅ CRITICAL: Multiple guards để prevent duplicate calls
+      if (!stableUser.videoTrack || !videoContainerRef.current) {
+        // Reset flags nếu không có track
+        isPlayingRef.current = false;
+        playPromiseRef.current = null;
+        currentTrackRef.current = null;
+        isInitializedRef.current = false;
+        setIsVideoLoaded(false);
+        setRetryCount(0);
+        return;
+      }
+
+      // ✅ CRITICAL: Check if same track already playing
+      if (currentTrackRef.current === stableUser.videoTrack && isPlayingRef.current) {
+        console.log('🎬 Same track already playing, skipping:', stableUser.uid);
+        return;
+      }
+
+      // ✅ CRITICAL: Debounce multiple rapid calls
+      const now = Date.now();
+      if (now - lastPlayTimeRef.current < 500) {
+        console.log('🎬 Debouncing play call for UID:', stableUser.uid);
+        return;
+      }
+      lastPlayTimeRef.current = now;
+
+      // ✅ CRITICAL: Limit play attempts
+      if (playAttemptCountRef.current >= 3) {
+        console.warn('🎬 Max play attempts reached for UID:', stableUser.uid);
+        return;
+      }
+
+      playAttemptCountRef.current++;
+      console.log(`🎬 Play attempt ${playAttemptCountRef.current}/3 for UID:`, stableUser.uid);
+
+      // ✅ CRITICAL: Check if container already has video element playing this track
+      const existingVideo = videoContainerRef.current.querySelector('video');
+      if (existingVideo && !existingVideo.paused && isPlayingRef.current) {
+        console.log('🎬 Video element already playing, skipping play() call');
+        setIsVideoLoaded(true);
+        currentTrackRef.current = stableUser.videoTrack;
+        return;
+      }
+
+      const playVideo = async () => {
+        try {
+          if (!videoContainerRef.current || !stableUser.videoTrack) {
+            return;
+          }
+
+          // ✅ CRITICAL: Set flags BEFORE play
+          isPlayingRef.current = true;
+          currentTrackRef.current = stableUser.videoTrack;
+          setIsVideoLoaded(false);
+
+          console.log('🎬 Starting video playback for UID:', stableUser.uid);
+
+          // ✅ CRITICAL: Store play promise
+          playPromiseRef.current = stableUser.videoTrack.play(videoContainerRef.current);
+          await playPromiseRef.current;
+
+          console.log('✅ Video play successful for UID:', stableUser.uid);
+
+          // ✅ CRITICAL: Style video ONLY once with timeout
+          setTimeout(() => {
+            if (stableUser.videoTrack &&
+              videoContainerRef.current &&
+              isPlayingRef.current &&
+              currentTrackRef.current === stableUser.videoTrack) {
+
+              const videoElement = videoContainerRef.current.querySelector('video');
+              if (videoElement && !videoElement.dataset.agoraStyled) {
+                videoElement.dataset.agoraStyled = 'true';
+
+                // ✅ Single CSS update
+                videoElement.style.cssText = `
+                position: absolute !important;
+                top: 0 !important;
+                left: 0 !important;
+                width: 100% !important;
+                height: 100% !important;
+                object-fit: cover !important;
+                background: #000 !important;
+                display: block !important;
+                z-index: 3 !important;
+                transition: none !important;
+                transform: translateZ(0) !important;
+                backface-visibility: hidden !important;
+                will-change: auto !important;
+              `;
+
+                // ✅ CRITICAL: Add event listeners ONCE
+                const handlePause = (e) => {
+                  if (!videoElement.ended && isPlayingRef.current) {
+                    console.log('🎬 Preventing auto-pause, resuming video');
+                    e.preventDefault();
+                    videoElement.play().catch(err => {
+                      console.warn('⚠️ Resume failed:', err);
+                    });
+                  }
+                };
+
+                const handlePlay = () => {
+                  console.log('🎬 Video play event fired for UID:', stableUser.uid);
+                  setIsVideoLoaded(true);
+                  isInitializedRef.current = true;
+                  playAttemptCountRef.current = 0; // Reset on success
+                };
+
+                // ✅ Remove old listeners first
+                videoElement.removeEventListener('pause', handlePause);
+                videoElement.removeEventListener('play', handlePlay);
+
+                // Add new listeners
+                videoElement.addEventListener('pause', handlePause, { passive: false });
+                videoElement.addEventListener('play', handlePlay);
+
+                setIsVideoLoaded(true);
+                setRetryCount(0);
+              }
+            }
+          }, 200);
+
+        } catch (playError) {
+          console.error('❌ Failed to play remote video:', playError);
+
+          // ✅ CRITICAL: Reset flags on error
+          isPlayingRef.current = false;
+          playPromiseRef.current = null;
+          currentTrackRef.current = null;
+          setIsVideoLoaded(false);
+
+          if (retryCount < maxRetries) {
+            setTimeout(() => {
+              setRetryCount(prev => prev + 1);
+            }, Math.pow(2, retryCount) * 1000);
+          } else {
+            console.error('❌ Max retries reached for video playback');
+          }
+        }
+      };
+
+      // ✅ Debounce execution
+      const timeoutId = setTimeout(playVideo, 100);
+
+      return () => {
+        clearTimeout(timeoutId);
+      };
+
+    }, [trackId, stableUser.uid, retryCount]); // ✅ STABLE dependencies
+
+    // ✅ CRITICAL: Cleanup effect
+    useEffect(() => {
+      return () => {
+        // Reset all flags on unmount
+        isPlayingRef.current = false;
+        playPromiseRef.current = null;
+        currentTrackRef.current = null;
+        isInitializedRef.current = false;
+        playAttemptCountRef.current = 0;
+        lastPlayTimeRef.current = 0;
+
+        if (videoContainerRef.current) {
+          try {
+            const videoElement = videoContainerRef.current.querySelector('video');
+            if (videoElement) {
+              delete videoElement.dataset.agoraStyled;
+              // Clean removal of event listeners
+              const newElement = videoElement.cloneNode(true);
+              videoElement.parentNode?.replaceChild(newElement, videoElement);
+            }
+          } catch (error) {
+            // Silent cleanup
+          }
+        }
+      };
+    }, []);
+
+    return (
+      <div
+        className="remote-video-player"
+        style={{
+          position: 'relative',
+          width: '100%',
+          height: '100%',
+          background: '#000',
+          borderRadius: '8px',
+          overflow: 'hidden'
+        }}
+      >
+        <div
+          ref={videoContainerRef}
+          className="video-aspect-content"
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            background: '#000',
+            zIndex: 1
+          }}
+        />
+
+        {shouldShowOverlay && (
+          <div className="no-video-overlay">
+            <Avatar
+              size={80}
+              src={stableUser.avatar}
+              icon={<UserOutlined />}
+              style={{
+                marginBottom: '16px',
+                border: '2px solid #fff',
+                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
+              }}
+            />
+            <Text style={{
+              color: '#666',
+              fontSize: '16px',
+              fontWeight: '500',
+              marginBottom: '8px',
+              textAlign: 'center'
+            }}>
+              {stableUser.name}
+            </Text>
+            {!stableUser.hasVideo && (
+              <Text style={{
+                color: '#ff9500',
+                fontSize: '14px',
+                textAlign: 'center'
+              }}>
+                Camera đã tắt
+              </Text>
+            )}
+          </div>
+        )}
+
+        {stableUser.hasVideo && stableUser.videoTrack && isVideoLoaded && (
+          <div style={{
+            position: 'absolute',
+            bottom: '12px',
+            left: '12px',
+            background: 'rgba(0, 0, 0, 0.7)',
+            color: 'white',
+            padding: '6px 12px',
+            borderRadius: '16px',
+            fontSize: '12px',
+            fontWeight: '500',
+            zIndex: 4,
+            maxWidth: 'calc(100% - 24px)',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap'
+          }}>
+            {stableUser.name || `User ${stableUser.uid}`}
+          </div>
+        )}
+      </div>
+    );
+  }, (prevProps, nextProps) => {
+    // ✅ CRITICAL: Deep comparison để prevent unnecessary re-renders
+    const prev = prevProps.user;
+    const next = nextProps.user;
+
+    const isEqual = prev.uid === next.uid &&
+      prev.hasVideo === next.hasVideo &&
+      prev.videoTrack === next.videoTrack &&
+      prev.name === next.name &&
+      prev.avatar === next.avatar &&
+      prevProps.isMainView === nextProps.isMainView;
+
+    if (!isEqual) {
+      console.log('🔄 RemoteVideoPlayer props changed, re-rendering for UID:', next.uid);
+    }
+
+    return isEqual;
+  });
+  const RemoteUsersContainer = useMemo(() => {
+    return (
+      <div className="remote-video-container" style={{
+        height: '100%',
+        minHeight: '400px',
+        background: '#000', // Changed to black
+        borderRadius: '8px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        position: 'relative',
+        overflow: 'hidden'
+      }}>
+        {remoteUsers.length > 0 ? (
+          <>
+            {!isGroupCall ? (
+              <RemoteVideoPlayer
+                key={`remote-single-${remoteUsers[0].uid}`}
+                user={remoteUsers[0]}
+                isMainView={true}
+              />
+            ) : (
+              remoteUsers.map(user => (
+                <RemoteVideoPlayer
+                  key={`remote-group-${user.uid}`}
+                  user={user}
+                  isMainView={remoteUsers.length === 1}
+                />
+              ))
+            )}
+          </>
+        ) : (
+          <div className="waiting-container" style={{
+            width: '100%',
+            height: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: 'linear-gradient(135deg, #f8f9fa, #e9ecef)',
+            borderRadius: '8px',
+            padding: '32px',
+            border: '1px solid #e8e8e8'
+          }}>
+            <Avatar size={100} src={conversation.avatar} icon={<UserOutlined />} />
+            <Text style={{ color: '#666', marginTop: '16px', fontSize: '16px' }}>
+              Đang chờ {conversation.name} tham gia...
+            </Text>
+            {!localVideoTrack && (
+              <Text style={{ color: '#ff9500', marginTop: '8px', fontSize: '14px' }}>
+                Cuộc gọi chỉ có âm thanh
+              </Text>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  }, [remoteUsers, isGroupCall, conversation.avatar, conversation.name, localVideoTrack]);
+
+
+  return (
+    <div className="agora-video-call">
+      {/* <AudioActivationButton onActivate={() => console.log('Audio activated')} /> */}
+      {/* <NetworkMonitor client={client} /> */}
+      <div className="video-call-header">
+        <div className="call-info">
+          <Avatar src={conversation.avatar} icon={<UserOutlined />} />
+          <div>
+            <Text strong>{conversation.name}</Text>
+            <div>
+              <Text type="secondary">
+                {remoteUsers.length > 0 ? formatDuration(callDuration) : 'Đang kết nối...'}
+              </Text>
+              {/* ✅ NEW: Show call mode */}
+              {!localVideoTrack && (
+                <div>
+                  <Text type="warning" style={{ fontSize: '12px' }}>
+                    🎤 Chế độ chỉ âm thanh
+                  </Text>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div className="call-controls">
-        <button className="end-call-btn" onClick={handleEndCall}>
-          Kết thúc cuộc gọi
-        </button>
+      <div className="video-container" style={{
+        padding: 0,
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column'
+      }}>
+        <Row gutter={[8, 8]} style={{ height: '100%', flex: 1 }}>
+
+          <Col span={24} style={{ height: '100%' }}>
+            {/* <div className="remote-video-container" style={{
+              height: '100%',
+              minHeight: '400px',
+              background: '#fafafa',
+              borderRadius: '8px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              position: 'relative'
+            }}>
+              {remoteUsers.length > 0 ? (
+                <>
+                  {!isGroupCall ? (
+                    <RemoteVideoPlayer
+                      key={remoteUsers[0].uid}
+                      user={remoteUsers[0]}
+                      isMainView={true}
+                    />
+                  ) : (
+                    // Group call: hiển thị tất cả users
+                    remoteUsers.map(user => (
+                      <RemoteVideoPlayer
+                        key={user.uid}
+                        user={user}
+                        isMainView={remoteUsers.length === 1}
+                      />
+                    ))
+                  )}
+                </>
+              ) : (
+                <div className="waiting-container" style={{
+                  width: '100%',
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: 'linear-gradient(135deg, #f8f9fa, #e9ecef)',
+                  borderRadius: '8px',
+                  padding: '32px',
+                  border: '1px solid #e8e8e8'
+                }}>
+                  <Avatar size={100} src={conversation.avatar} icon={<UserOutlined />} />
+                  <Text style={{ color: '#666', marginTop: '16px', fontSize: '16px' }}>
+                    Đang chờ {conversation.name} tham gia...
+                  </Text>
+                  {!localVideoTrack && (
+                    <Text style={{ color: '#ff9500', marginTop: '8px', fontSize: '14px' }}>
+                      Cuộc gọi chỉ có âm thanh
+                    </Text>
+                  )}
+                </div>
+              )}
+            </div> */}
+            {RemoteUsersContainer}
+          </Col>
+        </Row>
+
+        {localVideoTrack && (
+          <div style={{
+            position: 'absolute',
+            bottom: '100px',
+            right: '20px',
+            width: '180px',
+            height: '120px',
+            zIndex: 10
+          }}>
+            <div
+              ref={localVideoContainerRef}
+              className="local-video-player"
+              style={{
+                width: '100%',
+                height: '100%',
+                backgroundColor: '#000',
+                borderRadius: '8px',
+                position: 'relative',
+                overflow: 'hidden',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
+              }}
+            >
+              {isVideoMuted && (
+                <div className="video-muted-overlay">
+                  <Avatar size={40} src={currentUser.avatar} icon={<UserOutlined />} />
+                  <Text style={{ color: 'white', fontSize: '12px', marginTop: '4px' }}>
+                    Camera tắt
+                  </Text>
+                </div>
+              )}
+              <div style={{
+                position: 'absolute',
+                bottom: '4px',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                color: 'white',
+                fontSize: '12px',
+                background: 'rgba(0,0,0,0.5)',
+                padding: '2px 8px',
+                borderRadius: '4px',
+                whiteSpace: 'nowrap'
+              }}>
+                Bạn
+              </div>
+            </div>
+          </div>
+        )}
       </div>
+
+      {/* Controls */}
+      <div className="video-call-controls">
+        <Space size="large">
+          <Button
+            shape="circle"
+            size="large"
+            icon={isAudioMuted ? <AudioMutedOutlined /> : <AudioOutlined />}
+            onClick={toggleAudio}
+            className={isAudioMuted ? 'muted-btn' : 'active-btn'}
+          />
+          <Button
+            shape="circle"
+            size="large"
+            icon={isVideoMuted || !localVideoTrack ? <StopOutlined /> : <VideoCameraOutlined />}
+            onClick={toggleVideo}
+            className={isVideoMuted || !localVideoTrack ? 'muted-btn' : 'active-btn'}
+            title={!localVideoTrack ? 'Bật camera' : (isVideoMuted ? 'Bật camera' : 'Tắt camera')}
+          />
+          {/* ✅ ADD: Video display mode toggle */}
+          <Button
+            shape="circle"
+            size="large"
+            icon={<Icon type="expand" />} // or use ExpandOutlined
+            onClick={toggleVideoDisplayMode}
+            className="active-btn"
+            title={`Chuyển sang chế độ ${videoDisplayMode === 'cover' ? 'fit' : 'fill'}`}
+            style={{ fontSize: '16px' }}
+          >
+            ⚏
+          </Button>
+          <Button
+            shape="circle"
+            size="large"
+            danger
+            icon={<PhoneOutlined />}
+            onClick={handleEndCall}
+            className="end-call-btn"
+          />
+        </Space>
+      </div>
+      {/* <CallDebugInfo
+        localAudioTrack={localAudioTrack}
+        localVideoTrack={localVideoTrack}
+        remoteUsers={remoteUsers}
+      /> */}
     </div>
   );
-};
+});
 
 export default AgoraVideoCall;

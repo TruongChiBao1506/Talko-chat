@@ -1,12 +1,12 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
 const KEY = "home";
-// Giả lập API với delay 2 giây
+// Giả lập API với delay 0.5 giây
 export const fakeApiCall = createAsyncThunk("data/fetchFake", async () => {
     return new Promise((resolve) => {
       setTimeout(() => {
         resolve({ message: "Dữ liệu tải thành công!" });
-      }, 2000); // Giả lập API mất 2 giây
+      }, 500); // Giả lập API mất 0.5 giây
     });
   });
 const homeSlice = createSlice({
