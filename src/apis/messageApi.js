@@ -70,6 +70,10 @@ const messageApi = {
             `${API_URL}/${messageId}/share/${conversationId}`
         );
     },
+    // Thêm phương thức mới để cập nhật nội dung của tin nhắn hình ảnh
+    updateImageMessage: (messageId, newImageUrl) => {
+        return axiosClient.patch(`${API_URL}/${messageId}/image`, { newImageUrl });
+    },
 };
 
 export default messageApi;

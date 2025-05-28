@@ -31,8 +31,7 @@ function ModalVideoCustom({ isVisible, url, onClose }) {
                 isOpen={isVisible}
                 onClose={handleOnClose}
                 animationSpeed
-                ratio="16:9"
-            
+                ratio="16:9"                
             />
         </React.Fragment>
     );
