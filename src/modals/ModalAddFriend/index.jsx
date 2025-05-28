@@ -19,7 +19,7 @@ function ModalAddFriend({ isVisible, onCancel = null, onSearch = null, onEnter =
             onEnter(value);
         }
     }
-    const handleOk = () => {
+    const handleOk = () => {     
         if (onSearch) {
             onSearch(value);
         }
@@ -46,7 +46,7 @@ function ModalAddFriend({ isVisible, onCancel = null, onSearch = null, onEnter =
             okButtonProps={{ disabled: !(value.trim().length > 0) }}
         >
             <div className="input-add-friend_wrapper">
-                <Input placeholder="Nhập số điện thoại hoặc email"
+                <Input placeholder="Nhập email"
                     allowClear
                     value={value}
                     onChange={handleInputChange}
@@ -55,7 +55,7 @@ function ModalAddFriend({ isVisible, onCancel = null, onSearch = null, onEnter =
                     autoFocus
                 />
                 <Text type="secondary" className="search-hint">
-                    Nhập đầy đủ ký tự để tìm kiếm
+                    Nhập đầy đủ email để tìm kiếm
                 </Text>
             </div>
 

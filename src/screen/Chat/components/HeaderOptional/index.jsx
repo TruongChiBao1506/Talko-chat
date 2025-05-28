@@ -5,7 +5,7 @@ import {
     UserOutlined, VideoCameraOutlined
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
-import { Modal } from 'antd';
+import { message, Modal } from 'antd';
 import conversationApi from '../../../../apis/conversationApi';
 import { createGroup, fetchListMessages, getLastViewOfMembers, setCurrentChannel, setCurrentConversation } from '../../slices/chatSlice';
 import useWindowDimensions from '../../../../hook/useWindowDimensions';
@@ -16,7 +16,9 @@ import dateUtils from '../../../../utils/dateUtils';
 import ConversationAvatar from '../../components/ConservationAvatar';
 import ModalAddMemberToConver from '../../../../modals/ModalAddMemberToConver';
 import socket from '../../../../utils/socketClient';
+import userApi from '../../../../apis/userApi';
 import './style.css';
+import UserCard from '../UserCard';
 
 HeaderOptional.propTypes = {
     avatar: PropTypes.oneOfType([
@@ -32,7 +34,9 @@ HeaderOptional.propTypes = {
     onPopUpInfo: PropTypes.func,
     onOpenDrawer: PropTypes.func,
     onStartCall: PropTypes.func, // Thêm prop onStartCall
-    onStartVideoCall: PropTypes.func
+    onStartVideoCall: PropTypes.func,
+    isFriend: PropTypes.bool,
+    userId: PropTypes.string,
 };
 
 HeaderOptional.defaultProps = {
@@ -44,11 +48,13 @@ HeaderOptional.defaultProps = {
     onPopUpInfo: null,
     onOpenDrawer: null,
     onStartCall: null, // Giá trị mặc định cho onStartCall
-    onStartVideoCall: null
+    onStartVideoCall: null,
+    isFriend: false,
+    userId: null,
 };
 
 function HeaderOptional(props) {
-    const { avatar, totalMembers, name, typeConver, isLogin, lastLogin, avatarColor, onPopUpInfo, onOpenDrawer, memberInConversation = [], onStartCall, onStartVideoCall } = props;
+    const { avatar, totalMembers, name, typeConver, isLogin, lastLogin, avatarColor, onPopUpInfo, onOpenDrawer, memberInConversation = [], onStartCall, onStartVideoCall, isFriend, userId } = props;
     const type = typeof avatar;
     const { currentConversation, currentChannel, channels } = useSelector((state) => state.chat);
     const [isVisible, setIsvisible] = useState(false);
@@ -57,6 +63,8 @@ function HeaderOptional(props) {
     const dispatch = useDispatch();
     const { width } = useWindowDimensions();
     const { user } = useSelector((state) => state.global);
+    const [visibleModalUserCard, setVisibleModalUserCard] = useState(false);
+    const [userIsFind, setUserIsFind] = useState({});
 
 
     const handleCutText = (text) => {
@@ -121,6 +129,20 @@ function HeaderOptional(props) {
         }
     }
 
+    const handleShowUserInfo = async (value) => {
+        try {
+            const user = await userApi.fetchUserById(value);
+            console.log('user', user);
+            setUserIsFind(user);
+            setVisibleModalUserCard(true);
+        } catch (err) {
+            message.error('Không tìm thấy người dùng');
+        }
+    }
+    const handleCloseModalUserCard = () => {
+        setVisibleModalUserCard(false);
+    }
+
 
     const handleViewGeneralChannel = () => {
         dispatch(setCurrentChannel(''));
@@ -151,6 +173,7 @@ function HeaderOptional(props) {
         }
     };
 
+    console.log('HeaderOptional rendered with props:', props);
 
     return (
         <div id='header-optional'>
@@ -159,7 +182,10 @@ function HeaderOptional(props) {
                     <div className='icon-header back-list' onClick={handleBackToListConver}>
                         <LeftOutlined />
                     </div>
-                    <div className='icon_user'>
+                    <div
+                        className={`icon_user ${!typeConver ? 'clickable-avatar' : ''}`}
+                        onClick={() => !typeConver && userId && handleShowUserInfo(userId)}
+                        title={!typeConver ? 'Xem thông tin người dùng' : ''}>
                         {
                             <ConversationAvatar
                                 avatar={avatar}
@@ -175,6 +201,13 @@ function HeaderOptional(props) {
                     <div className='info_user'>
                         <div className='info_user-name'>
                             <span>{handleCutText(name)}</span>
+                            {!typeConver && (
+                                <div className='relationship-status-container'>
+                                    <span className={`relationship-status ${isFriend ? 'friend' : 'stranger'}`}>
+                                        {isFriend ? 'Bạn bè' : 'Người lạ'}
+                                    </span>
+                                </div>
+                            )}
                         </div>
 
                         {currentChannel ? (
@@ -239,7 +272,7 @@ function HeaderOptional(props) {
                         <div
                             className='icon-header voice-call'
                             title='Gọi thoại'
-                            onClick={handleVoiceCall} // Thêm sự kiện click
+                            onClick={handleVoiceCall}
                         >
                             <PhoneOutlined />
                         </div>
@@ -274,6 +307,11 @@ function HeaderOptional(props) {
 
             {/* Chỉ sử dụng modals ở đây để debug hoặc khi chuyển đổi sang ChatLayout */}
             {/* Modal đã được chuyển sang ChatLayout để quản lý tập trung */}
+            <UserCard
+                user={userIsFind}
+                isVisible={visibleModalUserCard}
+                onCancel={handleCloseModalUserCard}
+            />
         </div>
     );
 }

@@ -9,9 +9,11 @@ HeaderChatContainer.propTypes = {
     onOpenDrawer: PropTypes.func,
     onStartCall: PropTypes.func,
     onStartVideoCall: PropTypes.func,
+    isFriend: PropTypes.bool,
+    userId: PropTypes.string,
 };
 
-function HeaderChatContainer({ onPopUpInfo = null, onOpenDrawer = null, onStartCall = null, onStartVideoCall = null }) {
+function HeaderChatContainer({ onPopUpInfo = null, onOpenDrawer = null, onStartCall = null, onStartVideoCall = null, isFriend = false, userId = null }) {
     const [detailConver, setDetailConver] = useState({})
     const { currentConversation, conversations, memberInConversation } = useSelector(
         (state) => state.chat
@@ -43,6 +45,8 @@ function HeaderChatContainer({ onPopUpInfo = null, onOpenDrawer = null, onStartC
                 memberInConversation={memberInConversation} // Truyền thêm danh sách thành viên
                 onStartCall={onStartCall} // Truyền hàm xử lý cuộc gọi
                 onStartVideoCall={onStartVideoCall} // Truyền hàm xử lý cuộc gọi video
+                isFriend={isFriend} // Truyền trạng thái bạn bè
+                userId={userId} // Truyền ID người dùng
             />
         </div>
     );

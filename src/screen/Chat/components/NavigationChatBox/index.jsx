@@ -9,6 +9,7 @@ import PropTypes from 'prop-types';
 import React, { useState } from 'react';
 import { BsNewspaper } from "react-icons/bs";
 import { FcBarChart } from "react-icons/fc";
+import { ReactComponent as GeminiIcon } from '../../../../assets/icons/gemini.svg';
 import { IoText } from "react-icons/io5";
 import { useSelector } from 'react-redux';
 import ModalCreateVote from '../../../../modals/ModalCreateVote';
@@ -47,6 +48,23 @@ const styleButton = {
     borderRadius: '50%',
     fontSize: '2.2rem',
 }
+const GeminiPictureIcon = () => (
+    <span style={{ position: 'relative', display: 'inline-flex' }}>
+        <FileImageOutlined style={{ fontSize: 20 }} />
+        <GeminiIcon
+            style={{
+                position: 'absolute',
+                bottom: -6,
+                right: -4,
+                width: 14,
+                height: 14,
+                backgroundColor: 'transparent',
+                borderRadius: '50%',
+                padding: 1,
+            }}
+        />
+    </span>
+);
 
 
 function NavigationChatBox(props) {
@@ -135,15 +153,16 @@ function NavigationChatBox(props) {
                         <Button
                             title='Gửi hình ảnh'
                             type="text"
-                            style={styleButton}
+                            style={{...styleButton, display: 'flex', alignItems: 'center', justifyContent: 'center'}}
                         >
-                            <FileImageOutlined style={{fontSize: 20}}/>
+                            <GeminiPictureIcon />
                         </Button>
-                    </UploadFile>                </li>
+                    </UploadFile>
+                </li>
 
 
                 <li className='item-chat-box'>
-                    <div 
+                    <div
                         title='Gửi nhiều hình ảnh'
                         onClick={onMultiImageClick}
                     >
@@ -161,7 +180,7 @@ function NavigationChatBox(props) {
                             type="text"
                             style={styleButton}
                         >
-                            <LinkOutlined style={{fontSize: 20}}/>
+                            <LinkOutlined style={{ fontSize: 20 }} />
                         </Button>
                     </UploadFile>
                 </li>

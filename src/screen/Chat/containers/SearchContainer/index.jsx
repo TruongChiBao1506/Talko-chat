@@ -58,6 +58,7 @@ function SearchContainer ({ valueText='', onSearchChange=null, onSubmitSearch=nu
     const handleFindUser = async (value) => {
         try{
             const user = await userApi.fetchUser(value);
+            console.log('user', user);
             setUserIsFind(user);
             setVisibleModalUserCard(true);
             setVisibleModalAddFriend(false);
