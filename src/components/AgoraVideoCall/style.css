@@ -1,0 +1,482 @@
+.agora-video-call {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: #f5f5f5;
+}
+
+.video-call-header {
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.95);
+    color: #333;
+    z-index: 10;
+    border-bottom: 1px solid #e8e8e8;
+    backdrop-filter: blur(10px);
+}
+
+.call-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.video-container {
+    flex: 1;
+    padding: 8px;
+    background: #f5f5f5;
+
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+    position: relative;
+}
+
+
+/* Better remote video container */
+.remote-video-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    position: relative;
+    background: #fafafa;
+    border: 1px solid #e8e8e8;
+    border-radius: 8px;
+}
+
+/* Remote video player styling */
+.remote-video-player {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.remote-video-player.main-view {
+    height: 100%;
+}
+
+/* Video element styling */
+.remote-video-container video,
+.local-video-player video {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    object-position: center 30%;
+    background: #fafafa;
+    border-radius: 8px;
+    max-width: none !important;
+    max-height: none !important;
+    transition: none !important;
+    transform: translateZ(0) !important;
+    backface-visibility: hidden !important;
+    will-change: transform !important;
+    image-rendering: optimizeSpeed !important;
+    -webkit-font-smoothing: subpixel-antialiased !important;
+}
+
+.remote-video-container:has(.remote-video-player:only-child) video {
+    object-position: center 35%;
+    transform: scale(1.05);
+}
+/* Điều chỉnh khi có người dùng duy nhất */
+.remote-video-player video {
+  object-fit: cover !important;
+  object-position: center 20% !important; /* Ưu tiên hiển thị phần khuôn mặt */
+}
+
+/* Thêm khả năng điều chỉnh theo kích thước màn hình */
+@media (min-width: 1200px) {
+  .remote-video-container:has(.remote-video-player:only-child) video {
+    object-position: center 25% !important; /* Điều chỉnh cho màn hình lớn */
+  }
+}
+
+@media (max-width: 768px) {
+  .remote-video-container:has(.remote-video-player:only-child) video {
+    object-position: center 15% !important; /* Điều chỉnh cho màn hình nhỏ */
+  }
+}
+
+/* Use contain để show full video */
+.remote-video-container.contain video,
+.local-video-player.contain video {
+    object-fit: contain !important;
+    /* Contain để show toàn bộ video */
+}
+
+/* Local video container */
+.local-video-container {
+    width: 100%;
+    height: 100%;
+}
+
+.local-video-player {
+    width: 100%;
+    height: 150px;
+    background: #fafafa;
+    border: 1px solid #e8e8e8;
+    border-radius: 8px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Video overlay styling */
+.video-muted-overlay,
+.no-video-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #666;
+    text-align: center;
+    z-index: 2;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 16px;
+    border-radius: 8px;
+}
+
+/* Waiting container */
+.waiting-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: #666;
+    text-align: center;
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    border-radius: 8px;
+    padding: 32px;
+    border: 1px solid #e8e8e8;
+}
+
+/* Controls styling */
+.video-call-controls {
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.95);
+    display: flex;
+    justify-content: center;
+    z-index: 10;
+    border-top: 1px solid #e8e8e8;
+}
+
+.video-call-controls .ant-btn {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    font-size: 24px;
+}
+
+.active-btn {
+    background: #52c41a !important;
+    color: white !important;
+}
+
+.muted-btn {
+    background: #ff4d4f !important;
+    color: white !important;
+}
+
+.end-call-btn {
+    background: #ff4d4f !important;
+    color: white !important;
+}
+
+/* ✅ IMPROVED: Responsive design */
+@media (max-width: 768px) {
+    .video-container {
+        padding: 4px;
+    }
+
+    .local-video-player {
+        height: 120px;
+    }
+
+    .video-call-controls .ant-btn {
+        width: 50px;
+        height: 50px;
+        font-size: 20px;
+    }
+}
+
+/* ✅ ADD: Aspect ratio containers */
+.video-aspect-container {
+    /* position: relative;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    border-radius: 8px;
+    overflow: hidden; */
+
+    width: 100%;
+    height: 100%;
+    background: #fafafa;
+    overflow: hidden;
+    position: relative;
+    transform: translateZ(0);
+    contain: layout style paint;
+    border-radius: 8px;
+}
+
+.video-aspect-container::before {
+    display: none;
+}
+
+.video-aspect-content {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transform: translateZ(0);
+    contain: layout style paint;
+    background: #fafafa;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.no-video-overlay,
+.video-muted-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    text-align: center;
+    z-index: 2;
+    background: rgba(0, 0, 0, 0.6);
+    padding: 16px;
+    border-radius: 8px;
+    backdrop-filter: blur(4px);
+    /* Add subtle blur effect */
+}
+
+.video-call-modal .ant-modal-content {
+    height: 90vh;
+    /* Increase from 80vh to 90vh */
+    padding: 0;
+    background: #f5f5f5;
+}
+
+.video-call-modal .ant-modal-body {
+    padding: 0;
+    height: 100%;
+    background: #f5f5f5;
+}
+
+.stable-video {
+    transform: translateZ(0) !important;
+    backface-visibility: hidden !important;
+    -webkit-backface-visibility: hidden !important;
+    perspective: 1000px !important;
+    will-change: transform !important;
+    -webkit-transform: translate3d(0, 0, 0) !important;
+    transition: none !important;
+    image-rendering: optimizeSpeed !important;
+    image-rendering: -webkit-optimize-contrast !important;
+}
+
+.video-user-name {
+    background: rgba(255, 255, 255, 0.9);
+    color: #333;
+    padding: 4px 12px;
+    border-radius: 16px;
+    font-size: 12px;
+    font-weight: 500;
+    border: 1px solid #e8e8e8;
+    backdrop-filter: blur(4px);
+}
+
+/* Better avatar styling for light theme */
+.video-avatar-container {
+    background: #fff;
+    border: 2px solid #e8e8e8;
+    border-radius: 50%;
+    padding: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Loading state with light theme */
+.video-loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    background: #fafafa;
+    color: #666;
+    padding: 32px;
+}
+
+/* Error state with light theme */
+.video-error-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    background: #fff2f0;
+    /* Màu nền đỏ nhạt cho error */
+    color: #cf1322;
+    /* Màu chữ đỏ */
+    padding: 32px;
+    border: 1px solid #ffccc7;
+    border-radius: 8px;
+}
+
+/* Debug info với màu sáng */
+.debug-info-container {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background: rgba(255, 255, 255, 0.95) !important;
+    /* Nền trắng */
+    color: #333 !important;
+    /* Màu chữ tối */
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 11px;
+    max-width: 280px;
+    z-index: 1000;
+    border: 1px solid #e8e8e8 !important;
+    /* Viền sáng */
+    backdrop-filter: blur(10px);
+}
+
+/* Better button styling for light theme */
+.video-control-button {
+    background: rgba(255, 255, 255, 0.9) !important;
+    color: #333 !important;
+    border: 1px solid #d9d9d9 !important;
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    backdrop-filter: blur(4px);
+}
+
+.video-control-button:hover {
+    background: rgba(255, 255, 255, 1) !important;
+    border-color: #40a9ff !important;
+    color: #1890ff !important;
+}
+
+
+.remote-video-player {
+    position: relative !important;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    border-radius: 8px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    /* Layout recalculations */
+    contain: layout style paint;
+    transform: translateZ(0);
+
+    /* Browser optimizations */
+    will-change: auto;
+}
+
+.remote-video-player video {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    z-index: 3 !important;
+    display: block !important;
+    background: #000;
+
+    /* Browser optimizations that cause pause/resume */
+    transition: none !important;
+    transform: none !important;
+    will-change: auto !important;
+    backface-visibility: visible !important;
+
+    /* Layout shifts */
+    contain: layout style paint !important;
+
+    /* Auto-pause behavior */
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+
+    /* Rendering performance */
+    image-rendering: optimizeSpeed !important;
+    image-rendering: -webkit-optimize-contrast !important;
+
+    /* Browser video controls interference */
+    pointer-events: none !important;
+}
+
+.no-video-overlay {
+    position: absolute !important;
+    /* inset: 0 !important; */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100% !important;
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    /* Sửa alignItems → align-items */
+    justify-content: center !important;
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef) !important;
+    z-index: 2 !important;
+    /* Sửa zIndex → z-index */
+    margin: 0 !important;
+    padding: 0 !important;
+    border-radius: 8px;
+    box-sizing: border-box;
+}
+
+.no-video-overlay .ant-avatar {
+    margin-bottom: 16px !important;
+}
+
+.no-video-overlay .ant-typography {
+    margin: 5px 0 !important;
+    text-align: center !important;
+    width: 100% !important;
+}
+
+/* Ensure video takes precedence */
+.remote-video-player:has(video) .no-video-overlay {
+    opacity: 0;
+    pointer-events: none;
+}

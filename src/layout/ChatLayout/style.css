@@ -1,0 +1,49 @@
+.ant-modal-confirm-btns {
+  margin-top: 24px;
+}
+
+.ant-modal-confirm-title {
+  color: #1890ff;
+  font-weight: 600;
+}
+
+.ant-modal-confirm-content {
+  margin-top: 16px;
+  font-size: 16px;
+}
+
+/* Animation cho modal cuộc gọi */
+.ant-modal-confirm {
+  animation: callModalBounce 0.5s ease-out;
+}
+
+@keyframes callModalBounce {
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Style cho nút trong modal cuộc gọi */
+.ant-btn-primary {
+  background: #52c41a;
+  border-color: #52c41a;
+}
+
+.ant-btn-primary:hover {
+  background: #73d13d;
+  border-color: #73d13d;
+}
+
+.ant-btn-default:hover {
+  background: #ff4d4f;
+  border-color: #ff4d4f;
+  color: white;
+}

@@ -1,5 +1,6 @@
 {
   "name": "my-web-chat",
+  "proxy": "http://localhost:3001",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -7,6 +8,8 @@
     "@dhaiwat10/react-link-preview": "^1.15.0",
     "@reduxjs/toolkit": "^2.5.0",
     "@testing-library/react": "^13.4.0",
+    "agora-rtc-react": "^2.4.0",
+    "agora-rtc-sdk-ng": "^4.23.3",
     "antd": "^5.23.2",
     "axios": "^1.7.9",
     "cra-template": "1.2.0",
