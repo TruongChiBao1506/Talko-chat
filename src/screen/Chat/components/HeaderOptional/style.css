@@ -3,26 +3,6 @@
     background-color: #ffffff;
 }
 
-.icon-header.video-call {
-    color: #1890ff;
-    cursor: pointer;
-}
-
-.icon-header.video-call:hover {
-    color: #40a9ff;
-    background-color: rgba(24, 144, 255, 0.1);
-}
-
-.icon-header.audio-call {
-    color: #52c41a;
-    cursor: pointer;
-}
-
-.icon-header.audio-call:hover {
-    color: #73d13d;
-    background-color: rgba(82, 196, 26, 0.1);
-}
-
 @media only screen and (min-width: 992px) and (max-width: 1199px),
 only screen and (min-width: 768px) and (max-width: 991px),
 only screen and (min-width: 577px) and (max-width: 767px),
@@ -30,6 +10,7 @@ only screen and (max-width: 576px) {
     .header_rightside .pop-up-layout {
         display: none;
     }
+
     .pop-up-responsive {
         display: inline-block;
     }
@@ -83,7 +64,7 @@ only screen and (max-width: 576px) {
     display: flex;
 }
 
-.header_wrapper .header_leftside .info_user .lastime-access > span {
+.header_wrapper .header_leftside .info_user .lastime-access>span {
     font-size: 14px;
     color: #87929e;
 }
@@ -146,7 +127,8 @@ only screen and (max-width: 576px) {
 .header_wrapper .header_rightside .search-message,
 .header_wrapper .header_rightside .pop-up-layout,
 .header_wrapper .header_rightside .create-group,
-.header_wrapper .header_rightside .call-video,
+.header_wrapper .header_rightside .voice-call,
+.header_wrapper .header_rightside .video-call,
 .header_wrapper .header_rightside .back-channel,
 .header_wrapper .header_rightside .pop-up-responsive {
     cursor: pointer;
@@ -158,7 +140,8 @@ only screen and (max-width: 576px) {
 .header_wrapper .header_rightside .search-message:hover,
 .header_wrapper .header_rightside .pop-up-layout:hover,
 .header_wrapper .header_rightside .create-group:hover,
-.header_wrapper .header_rightside .call-video:hover,
+.header_wrapper .header_rightside .voice-call:hover,
+.header_wrapper .header_rightside .video-call:hover,
 .header_wrapper .header_rightside .back-channel:hover,
 .header_wrapper .header_rightside .pop-up-responsive:hover {
     background-color: #c2d8f2;
@@ -167,11 +150,65 @@ only screen and (max-width: 576px) {
 .header_wrapper .header_rightside .pop-up-responsive {
     display: none;
 }
-.header_rightside .video-call {
-    margin-right: 8px;
-    color: #1890ff;
+
+.info_user-name {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
 }
 
-.header_rightside .video-call:hover {
-    background-color: rgba(24, 144, 255, 0.1);
+.user-name-main {
+    font-weight: 600;
+    font-size: 14px;
+    color: #333;
+}
+
+.relationship-status-container {
+    margin-top: 2px;
+}
+
+.relationship-status {
+    font-size: 11px;
+    font-weight: 500;
+    padding: 1px 6px;
+    border-radius: 8px;
+    display: inline-block;
+}
+
+.relationship-status.friend {
+    color: #52c41a;
+    /* Màu xanh lá */
+    background-color: #f6ffed;
+    border: 1px solid #b7eb8f;
+}
+
+.relationship-status.stranger {
+    color: #faad14;
+    /* Màu vàng */
+    background-color: #fffbe6;
+    border: 1px solid #ffe58f;
+}
+
+/* Responsive cho mobile */
+@media only screen and (max-width: 576px) {
+    .relationship-status {
+        font-size: 10px;
+        padding: 1px 4px;
+    }
+
+    .user-name-main {
+        font-size: 13px;
+    }
+}
+.clickable-avatar {
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.clickable-avatar:hover {
+    transform: scale(1.05);
+}
+
+.clickable-avatar:active {
+    transform: scale(0.98);
 }

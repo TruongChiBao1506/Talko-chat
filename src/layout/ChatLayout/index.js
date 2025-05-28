@@ -48,6 +48,8 @@ function ChatLayout() {
     const { conversations, currentConversation } = useSelector((state) => state.chat);
     const { isJoinChatLayout, user } = useSelector((state) => state.global);
     const { amountNotify } = useSelector((state) => state.friend);
+    const { friends } = useSelector(state => state.chat);
+
     const [idNewMessage, setIdNewMessage] = useState('');
     const [codeRevoke, setCodeRevoke] = useState('');
     const codeRevokeRef = useRef();

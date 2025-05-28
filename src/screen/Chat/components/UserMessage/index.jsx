@@ -34,6 +34,7 @@ import StickerMessage from "../../../../screen/Chat/components/MessageType/Stick
 import TextMessage from "../../../../screen/Chat/components/MessageType/TextMessage";
 import VideoMessage from "../../../../screen/Chat/components/MessageType/VideoMessage";
 import VoteMessage from "../../../../screen/Chat/components/MessageType/VoteMessage";
+import MultipleImageMessage from "../../../../screen/Chat/components/MessageType/MultipleImageMessage";
 import "./style.css";
 
 UserMessage.propTypes = {
@@ -272,14 +273,12 @@ function UserMessage({
           {type === "VOTE" && <VoteMessage data={message} />}
 
           <div
-            className={`${setMarginTopAndBottom(_id)} user-message ${
-              type === "VOTE" ? "hidden" : ""
-            }`}
+            className={`${setMarginTopAndBottom(_id)} user-message ${type === "VOTE" ? "hidden" : ""
+              }`}
           >
             <div
-              className={`interact-conversation ${
-                isMyMessage ? "reverse" : ""
-              }  `}
+              className={`interact-conversation ${isMyMessage ? "reverse" : ""
+                }  `}
             >
               <div className={`avatar-user ${isSameUser ? "hidden" : ""}`}>
                 <PersonalIcon
@@ -293,35 +292,53 @@ function UserMessage({
               <div className="list-conversation">
                 <div className="message" id={`${_id}`}>
                   <div
-                    className={`sub-message ${isMyMessage ? "reverse" : ""} ${
-                      isSameUser ? "same-user" : ""
-                    }`}
+                    className={`sub-message ${isMyMessage ? "reverse" : ""} ${isSameUser ? "same-user" : ""
+                      }`}
                   >
                     <div
-                      className={`content-message ${
-                        type === "IMAGE" ||
-                        type === "VIDEO" ||
-                        type === "STICKER"
+                      // className={`content-message ${type === "IMAGE" ||
+                      //     type === "VIDEO" ||
+                      //     type === "STICKER" ||
+                      //     type === "MULTI_IMAGE"
+                      //     ? "content-media"
+                      //     : ""
+                      //   } 
+                      //                   ${isMyMessage &&
+                      //     type !== "IMAGE" &&
+                      //     type !== "VIDEO" &&
+                      //     type !== "STICKER" &&
+                      //     type !== "MULTI_IMAGE"
+                      //     ? "my-message-bg"
+                      //     : ""
+                      //   }`}
+                      className={`content-message 
+                        ${type === "IMAGE" ||
+                          type === "VIDEO" ||
+                          type === "STICKER"
                           ? "content-media"
                           : ""
-                      } 
-                                        ${
-                                          isMyMessage &&
-                                          type !== "IMAGE" &&
-                                          type !== "VIDEO" &&
-                                          type !== "STICKER"
-                                            ? "my-message-bg"
-                                            : ""
-                                        }`}
+                        } 
+                        ${type === "MULTI_IMAGE"
+                          ? isMyMessage ? "content-media my-message-bg" : "content-media"
+                          : ""
+                        }
+                        ${isMyMessage &&
+                          type !== "IMAGE" &&
+                          type !== "VIDEO" &&
+                          type !== "STICKER" &&
+                          type !== "MULTI_IMAGE"
+                          ? "my-message-bg"
+                          : ""
+                        }`}
                     >
                       <span className="author-message">
                         {isSameUser && isMyMessage
                           ? ""
                           : isSameUser && !isMyMessage
-                          ? ""
-                          : !isSameUser && isMyMessage
-                          ? ""
-                          : name}
+                            ? ""
+                            : !isSameUser && isMyMessage
+                              ? ""
+                              : name}
                       </span>
                       <div className="content-message-description">
                         {isDeleted ? (
@@ -380,6 +397,33 @@ function UserMessage({
                                   />
                                 )}
                               </ImageMessage>
+                            ) : type === "MULTI_IMAGE" ? (
+                              (() => {
+                                try {
+                                  const parsedContent = JSON.parse(content);
+                                  return (
+                                    <MultipleImageMessage
+                                      images={parsedContent.images || []}
+                                      text={parsedContent.text || ""}
+                                      dateAt={dateAt}
+                                      isSeen={viewUsers && viewUsers.length > 0}
+                                    >
+                                      {!myReact && (
+                                        <ListReaction
+                                          type="media"
+                                          isMyMessage={isMyMessage}
+                                          onClickLike={handleClickLike}
+                                          listReaction={listReaction}
+                                          onClickReaction={handleClickReaction}
+                                        />
+                                      )}
+                                    </MultipleImageMessage>
+                                  );
+                                } catch (error) {
+                                  console.error('Error parsing MULTI_IMAGE content:', error, content);
+                                  return <div>Lỗi hiển thị nhiều ảnh</div>;
+                                }
+                              })()
                             ) : type === "VIDEO" ? (
                               <VideoMessage
                                 content={content}
@@ -426,9 +470,8 @@ function UserMessage({
                       </div>
 
                       <div
-                        className={`reacted-block ${
-                          type === "IMAGE" || type === "VIDEO" ? "media" : ""
-                        } 
+                        className={`reacted-block ${type === "IMAGE" || type === "VIDEO" || type === "MULTI_IMAGE" ? "media" : ""
+                          } 
                                             ${isMyMessage ? "left" : "right"} `}
                       >
                         {listReactionCurrent.length > 0 && !isDeleted && (
@@ -442,9 +485,8 @@ function UserMessage({
 
                         {myReact && !isDeleted && (
                           <div
-                            className={`your-react ${
-                              isMyMessage ? "bg-white" : ""
-                            }`}
+                            className={`your-react ${isMyMessage ? "bg-white" : ""
+                              }`}
                           >
                             <span className="react-current">
                               {myReact ? transferIcon(myReact.type) : ""}

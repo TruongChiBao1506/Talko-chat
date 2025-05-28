@@ -657,6 +657,20 @@ function Chat({ socket, idNewMessage, onStartCall, onStartVideoCall }) {
                                             onStartVideoCall={
                                                 onStartVideoCall
                                             }
+                                            isFriend={
+                                                conversations.find(
+                                                    (ele) =>
+                                                        ele._id ===
+                                                        currentConversation
+                                                ).friendStatus === 'FRIEND'
+                                            }
+                                            userId={
+                                                conversations.find(
+                                                    (ele) =>
+                                                        ele._id ===
+                                                        currentConversation
+                                                ).userId
+                                            }
                                         />
                                     </div>
 
