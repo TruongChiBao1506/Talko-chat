@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, forwardRef, useImperativeHandle, useCallback, useMemo } from 'react';
 import AgoraRTC from 'agora-rtc-sdk-ng';
-import { Button, Avatar, Typography, Space, Row, Col, message } from 'antd';
+import { Button, Avatar, Typography, Space, Row, Col, message, Modal } from 'antd';
 import Icon, {
   AudioMutedOutlined,
   AudioOutlined,
@@ -8,7 +8,10 @@ import Icon, {
   VideoCameraFilled,
   StopOutlined,
   PhoneOutlined,
-  UserOutlined
+  UserOutlined,
+  AppstoreOutlined,
+  BorderOutlined,
+  TeamOutlined
 } from '@ant-design/icons';
 import { APP_ID, generateChannelId } from '../../utils/agoraConfig';
 import socket from '../../utils/socketClient';
@@ -48,6 +51,11 @@ const AgoraVideoCall = forwardRef(({
   const localVideoContainerRef = useRef(null);
   const updateTimeouts = useRef(new Map());
   const lastUpdateTime = useRef(new Map());
+
+  const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'speaker' | 'pagination'
+  const [currentPage, setCurrentPage] = useState(0);
+  const [speakerUser, setSpeakerUser] = useState(null);
+  const [showParticipantsList, setShowParticipantsList] = useState(false);
 
   // Determine if this is a group call
   const isGroupCall = conversation.type === true || conversation.totalMembers > 2;
@@ -139,7 +147,7 @@ const AgoraVideoCall = forwardRef(({
   // Thêm useEffect này để đảm bảo local video luôn được play khi có track
 
   useEffect(() => {
-    // ✅ CRITICAL: Monitor local video track changes and ensure it's playing
+    // Monitor local video track changes and ensure it's playing
     if (localVideoTrack && localVideoContainerRef.current && !isVideoMuted) {
       console.log('🎬 Local video track changed, ensuring playback...');
 
@@ -196,6 +204,40 @@ const AgoraVideoCall = forwardRef(({
     };
   }, []);
 
+
+  useEffect(() => {
+    const userCount = remoteUsers.length;
+
+    if (userCount <= 3 && viewMode !== 'grid') {
+      // Small group: always use grid
+      setViewMode('grid');
+      setSpeakerUser(null);
+      setCurrentPage(0);
+    } else if (userCount >= 13 && viewMode !== 'pagination' && viewMode !== 'speaker') {
+      // Very large group: suggest pagination
+      setViewMode('pagination');
+      setCurrentPage(0);
+    } else if (userCount >= 7 && userCount <= 12 && viewMode === 'grid') {
+      // Large group: suggest speaker view
+      setTimeout(() => {
+        Modal.confirm({
+          title: 'Chuyển sang Speaker View?',
+          content: `Có ${userCount} người trong cuộc gọi. Bạn có muốn chuyển sang chế độ Speaker View để dễ theo dõi hơn?`,
+          okText: 'Đồng ý',
+          cancelText: 'Giữ Grid View',
+          icon: <TeamOutlined />,
+          onOk() {
+            setViewMode('speaker');
+            setSpeakerUser(remoteUsers[0]);
+          },
+          onCancel() {
+            console.log('User chose to keep grid view');
+          },
+        });
+      }, 2000);
+    }
+  }, [remoteUsers.length]);
+
   const setupVideoCall = async () => {
     if (joinInProgress.current || !isComponentMounted.current) {
       console.log('🚫 Setup already in progress or component unmounted');
@@ -206,7 +248,7 @@ const AgoraVideoCall = forwardRef(({
     console.log('🎥 Setting up video call...');
 
     try {
-      // ✅ CRITICAL: Force cleanup với retry mechanism
+      // Force cleanup với retry mechanism
       await forceCleanupWithRetry();
 
       // Wait a bit for cleanup to complete
@@ -263,12 +305,12 @@ const AgoraVideoCall = forwardRef(({
         }
       });
 
-      // ✅ CRITICAL: Setup user-joined handler like audio call
+      // Setup user-joined handler like audio call
       agoraClient.on('user-joined', async (user) => {
         if (!isComponentMounted.current) return;
         console.log('👤 User joined video call:', user.uid);
 
-        // ✅ CRITICAL: Kiểm tra xem user đã tồn tại chưa
+        // Kiểm tra xem user đã tồn tại chưa
         const existingUser = remoteUsers.find(u => String(u.uid) === String(user.uid));
         if (existingUser) {
           console.log('ℹ️ User already exists, skipping add:', user.uid);
@@ -307,7 +349,7 @@ const AgoraVideoCall = forwardRef(({
         });
 
         setRemoteUsers(prev => {
-          // ✅ CRITICAL: Double check không trùng lặp
+          // Double check không trùng lặp
           const exists = prev.find(u => String(u.uid) === String(user.uid));
           if (exists) {
             console.log('⚠️ User already in remoteUsers, not adding:', user.uid);
@@ -341,330 +383,29 @@ const AgoraVideoCall = forwardRef(({
         }
       });
 
-      // ✅ CRITICAL: Setup user-published handler with better audio handling
-      // agoraClient.on('user-published', async (user, mediaType) => {
-      //   if (!isComponentMounted.current) return;
+      // Setup user-unpublished handler
+      agoraClient.on('user-unpublished', (user, mediaType) => {
+        if (!isComponentMounted.current) return;
+        console.log('👤 User unpublished:', user.uid, mediaType);
 
-      //   console.log('👤 User published:', user.uid, mediaType);
-
-      //   try {
-      //     await agoraClient.subscribe(user, mediaType);
-      //     console.log('✅ Successfully subscribed to user:', user.uid, mediaType);
-
-      //     if (mediaType === 'video' && user.videoTrack && isComponentMounted.current) {
-      //       console.log('📹 Remote video track received from:', user.uid);
-
-      //       // ✅ CRITICAL: Chỉ update khi thực sự có thay đổi
-      //       setRemoteUsers(prev => {
-      //         const existingUserIndex = prev.findIndex(u => u.uid === user.uid);
-
-      //         if (existingUserIndex !== -1) {
-      //           // Update existing user
-      //           const updatedUsers = [...prev];
-      //           const existingUser = updatedUsers[existingUserIndex];
-
-      //           // ✅ ONLY update nếu thực sự khác biệt
-      //           if (existingUser.videoTrack !== user.videoTrack || !existingUser.hasVideo) {
-      //             console.log('🔄 Updating existing user with video:', user.uid);
-
-      //             updatedUsers[existingUserIndex] = {
-      //               ...existingUser,
-      //               videoTrack: user.videoTrack,
-      //               hasVideo: true
-      //             };
-
-      //             console.log('📋 Updated remote users after video:', updatedUsers);
-      //             return updatedUsers;
-      //           } else {
-      //             console.log('ℹ️ No video changes needed for user:', user.uid);
-      //             return prev; // ✅ Không thay đổi state nếu không cần
-      //           }
-      //         } else {
-      //           console.warn('⚠️ User not found in remoteUsers for video update:', user.uid);
-      //           return prev;
-      //         }
-      //       });
-
-      //       // ✅ REMOVE: Bỏ force re-render không cần thiết
-      //       // setTimeout(() => {
-      //       //   if (isComponentMounted.current) {
-      //       //     console.log('🔄 Force updating remote users state');
-      //       //     setRemoteUsers(prev => [...prev]);
-      //       //   }
-      //       // }, 100);
-      //     }
-
-      //     if (mediaType === 'audio' && user.audioTrack && isComponentMounted.current) {
-      //       console.log('🎤 Remote audio track received from:', user.uid);
-
-      //       // ✅ IMPROVED: Better audio context management
-      //       try {
-      //         // Check and resume audio context FIRST
-      //         if (window.AudioContext || window.webkitAudioContext) {
-      //           const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-
-      //           if (!window.globalAudioContext) {
-      //             window.globalAudioContext = new AudioContextClass();
-      //           }
-
-      //           const audioContext = window.globalAudioContext;
-
-      //           if (audioContext.state === 'suspended') {
-      //             console.log('🎵 Audio context suspended, trying to resume...');
-      //             try {
-      //               await audioContext.resume();
-      //               console.log('✅ Audio context resumed successfully');
-      //             } catch (resumeError) {
-      //               console.error('❌ Failed to resume audio context:', resumeError);
-      //             }
-      //           }
-      //         }
-
-      //         // ✅ IMPROVED: Play audio with better error handling
-      //         await user.audioTrack.play();
-      //         console.log('✅ Remote audio playing successfully from:', user.uid);
-
-      //       } catch (audioError) {
-      //         console.error('❌ Audio play error:', audioError);
-
-      //         // ✅ IMPROVED: Single retry with delay
-      //         if (audioError.name !== 'NotAllowedError') {
-      //           setTimeout(async () => {
-      //             try {
-      //               if (user.audioTrack && isComponentMounted.current) {
-      //                 await user.audioTrack.play();
-      //                 console.log('✅ Remote audio playing on retry');
-      //               }
-      //             } catch (retryError) {
-      //               console.error('❌ Audio retry failed:', retryError);
-      //             }
-      //           }, 1500);
-      //         }
-      //       }
-
-      //       // ✅ CRITICAL: Chỉ update audio khi thực sự có thay đổi
-      //       setRemoteUsers(prev => {
-      //         const existingUserIndex = prev.findIndex(u => u.uid === user.uid);
-
-      //         if (existingUserIndex !== -1) {
-      //           const updatedUsers = [...prev];
-      //           const existingUser = updatedUsers[existingUserIndex];
-
-      //           // ✅ ONLY update nếu audio track thực sự khác biệt
-      //           if (existingUser.audioTrack !== user.audioTrack || !existingUser.hasAudio) {
-      //             console.log('🔄 Updating existing user with audio:', user.uid);
-
-      //             updatedUsers[existingUserIndex] = {
-      //               ...existingUser,
-      //               audioTrack: user.audioTrack,
-      //               hasAudio: true
-      //             };
-
-      //             console.log('📋 Updated remote users after audio:', updatedUsers);
-      //             return updatedUsers;
-      //           } else {
-      //             console.log('ℹ️ No audio changes needed for user:', user.uid);
-      //             return prev; // ✅ Không thay đổi state nếu không cần
-      //           }
-      //         } else {
-      //           console.warn('⚠️ User not found in remoteUsers for audio update:', user.uid);
-      //           return prev;
-      //         }
-      //       });
-      //     }
-
-      //   } catch (err) {
-      //     console.error('❌ Error subscribing to user:', err);
-
-      //     // ✅ IMPROVED: Better retry mechanism với debounce
-      //     const retryKey = `${user.uid}-${mediaType}`;
-
-      //     // Clear any existing retry for this user/mediaType
-      //     if (window.retryTimeouts && window.retryTimeouts[retryKey]) {
-      //       clearTimeout(window.retryTimeouts[retryKey]);
-      //     }
-
-      //     // Initialize retry timeouts object if not exists
-      //     if (!window.retryTimeouts) {
-      //       window.retryTimeouts = {};
-      //     }
-
-      //     // ✅ DEBOUNCED: Single retry after delay
-      //     window.retryTimeouts[retryKey] = setTimeout(async () => {
-      //       try {
-      //         if (isComponentMounted.current) {
-      //           console.log('🔄 Retrying subscription for:', user.uid, mediaType);
-      //           await agoraClient.subscribe(user, mediaType);
-      //           console.log('✅ Subscription retry successful');
-
-      //           if (mediaType === 'video' && user.videoTrack) {
-      //             setRemoteUsers(prev => {
-      //               const existingUserIndex = prev.findIndex(u => u.uid === user.uid);
-
-      //               if (existingUserIndex !== -1) {
-      //                 const updatedUsers = [...prev];
-      //                 updatedUsers[existingUserIndex] = {
-      //                   ...updatedUsers[existingUserIndex],
-      //                   videoTrack: user.videoTrack,
-      //                   hasVideo: true
-      //                 };
-      //                 return updatedUsers;
-      //               }
-      //               return prev;
-      //             });
-
-      //           } else if (mediaType === 'audio' && user.audioTrack) {
-      //             // Try to play audio on retry
-      //             try {
-      //               await user.audioTrack.play();
-      //               console.log('✅ Audio played successfully on retry');
-      //             } catch (playErr) {
-      //               console.warn('⚠️ Audio play failed on retry:', playErr);
-      //             }
-
-      //             setRemoteUsers(prev => {
-      //               const existingUserIndex = prev.findIndex(u => u.uid === user.uid);
-
-      //               if (existingUserIndex !== -1) {
-      //                 const updatedUsers = [...prev];
-      //                 updatedUsers[existingUserIndex] = {
-      //                   ...updatedUsers[existingUserIndex],
-      //                   audioTrack: user.audioTrack,
-      //                   hasAudio: true
-      //                 };
-      //                 return updatedUsers;
-      //               }
-      //               return prev;
-      //             });
-      //           }
-      //         }
-      //       } catch (retryError) {
-      //         console.error('❌ Subscription retry failed:', retryError);
-      //       } finally {
-      //         // Clean up retry timeout
-      //         if (window.retryTimeouts && window.retryTimeouts[retryKey]) {
-      //           delete window.retryTimeouts[retryKey];
-      //         }
-      //       }
-      //     }, 2000);
-      //   }
-      // });
-      // ✅ CRITICAL: Debounced state updates
-
-      // agoraClient.on('user-published', async (user, mediaType) => {
-      //   if (!isComponentMounted.current) return;
-
-      //   console.log('👤 User published:', user.uid, mediaType);
-
-      //   try {
-      //     await agoraClient.subscribe(user, mediaType);
-
-      //     if (mediaType === 'video' && user.videoTrack && isComponentMounted.current) {
-      //       // ✅ CRITICAL: Debounce video updates
-      //       const videoUpdateKey = `video-${user.uid}`;
-
-      //       if (updateTimeouts.current.has(videoUpdateKey)) {
-      //         clearTimeout(updateTimeouts.current.get(videoUpdateKey));
-      //       }
-
-      //       updateTimeouts.current.set(videoUpdateKey, setTimeout(() => {
-      //         if (!isComponentMounted.current) return;
-
-      //         setRemoteUsers(prev => {
-      //           const existingUserIndex = prev.findIndex(u => u.uid === user.uid);
-
-      //           if (existingUserIndex !== -1) {
-      //             const currentUser = prev[existingUserIndex];
-
-      //             // ✅ ONLY update if actually different
-      //             if (currentUser.videoTrack !== user.videoTrack || !currentUser.hasVideo) {
-      //               const updatedUsers = [...prev];
-      //               updatedUsers[existingUserIndex] = {
-      //                 ...currentUser,
-      //                 videoTrack: user.videoTrack,
-      //                 hasVideo: true
-      //               };
-      //               return updatedUsers;
-      //             }
-      //           }
-
-      //           return prev; // No changes
-      //         });
-
-      //         updateTimeouts.current.delete(videoUpdateKey);
-      //       }, 100)); // Debounce 100ms
-      //     }
-
-      //     if (mediaType === 'audio' && user.audioTrack && isComponentMounted.current) {
-      //       // ✅ CRITICAL: Debounce audio updates
-      //       const audioUpdateKey = `audio-${user.uid}`;
-
-      //       if (updateTimeouts.current.has(audioUpdateKey)) {
-      //         clearTimeout(updateTimeouts.current.get(audioUpdateKey));
-      //       }
-
-      //       try {
-      //         await user.audioTrack.play();
-      //       } catch (audioError) {
-      //         console.error('❌ Audio play error:', audioError);
-      //       }
-
-      //       updateTimeouts.current.set(audioUpdateKey, setTimeout(() => {
-      //         if (!isComponentMounted.current) return;
-
-      //         setRemoteUsers(prev => {
-      //           const existingUserIndex = prev.findIndex(u => u.uid === user.uid);
-
-      //           if (existingUserIndex !== -1) {
-      //             const currentUser = prev[existingUserIndex];
-
-      //             // ✅ ONLY update if actually different
-      //             if (currentUser.audioTrack !== user.audioTrack || !currentUser.hasAudio) {
-      //               const updatedUsers = [...prev];
-      //               updatedUsers[existingUserIndex] = {
-      //                 ...currentUser,
-      //                 audioTrack: user.audioTrack,
-      //                 hasAudio: true
-      //               };
-      //               return updatedUsers;
-      //             }
-      //           }
-
-      //           return prev; // No changes
-      //         });
-
-      //         updateTimeouts.current.delete(audioUpdateKey);
-      //       }, 100)); // Debounce 100ms
-      //     }
-
-      //   } catch (err) {
-      //     console.error('❌ Error subscribing to user:', err);
-      //   }
-      // });
-
-      // // ✅ CRITICAL: Setup user-unpublished handler
-      // agoraClient.on('user-unpublished', (user, mediaType) => {
-      //   if (!isComponentMounted.current) return;
-      //   console.log('👤 User unpublished:', user.uid, mediaType);
-
-      //   if (mediaType === 'video') {
-      //     setRemoteUsers(prev =>
-      //       prev.map(u =>
-      //         u.uid === user.uid
-      //           ? { ...u, videoTrack: null, hasVideo: false }
-      //           : u
-      //       )
-      //     );
-      //   } else if (mediaType === 'audio') {
-      //     setRemoteUsers(prev =>
-      //       prev.map(u =>
-      //         u.uid === user.uid
-      //           ? { ...u, audioTrack: null, hasAudio: false }
-      //           : u
-      //       )
-      //     );
-      //   }
-      // });
+        if (mediaType === 'video') {
+          setRemoteUsers(prev =>
+            prev.map(u =>
+              u.uid === user.uid
+                ? { ...u, videoTrack: null, hasVideo: false }
+                : u
+            )
+          );
+        } else if (mediaType === 'audio') {
+          setRemoteUsers(prev =>
+            prev.map(u =>
+              u.uid === user.uid
+                ? { ...u, audioTrack: null, hasAudio: false }
+                : u
+            )
+          );
+        }
+      });
       agoraClient.on('user-published', async (user, mediaType) => {
         if (!isComponentMounted.current) return;
 
@@ -676,7 +417,7 @@ const AgoraVideoCall = forwardRef(({
           if (mediaType === 'video' && user.videoTrack && isComponentMounted.current) {
             const updateKey = `video-${user.uid}`;
 
-            // ✅ CRITICAL: Debounce với time check
+            // Debounce với time check
             const now = Date.now();
             const lastUpdate = lastUpdateTime.current.get(updateKey) || 0;
 
@@ -692,7 +433,7 @@ const AgoraVideoCall = forwardRef(({
               clearTimeout(updateTimeouts.current.get(updateKey));
             }
 
-            // ✅ CRITICAL: Single debounced update
+            // Single debounced update
             updateTimeouts.current.set(updateKey, setTimeout(() => {
               if (!isComponentMounted.current) return;
 
@@ -732,7 +473,7 @@ const AgoraVideoCall = forwardRef(({
           if (mediaType === 'audio' && user.audioTrack && isComponentMounted.current) {
             const updateKey = `audio-${user.uid}`;
 
-            // ✅ CRITICAL: Debounce audio updates
+            // Debounce audio updates
             const now = Date.now();
             const lastUpdate = lastUpdateTime.current.get(updateKey) || 0;
 
@@ -796,7 +537,7 @@ const AgoraVideoCall = forwardRef(({
         }
       });
 
-      // ✅ CRITICAL: Setup user-left handler like audio call
+      // Setup user-left handler like audio call
       agoraClient.on('user-left', (user) => {
         if (!isComponentMounted.current) return;
         console.log('👋 User left video call:', user.uid);
@@ -876,17 +617,21 @@ const AgoraVideoCall = forwardRef(({
           console.error('❌ Failed to create basic audio track:', basicAudioError);
         }
       }
-
+      // width: { ideal: 640, min: 480, max: 960 },
+      //             height: { ideal: 480, min: 360, max: 720 },
+      //             frameRate: 15,
+      //             bitrateMin: 400,
+      //             bitrateMax: 800,
       // Create video track
       try {
         console.log('📹 Attempting to create video track...');
         videoTrack = await AgoraRTC.createCameraVideoTrack({
           encoderConfig: {
-            width: { ideal: 640, min: 480, max: 960 },
-            height: { ideal: 480, min: 360, max: 720 },
-            frameRate: 15,
-            bitrateMin: 400,
-            bitrateMax: 800,
+            width: { ideal: 1280, min: 640, max: 1920 },
+            height: { ideal: 720, min: 480, max: 1080 },
+            frameRate: { ideal: 30, min: 15, max: 30 },
+            bitrateMin: 800,
+            bitrateMax: 2000,
           },
           facingMode: 'user',
           optimizationMode: 'detail'
@@ -897,7 +642,7 @@ const AgoraVideoCall = forwardRef(({
         tracksToPublish.push(videoTrack);
         console.log('✅ Video track created successfully');
 
-        // ✅ CRITICAL: Play local video immediately
+        // Play local video immediately
         if (localVideoContainerRef.current && isComponentMounted.current) {
           try {
             await videoTrack.play(localVideoContainerRef.current);
@@ -1015,7 +760,7 @@ const AgoraVideoCall = forwardRef(({
         }
       }
 
-      // ✅ CRITICAL: Emit answered notification like audio call
+      // Emit answered notification like audio call
       setTimeout(() => {
         if (conversation._id && isComponentMounted.current) {
           console.log('🎯 Emitting video call answered after join delay');
@@ -1036,7 +781,7 @@ const AgoraVideoCall = forwardRef(({
         }
       }, 2000);
 
-      // ✅ CRITICAL: Emit join event for group calls like audio
+      // Emit join event for group calls like audio
       if (isGroupCall && conversation._id) {
         socket.emit('user-joined-video-channel', {
           conversationId: conversation._id,
@@ -1161,6 +906,60 @@ const AgoraVideoCall = forwardRef(({
   //     }
   //   }
   // };
+  const getGridLayout = (userCount) => {
+    if (userCount === 1) return {
+      flex: '1',
+      minHeight: '100%',
+      columns: 1,
+      rows: 1
+    };
+    if (userCount === 2) return {
+      flex: '0 0 48%',
+      minHeight: '200px',
+      columns: 2,
+      rows: 1
+    };
+    if (userCount === 3) return {
+      flex: '0 0 31%',
+      minHeight: '180px',
+      columns: 3,
+      rows: 1
+    };
+    if (userCount === 4) return {
+      flex: '0 0 48%',
+      minHeight: '160px',
+      columns: 2,
+      rows: 2
+    };
+    if (userCount <= 6) return {
+      flex: '0 0 31%',
+      minHeight: '140px',
+      columns: 3,
+      rows: 2
+    };
+    if (userCount <= 9) return {
+      flex: '0 0 31%',
+      minHeight: '120px',
+      columns: 3,
+      rows: 3
+    };
+    if (userCount <= 12) return {
+      flex: '0 0 23%',
+      minHeight: '100px',
+      columns: 4,
+      rows: 3
+    };
+
+    // 13+ users: Speaker view with pagination
+    return {
+      flex: '0 0 31%',
+      minHeight: '100px',
+      columns: 3,
+      rows: 3,
+      needsPagination: true
+    };
+  };
+
 
   const forceCleanupWithRetry = async () => {
     console.log('🧹 Force cleanup with retry...');
@@ -1445,13 +1244,13 @@ const AgoraVideoCall = forwardRef(({
 
     try {
       if (localVideoTrackRef.current) {
-        // ✅ CASE 1: Đã có video track - chỉ toggle enable/disable
+        // Đã có video track - chỉ toggle enable/disable
         const currentEnabled = localVideoTrackRef.current.enabled;
         await localVideoTrackRef.current.setEnabled(!currentEnabled);
         setIsVideoMuted(currentEnabled);
         console.log(`📹 Video ${currentEnabled ? 'disabled' : 'enabled'}`);
 
-        // ✅ CRITICAL: Đảm bảo video vẫn được play trong container
+        // Đảm bảo video vẫn được play trong container
         if (!currentEnabled && localVideoContainerRef.current) {
           // Khi enable lại, đảm bảo video được play
           setTimeout(async () => {
@@ -1476,7 +1275,7 @@ const AgoraVideoCall = forwardRef(({
         }
 
       } else {
-        // ✅ CASE 2: Chưa có video track - tạo mới
+        // Chưa có video track - tạo mới
         console.log('📹 Creating new video track...');
 
         let newVideoTrack;
@@ -1501,7 +1300,7 @@ const AgoraVideoCall = forwardRef(({
         setLocalVideoTrack(newVideoTrack);
         setIsVideoMuted(false);
 
-        // ✅ CRITICAL: Play ngay lập tức khi tạo track mới
+        // Play ngay lập tức khi tạo track mới
         if (localVideoContainerRef.current) {
           try {
             await newVideoTrack.play(localVideoContainerRef.current);
@@ -1669,7 +1468,7 @@ const AgoraVideoCall = forwardRef(({
             videoTrackExists: !!user.videoTrack
           })),
           totalRemoteUsers: remoteUsers.length,
-          // ✅ ADD: Additional stats
+          // Additional stats
           connectionStats: {
             hasLocalTracks: !!(localAudioTrack || localVideoTrack),
             hasRemoteTracks: remoteUsers.some(u => u.audioTrack || u.videoTrack),
@@ -1827,7 +1626,7 @@ const AgoraVideoCall = forwardRef(({
       try {
         console.log('🎵 Activating audio context...');
 
-        // ✅ IMPROVED: Better audio context activation
+        // Better audio context activation
         if (window.AudioContext || window.webkitAudioContext) {
           const AudioContextClass = window.AudioContext || window.webkitAudioContext;
 
@@ -1846,7 +1645,7 @@ const AgoraVideoCall = forwardRef(({
           await new Promise(resolve => setTimeout(resolve, 500));
         }
 
-        // ✅ IMPROVED: Better remote audio activation
+        // Better remote audio activation
         const audioUsers = remoteUsers.filter(user => user.audioTrack);
         console.log(`🎵 Attempting to activate ${audioUsers.length} remote audio tracks`);
 
@@ -1880,7 +1679,7 @@ const AgoraVideoCall = forwardRef(({
       }
     };
 
-    // ✅ IMPROVED: Better conditions for showing button
+    // Better conditions for showing button
     const hasRemoteAudio = remoteUsers.some(user => user.hasAudio);
     const shouldShow = hasChecked && needsActivation && hasRemoteAudio && !isActivated;
 
@@ -1922,51 +1721,6 @@ const AgoraVideoCall = forwardRef(({
     );
   };
 
-
-  // const generateConsistentUID = (userId) => {
-  //   if (!userId) return Math.floor(Math.random() * 100000);
-
-  //   // Convert MongoDB ObjectId to consistent number
-  //   let hash = 0;
-  //   const userIdStr = userId.toString();
-
-  //   for (let i = 0; i < userIdStr.length; i++) {
-  //     const char = userIdStr.charCodeAt(i);
-  //     hash = ((hash << 5) - hash) + char;
-  //     hash = hash & hash; // Convert to 32-bit integer
-  //   }
-
-  //   // Ensure positive number within Agora's UID range (1 to 2^32 - 1)
-  //   const consistentUid = Math.abs(hash) % 999999999 + 1;
-
-  //   console.log(`🎯 Generated consistent UID: ${consistentUid} for user: ${userId}`);
-  //   return consistentUid;
-  // };
-
-  // const generateConsistentUID = (userId) => {
-  //   if (!userId) return Math.floor(Math.random() * 100000);
-
-  //   // Convert MongoDB ObjectId to consistent number
-  //   let hash = 0;
-  //   const userIdStr = userId.toString();
-
-  //   for (let i = 0; i < userIdStr.length; i++) {
-  //     const char = userIdStr.charCodeAt(i);
-  //     hash = ((hash << 5) - hash) + char;
-  //     hash = hash & hash; // Convert to 32-bit integer
-  //   }
-
-  //   // ✅ IMPROVED: Add video call specific seed for uniqueness
-  //   const videoCallSeed = 98765; // Different from audio call seed
-  //   hash = hash + videoCallSeed;
-
-  //   // Ensure positive number within Agora's UID range (1 to 2^32 - 1)
-  //   const consistentUid = Math.abs(hash) % 999999999 + 1;
-
-  //   console.log(`🎯 Generated video UID: ${consistentUid} for user: ${userId}`);
-  //   return consistentUid;
-  // };
-
   const generateConsistentUID = (userId) => {
     if (!userId) return Math.floor(Math.random() * 100000);
 
@@ -1979,231 +1733,19 @@ const AgoraVideoCall = forwardRef(({
       hash = hash & hash;
     }
 
-    // ✅ CRITICAL: Đảm bảo UID unique và trong range hợp lệ
+    // Đảm bảo UID unique và trong range hợp lệ
     const consistentUid = Math.abs(hash) % 999999999 + 1;
     console.log(`🎯 Generated consistent UID: ${consistentUid} for user: ${userId}`);
     return consistentUid;
   };
 
-  // const RemoteVideoPlayer = React.memo(({ user, isMainView = false }) => {
-  //   const videoContainerRef = useRef(null);
-  //   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
-  //   const [retryCount, setRetryCount] = useState(0);
-  //   const maxRetries = 3;
 
-  //   // ✅ CRITICAL: Stable reference tracking
-  //   const userRef = useRef(user);
-  //   const isFirstRender = useRef(true);
-
-  //   // ✅ CRITICAL: Memoize user để tránh object recreation
-  //   const stableUser = useMemo(() => {
-  //     // Chỉ update khi thực sự có thay đổi
-  //     const hasChanged = !userRef.current ||
-  //       userRef.current.uid !== user.uid ||
-  //       userRef.current.hasVideo !== user.hasVideo ||
-  //       userRef.current.videoTrack !== user.videoTrack ||
-  //       userRef.current.name !== user.name ||
-  //       userRef.current.avatar !== user.avatar;
-
-  //     if (hasChanged || isFirstRender.current) {
-  //       userRef.current = {
-  //         uid: user.uid,
-  //         hasVideo: user.hasVideo,
-  //         videoTrack: user.videoTrack,
-  //         name: user.name,
-  //         avatar: user.avatar
-  //       };
-  //       isFirstRender.current = false;
-  //     }
-
-  //     return userRef.current;
-  //   }, [user.uid, user.hasVideo, user.videoTrack, user.name, user.avatar]);
-
-  //   // ✅ CRITICAL: Memoize overlay condition with debounce
-  //   const shouldShowOverlay = useMemo(() => {
-  //     return !stableUser.hasVideo || !stableUser.videoTrack || !isVideoLoaded;
-  //   }, [stableUser.hasVideo, stableUser.videoTrack, isVideoLoaded]);
-
-  //   // ✅ CRITICAL: Debounced video setup
-  //   const setupVideoRef = useRef(null);
-
-  //   useEffect(() => {
-  //     // Clear previous setup
-  //     if (setupVideoRef.current) {
-  //       clearTimeout(setupVideoRef.current);
-  //     }
-
-  //     // Debounce video setup để tránh multiple calls
-  //     setupVideoRef.current = setTimeout(() => {
-  //       if (stableUser.videoTrack && videoContainerRef.current) {
-  //         setIsVideoLoaded(false);
-
-  //         const playVideo = async () => {
-  //           try {
-  //             if (!videoContainerRef.current || !stableUser.videoTrack) {
-  //               return;
-  //             }
-
-  //             await stableUser.videoTrack.play(videoContainerRef.current);
-
-  //             // ✅ CRITICAL: Single style application với flag
-  //             setTimeout(() => {
-  //               if (stableUser.videoTrack && videoContainerRef.current) {
-  //                 const videoElement = videoContainerRef.current.querySelector('video');
-  //                 if (videoElement && !videoElement.dataset.agoraStyled) {
-  //                   // Mark as styled để không style lại
-  //                   videoElement.dataset.agoraStyled = 'true';
-
-  //                   // Apply styles in one go
-  //                   Object.assign(videoElement.style, {
-  //                     position: 'absolute',
-  //                     top: '0',
-  //                     left: '0',
-  //                     width: '100%',
-  //                     height: '100%',
-  //                     objectFit: 'cover',
-  //                     background: '#000',
-  //                     display: 'block',
-  //                     zIndex: '3',
-  //                     transition: 'none',
-  //                     transform: 'translateZ(0)',
-  //                     backfaceVisibility: 'hidden'
-  //                   });
-
-  //                   setIsVideoLoaded(true);
-  //                   setRetryCount(0);
-  //                 }
-  //               }
-  //             }, 100); // Giảm delay
-
-  //           } catch (playError) {
-  //             console.error('❌ Failed to play remote video:', playError);
-  //             setIsVideoLoaded(false);
-
-  //             if (retryCount < maxRetries) {
-  //               setTimeout(() => {
-  //                 setRetryCount(prev => prev + 1);
-  //               }, Math.pow(2, retryCount) * 1000);
-  //             }
-  //           }
-  //         };
-
-  //         playVideo();
-  //       } else {
-  //         setIsVideoLoaded(false);
-  //         setRetryCount(0);
-  //       }
-  //     }, 50); // Debounce 50ms
-
-  //     return () => {
-  //       if (setupVideoRef.current) {
-  //         clearTimeout(setupVideoRef.current);
-  //       }
-  //     };
-  //   }, [stableUser.videoTrack, stableUser.uid, retryCount]);
-
-  //   return (
-  //     <div
-  //       className="remote-video-player"
-  //       style={{
-  //         position: 'relative',
-  //         width: '100%',
-  //         height: '100%',
-  //         background: '#000',
-  //         borderRadius: '8px',
-  //         overflow: 'hidden'
-  //       }}
-  //     >
-  //       <div
-  //         ref={videoContainerRef}
-  //         className="video-aspect-content"
-  //         style={{
-  //           position: 'absolute',
-  //           top: 0,
-  //           left: 0,
-  //           width: '100%',
-  //           height: '100%',
-  //           background: '#000',
-  //           zIndex: 1
-  //         }}
-  //       />
-
-  //       {shouldShowOverlay && (
-  //         <div className="no-video-overlay">
-  //           <Avatar
-  //             size={80}
-  //             src={stableUser.avatar}
-  //             icon={<UserOutlined />}
-  //             style={{
-  //               marginBottom: '16px',
-  //               border: '2px solid #fff',
-  //               boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
-  //             }}
-  //           />
-  //           <Text style={{
-  //             color: '#666',
-  //             fontSize: '16px',
-  //             fontWeight: '500',
-  //             marginBottom: '8px',
-  //             textAlign: 'center'
-  //           }}>
-  //             {stableUser.name}
-  //           </Text>
-  //           {!stableUser.hasVideo && (
-  //             <Text style={{
-  //               color: '#ff9500',
-  //               fontSize: '14px',
-  //               textAlign: 'center'
-  //             }}>
-  //               Camera đã tắt
-  //             </Text>
-  //           )}
-  //         </div>
-  //       )}
-
-  //       {stableUser.hasVideo && stableUser.videoTrack && isVideoLoaded && (
-  //         <div style={{
-  //           position: 'absolute',
-  //           bottom: '12px',
-  //           left: '12px',
-  //           background: 'rgba(0, 0, 0, 0.7)',
-  //           color: 'white',
-  //           padding: '6px 12px',
-  //           borderRadius: '16px',
-  //           fontSize: '12px',
-  //           fontWeight: '500',
-  //           zIndex: 4,
-  //           maxWidth: 'calc(100% - 24px)',
-  //           overflow: 'hidden',
-  //           textOverflow: 'ellipsis',
-  //           whiteSpace: 'nowrap'
-  //         }}>
-  //           {stableUser.name || `User ${stableUser.uid}`}
-  //         </div>
-  //       )}
-  //     </div>
-  //   );
-  // }, (prevProps, nextProps) => {
-  //   // ✅ CRITICAL: Enhanced comparison
-  //   const prev = prevProps.user;
-  //   const next = nextProps.user;
-
-  //   const isEqual = prev.uid === next.uid &&
-  //     prev.hasVideo === next.hasVideo &&
-  //     prev.videoTrack === next.videoTrack &&
-  //     prev.name === next.name &&
-  //     prev.avatar === next.avatar &&
-  //     prevProps.isMainView === nextProps.isMainView;
-
-  //   return isEqual;
-  // });
-
-  const RemoteVideoPlayer = React.memo(({ user, isMainView = false }) => {
+  const RemoteVideoPlayer = React.memo(({ user, isMainView = false, isCompact = false }) => {
     const videoContainerRef = useRef(null);
     const [isVideoLoaded, setIsVideoLoaded] = useState(false);
     const [retryCount, setRetryCount] = useState(0);
 
-    // ✅ CRITICAL: Refs để track state without causing re-renders
+    // Refs để track state without causing re-renders
     const isPlayingRef = useRef(false);
     const playPromiseRef = useRef(null);
     const currentTrackRef = useRef(null);
@@ -2212,7 +1754,7 @@ const AgoraVideoCall = forwardRef(({
     const lastPlayTimeRef = useRef(0);
     const maxRetries = 3;
 
-    // ✅ CRITICAL: Deep stable user object với ref comparison
+    // Deep stable user object với ref comparison
     const prevUserRef = useRef(user);
     const stableUser = useMemo(() => {
       const currentUser = {
@@ -2223,7 +1765,7 @@ const AgoraVideoCall = forwardRef(({
         avatar: user.avatar
       };
 
-      // ✅ CRITICAL: Only update if actually different
+      // Only update if actually different
       const hasChanged = !prevUserRef.current ||
         prevUserRef.current.uid !== currentUser.uid ||
         prevUserRef.current.hasVideo !== currentUser.hasVideo ||
@@ -2247,18 +1789,18 @@ const AgoraVideoCall = forwardRef(({
       user.avatar
     ]);
 
-    // ✅ CRITICAL: Stable overlay condition
+    // Stable overlay condition
     const shouldShowOverlay = useMemo(() => {
       return !stableUser.hasVideo || !stableUser.videoTrack || !isVideoLoaded;
     }, [stableUser.hasVideo, stableUser.videoTrack, isVideoLoaded]);
 
-    // ✅ CRITICAL: Video track change detection với debounce
+    // Video track change detection với debounce
     const trackId = stableUser.videoTrack ?
       (stableUser.videoTrack.trackMediaType + '-' + stableUser.uid) :
       null;
 
     useEffect(() => {
-      // ✅ CRITICAL: Multiple guards để prevent duplicate calls
+      // Multiple guards để prevent duplicate calls
       if (!stableUser.videoTrack || !videoContainerRef.current) {
         // Reset flags nếu không có track
         isPlayingRef.current = false;
@@ -2270,13 +1812,13 @@ const AgoraVideoCall = forwardRef(({
         return;
       }
 
-      // ✅ CRITICAL: Check if same track already playing
+      // Check if same track already playing
       if (currentTrackRef.current === stableUser.videoTrack && isPlayingRef.current) {
         console.log('🎬 Same track already playing, skipping:', stableUser.uid);
         return;
       }
 
-      // ✅ CRITICAL: Debounce multiple rapid calls
+      // Debounce multiple rapid calls
       const now = Date.now();
       if (now - lastPlayTimeRef.current < 500) {
         console.log('🎬 Debouncing play call for UID:', stableUser.uid);
@@ -2284,7 +1826,7 @@ const AgoraVideoCall = forwardRef(({
       }
       lastPlayTimeRef.current = now;
 
-      // ✅ CRITICAL: Limit play attempts
+      // Limit play attempts
       if (playAttemptCountRef.current >= 3) {
         console.warn('🎬 Max play attempts reached for UID:', stableUser.uid);
         return;
@@ -2293,7 +1835,7 @@ const AgoraVideoCall = forwardRef(({
       playAttemptCountRef.current++;
       console.log(`🎬 Play attempt ${playAttemptCountRef.current}/3 for UID:`, stableUser.uid);
 
-      // ✅ CRITICAL: Check if container already has video element playing this track
+      // Check if container already has video element playing this track
       const existingVideo = videoContainerRef.current.querySelector('video');
       if (existingVideo && !existingVideo.paused && isPlayingRef.current) {
         console.log('🎬 Video element already playing, skipping play() call');
@@ -2308,20 +1850,20 @@ const AgoraVideoCall = forwardRef(({
             return;
           }
 
-          // ✅ CRITICAL: Set flags BEFORE play
+          // Set flags BEFORE play
           isPlayingRef.current = true;
           currentTrackRef.current = stableUser.videoTrack;
           setIsVideoLoaded(false);
 
           console.log('🎬 Starting video playback for UID:', stableUser.uid);
 
-          // ✅ CRITICAL: Store play promise
+          // Store play promise
           playPromiseRef.current = stableUser.videoTrack.play(videoContainerRef.current);
           await playPromiseRef.current;
 
           console.log('✅ Video play successful for UID:', stableUser.uid);
 
-          // ✅ CRITICAL: Style video ONLY once with timeout
+          // Style video ONLY once with timeout
           setTimeout(() => {
             if (stableUser.videoTrack &&
               videoContainerRef.current &&
@@ -2332,7 +1874,7 @@ const AgoraVideoCall = forwardRef(({
               if (videoElement && !videoElement.dataset.agoraStyled) {
                 videoElement.dataset.agoraStyled = 'true';
 
-                // ✅ Single CSS update
+                // Single CSS update
                 videoElement.style.cssText = `
                 position: absolute !important;
                 top: 0 !important;
@@ -2340,6 +1882,7 @@ const AgoraVideoCall = forwardRef(({
                 width: 100% !important;
                 height: 100% !important;
                 object-fit: cover !important;
+                object-position: center 20% !important;
                 background: #000 !important;
                 display: block !important;
                 z-index: 3 !important;
@@ -2349,7 +1892,7 @@ const AgoraVideoCall = forwardRef(({
                 will-change: auto !important;
               `;
 
-                // ✅ CRITICAL: Add event listeners ONCE
+                // Add event listeners ONCE
                 const handlePause = (e) => {
                   if (!videoElement.ended && isPlayingRef.current) {
                     console.log('🎬 Preventing auto-pause, resuming video');
@@ -2367,7 +1910,7 @@ const AgoraVideoCall = forwardRef(({
                   playAttemptCountRef.current = 0; // Reset on success
                 };
 
-                // ✅ Remove old listeners first
+                // Remove old listeners first
                 videoElement.removeEventListener('pause', handlePause);
                 videoElement.removeEventListener('play', handlePlay);
 
@@ -2384,7 +1927,7 @@ const AgoraVideoCall = forwardRef(({
         } catch (playError) {
           console.error('❌ Failed to play remote video:', playError);
 
-          // ✅ CRITICAL: Reset flags on error
+          // Reset flags on error
           isPlayingRef.current = false;
           playPromiseRef.current = null;
           currentTrackRef.current = null;
@@ -2400,7 +1943,7 @@ const AgoraVideoCall = forwardRef(({
         }
       };
 
-      // ✅ Debounce execution
+      // Debounce execution
       const timeoutId = setTimeout(playVideo, 100);
 
       return () => {
@@ -2409,7 +1952,7 @@ const AgoraVideoCall = forwardRef(({
 
     }, [trackId, stableUser.uid, retryCount]); // ✅ STABLE dependencies
 
-    // ✅ CRITICAL: Cleanup effect
+    // Cleanup effect
     useEffect(() => {
       return () => {
         // Reset all flags on unmount
@@ -2436,9 +1979,12 @@ const AgoraVideoCall = forwardRef(({
       };
     }, []);
 
+    const avatarSize = isCompact ? 40 : 80;
+    const fontSize = isCompact ? '12px' : '16px';
+
     return (
       <div
-        className="remote-video-player"
+        className={`remote-video-player ${isCompact ? 'compact' : ''}`}
         style={{
           position: 'relative',
           width: '100%',
@@ -2465,7 +2011,7 @@ const AgoraVideoCall = forwardRef(({
         {shouldShowOverlay && (
           <div className="no-video-overlay">
             <Avatar
-              size={80}
+              size={avatarSize}
               src={stableUser.avatar}
               icon={<UserOutlined />}
               style={{
@@ -2535,12 +2081,286 @@ const AgoraVideoCall = forwardRef(({
 
     return isEqual;
   });
+  const SpeakerViewLayout = useMemo(() => {
+    if (!speakerUser || remoteUsers.length <= 2) return null;
+
+    const otherUsers = remoteUsers.filter(u => u.uid !== speakerUser.uid);
+    const maxSidebarUsers = 6; // Show max 6 users in sidebar
+    const visibleSidebarUsers = otherUsers.slice(0, maxSidebarUsers);
+    const hiddenUsersCount = Math.max(0, otherUsers.length - maxSidebarUsers);
+
+    return (
+      <div style={{
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        gap: '8px',
+        padding: '8px',
+        background: '#000',
+        borderRadius: '8px'
+      }}>
+        {/* Main speaker (75% width) */}
+        <div style={{
+          flex: '0 0 75%',
+          height: '100%',
+          background: '#333',
+          borderRadius: '8px',
+          overflow: 'hidden',
+          position: 'relative'
+        }}>
+          <RemoteVideoPlayer
+            user={speakerUser}
+            isMainView={true}
+          />
+
+          {/* Speaker controls overlay */}
+          <div style={{
+            position: 'absolute',
+            top: '10px',
+            left: '10px',
+            background: 'rgba(0,0,0,0.8)',
+            color: 'white',
+            padding: '6px 12px',
+            borderRadius: '20px',
+            fontSize: '14px',
+            fontWeight: 'bold',
+            zIndex: 5
+          }}>
+            🎤 {speakerUser.name}
+          </div>
+        </div>
+
+        {/* Participants sidebar (25% width) */}
+        <div style={{
+          flex: '0 0 23%',
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '6px',
+          overflowY: 'auto',
+          background: 'rgba(255,255,255,0.1)',
+          borderRadius: '8px',
+          padding: '6px'
+        }}>
+          {/* Sidebar header */}
+          <div style={{
+            color: 'white',
+            fontSize: '12px',
+            fontWeight: 'bold',
+            padding: '4px 8px',
+            background: 'rgba(0,0,0,0.5)',
+            borderRadius: '4px',
+            textAlign: 'center'
+          }}>
+            Participants ({otherUsers.length})
+          </div>
+
+          {/* Visible participants */}
+          {visibleSidebarUsers.map((user, index) => (
+            <div
+              key={`sidebar-user-${user.uid}`}
+              style={{
+                height: '80px',
+                background: '#444',
+                borderRadius: '6px',
+                overflow: 'hidden',
+                cursor: 'pointer',
+                border: '2px solid transparent',
+                transition: 'border-color 0.2s'
+              }}
+              onClick={() => setSpeakerUser(user)}
+              onMouseEnter={(e) => {
+                e.target.style.borderColor = '#1890ff';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.borderColor = 'transparent';
+              }}
+            >
+              <RemoteVideoPlayer user={user} isCompact={true} />
+            </div>
+          ))}
+
+          {/* Hidden users indicator */}
+          {hiddenUsersCount > 0 && (
+            <div
+              style={{
+                height: '60px',
+                background: 'rgba(255,255,255,0.1)',
+                borderRadius: '6px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'white',
+                fontSize: '12px',
+                cursor: 'pointer',
+                border: '1px dashed rgba(255,255,255,0.3)'
+              }}
+              onClick={() => setShowParticipantsList(true)}
+            >
+              +{hiddenUsersCount} more
+            </div>
+          )}
+
+          {/* Back to grid button */}
+          <Button
+            size="small"
+            type="primary"
+            ghost
+            onClick={() => {
+              setViewMode('grid');
+              setSpeakerUser(null);
+            }}
+            style={{
+              marginTop: 'auto',
+              fontSize: '11px'
+            }}
+          >
+            📱 Grid View
+          </Button>
+        </div>
+      </div>
+    );
+  }, [speakerUser, remoteUsers, showParticipantsList]);
+
+  const PaginatedGridLayout = useMemo(() => {
+    const usersPerPage = 9; // 3x3 grid per page
+    const totalPages = Math.ceil(remoteUsers.length / usersPerPage);
+    const startIndex = currentPage * usersPerPage;
+    const currentPageUsers = remoteUsers.slice(startIndex, startIndex + usersPerPage);
+
+    return (
+      <div style={{
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        background: '#000',
+        borderRadius: '8px',
+        position: 'relative'
+      }}>
+        {/* Page header */}
+        <div style={{
+          height: '40px',
+          background: 'rgba(0,0,0,0.8)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '0 16px',
+          color: 'white'
+        }}>
+          <span style={{ fontSize: '14px', fontWeight: 'bold' }}>
+            👥 Page {currentPage + 1} of {totalPages} ({remoteUsers.length} total)
+          </span>
+
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <Button
+              size="small"
+              disabled={currentPage === 0}
+              onClick={() => setCurrentPage(prev => Math.max(0, prev - 1))}
+            >
+              ‹ Prev
+            </Button>
+            <Button
+              size="small"
+              disabled={currentPage >= totalPages - 1}
+              onClick={() => setCurrentPage(prev => Math.min(totalPages - 1, prev + 1))}
+            >
+              Next ›
+            </Button>
+            <Button
+              size="small"
+              type="primary"
+              ghost
+              onClick={() => setViewMode('speaker')}
+            >
+              Speaker View
+            </Button>
+          </div>
+        </div>
+
+        {/* Current page grid */}
+        <div style={{
+          flex: 1,
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: '4px',
+          padding: '8px',
+          alignContent: 'flex-start',
+          justifyContent: 'center'
+        }}>
+          {currentPageUsers.map((user, index) => (
+            <div
+              key={`page-user-${user.uid}`}
+              style={{
+                flex: '0 0 31%',
+                minHeight: '120px',
+                maxHeight: '150px',
+                background: '#333',
+                borderRadius: '6px',
+                overflow: 'hidden',
+                cursor: 'pointer'
+              }}
+              onClick={() => {
+                setSpeakerUser(user);
+                setViewMode('speaker');
+              }}
+            >
+              <RemoteVideoPlayer
+                user={user}
+                isCompact={true}
+              />
+            </div>
+          ))}
+        </div>
+
+        {/* Page indicators */}
+        <div style={{
+          height: '30px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '4px',
+          background: 'rgba(0,0,0,0.5)'
+        }}>
+          {Array.from({ length: totalPages }, (_, i) => (
+            <div
+              key={i}
+              style={{
+                width: '8px',
+                height: '8px',
+                borderRadius: '50%',
+                background: i === currentPage ? '#1890ff' : 'rgba(255,255,255,0.3)',
+                cursor: 'pointer'
+              }}
+              onClick={() => setCurrentPage(i)}
+            />
+          ))}
+        </div>
+      </div>
+    );
+  }, [remoteUsers, currentPage]);
+
   const RemoteUsersContainer = useMemo(() => {
+
+    const userCount = remoteUsers.length;
+    const gridLayout = getGridLayout(userCount);
+
+    // Auto switch to appropriate view mode
+    const shouldUseSpeakerView = userCount >= 7 && viewMode !== 'grid';
+    const shouldUsePagination = userCount > 12 && viewMode === 'pagination';
+
+    if (shouldUseSpeakerView && !shouldUsePagination) {
+      return SpeakerViewLayout;
+    }
+
+    if (shouldUsePagination) {
+      return PaginatedGridLayout;
+    }
     return (
       <div className="remote-video-container" style={{
         height: '100%',
-        minHeight: '400px',
-        background: '#000', // Changed to black
+        minHeight: userCount === 1 ? '540px' : '400px',
+        background: '#000',
         borderRadius: '8px',
         display: 'flex',
         alignItems: 'center',
@@ -2548,28 +2368,50 @@ const AgoraVideoCall = forwardRef(({
         position: 'relative',
         overflow: 'hidden'
       }}>
-        {remoteUsers.length > 0 ? (
-          <>
-            {!isGroupCall ? (
-              <RemoteVideoPlayer
-                key={`remote-single-${remoteUsers[0].uid}`}
-                user={remoteUsers[0]}
-                isMainView={true}
-              />
-            ) : (
-              remoteUsers.map(user => (
+        {userCount > 0 ? (
+          <div style={{
+            width: '100%',
+            height: '100%',
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: userCount <= 4 ? '8px' : '4px',
+            padding: userCount <= 4 ? '8px' : '4px',
+            alignContent: userCount >= 5 ? 'flex-start' : 'center',
+            justifyContent: 'center'
+          }}>
+            {remoteUsers.map((user, index) => (
+              <div
+                key={`remote-user-${user.uid}`}
+                style={{
+                  flex: gridLayout.flex,
+                  minHeight: userCount === 1 ? '100%' : gridLayout.minHeight,
+                  maxHeight: userCount >= 9 ? '150px' : '200px',
+                  background: '#333',
+                  borderRadius: userCount >= 9 ? '4px' : '8px',
+                  overflow: 'hidden',
+                  cursor: userCount >= 7 ? 'pointer' : 'default'
+                }}
+                onClick={() => {
+                  if (userCount >= 7) {
+                    setSpeakerUser(user);
+                    setViewMode('speaker');
+                  }
+                }}
+              >
                 <RemoteVideoPlayer
-                  key={`remote-group-${user.uid}`}
+                  key={`remote-player-${user.uid}`}
                   user={user}
-                  isMainView={remoteUsers.length === 1}
+                  isMainView={userCount === 1}
+                  isCompact={userCount >= 9}
                 />
-              ))
-            )}
-          </>
+              </div>
+            ))}
+          </div>
         ) : (
           <div className="waiting-container" style={{
             width: '100%',
             height: '100%',
+            minHeight: '480px',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
@@ -2590,15 +2432,28 @@ const AgoraVideoCall = forwardRef(({
             )}
           </div>
         )}
+        {userCount > 6 && (
+          <div style={{
+            position: 'absolute',
+            top: '10px',
+            right: '10px',
+            background: 'rgba(0,0,0,0.8)',
+            color: 'white',
+            padding: '4px 8px',
+            borderRadius: '12px',
+            fontSize: '12px',
+            zIndex: 5
+          }}>
+            👥 {userCount} người
+          </div>
+        )}
       </div>
     );
-  }, [remoteUsers, isGroupCall, conversation.avatar, conversation.name, localVideoTrack]);
+  }, [remoteUsers, viewMode, currentPage, speakerUser]);
 
 
   return (
     <div className="agora-video-call">
-      {/* <AudioActivationButton onActivate={() => console.log('Audio activated')} /> */}
-      {/* <NetworkMonitor client={client} /> */}
       <div className="video-call-header">
         <div className="call-info">
           <Avatar src={conversation.avatar} icon={<UserOutlined />} />
@@ -2608,14 +2463,13 @@ const AgoraVideoCall = forwardRef(({
               <Text type="secondary">
                 {remoteUsers.length > 0 ? formatDuration(callDuration) : 'Đang kết nối...'}
               </Text>
-              {/* ✅ NEW: Show call mode */}
-              {!localVideoTrack && (
+              {/* {!localVideoTrack && (
                 <div>
                   <Text type="warning" style={{ fontSize: '12px' }}>
                     🎤 Chế độ chỉ âm thanh
                   </Text>
                 </div>
-              )}
+              )} */}
             </div>
           </div>
         </div>
@@ -2628,66 +2482,13 @@ const AgoraVideoCall = forwardRef(({
         flexDirection: 'column'
       }}>
         <Row gutter={[8, 8]} style={{ height: '100%', flex: 1 }}>
-
           <Col span={24} style={{ height: '100%' }}>
-            {/* <div className="remote-video-container" style={{
-              height: '100%',
-              minHeight: '400px',
-              background: '#fafafa',
-              borderRadius: '8px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              position: 'relative'
-            }}>
-              {remoteUsers.length > 0 ? (
-                <>
-                  {!isGroupCall ? (
-                    <RemoteVideoPlayer
-                      key={remoteUsers[0].uid}
-                      user={remoteUsers[0]}
-                      isMainView={true}
-                    />
-                  ) : (
-                    // Group call: hiển thị tất cả users
-                    remoteUsers.map(user => (
-                      <RemoteVideoPlayer
-                        key={user.uid}
-                        user={user}
-                        isMainView={remoteUsers.length === 1}
-                      />
-                    ))
-                  )}
-                </>
-              ) : (
-                <div className="waiting-container" style={{
-                  width: '100%',
-                  height: '100%',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  background: 'linear-gradient(135deg, #f8f9fa, #e9ecef)',
-                  borderRadius: '8px',
-                  padding: '32px',
-                  border: '1px solid #e8e8e8'
-                }}>
-                  <Avatar size={100} src={conversation.avatar} icon={<UserOutlined />} />
-                  <Text style={{ color: '#666', marginTop: '16px', fontSize: '16px' }}>
-                    Đang chờ {conversation.name} tham gia...
-                  </Text>
-                  {!localVideoTrack && (
-                    <Text style={{ color: '#ff9500', marginTop: '8px', fontSize: '14px' }}>
-                      Cuộc gọi chỉ có âm thanh
-                    </Text>
-                  )}
-                </div>
-              )}
-            </div> */}
+            {/* ALWAYS render remote users container */}
             {RemoteUsersContainer}
           </Col>
         </Row>
 
+        {/* ALWAYS show local video when available */}
         {localVideoTrack && (
           <div style={{
             position: 'absolute',
@@ -2750,23 +2551,44 @@ const AgoraVideoCall = forwardRef(({
           <Button
             shape="circle"
             size="large"
-            icon={isVideoMuted || !localVideoTrack ? <StopOutlined /> : <VideoCameraOutlined />}
+            icon={isVideoMuted || !localVideoTrack ? <VideoCameraOutlined /> : <StopOutlined />}
             onClick={toggleVideo}
-            className={isVideoMuted || !localVideoTrack ? 'muted-btn' : 'active-btn'}
-            title={!localVideoTrack ? 'Bật camera' : (isVideoMuted ? 'Bật camera' : 'Tắt camera')}
+            className={isVideoMuted || !localVideoTrack ? 'active-btn' : 'muted-btn'}
           />
-          {/* ✅ ADD: Video display mode toggle */}
-          <Button
-            shape="circle"
-            size="large"
-            icon={<Icon type="expand" />} // or use ExpandOutlined
-            onClick={toggleVideoDisplayMode}
-            className="active-btn"
-            title={`Chuyển sang chế độ ${videoDisplayMode === 'cover' ? 'fit' : 'fill'}`}
-            style={{ fontSize: '16px' }}
-          >
-            ⚏
-          </Button>
+          {remoteUsers.length >= 4 && (
+            <Button
+              shape="circle"
+              size="large"
+              icon={viewMode === 'grid' ? <AppstoreOutlined /> : <BorderOutlined />}
+              onClick={() => {
+                if (viewMode === 'grid') {
+                  if (remoteUsers.length > 12) {
+                    setViewMode('pagination');
+                    setCurrentPage(0);
+                  } else {
+                    setViewMode('speaker');
+                    setSpeakerUser(remoteUsers[0]);
+                  }
+                } else {
+                  setViewMode('grid');
+                  setSpeakerUser(null);
+                  setCurrentPage(0);
+                }
+              }}
+              className="active-btn"
+              title={`Switch to ${viewMode === 'grid' ? 'speaker' : 'grid'} view`}
+            />
+          )}
+          {remoteUsers.length >= 7 && (
+            <Button
+              shape="circle"
+              size="large"
+              icon={<TeamOutlined />}
+              onClick={() => setShowParticipantsList(true)}
+              className="active-btn"
+              title="Show participants list"
+            />
+          )}
           <Button
             shape="circle"
             size="large"
@@ -2777,11 +2599,6 @@ const AgoraVideoCall = forwardRef(({
           />
         </Space>
       </div>
-      {/* <CallDebugInfo
-        localAudioTrack={localAudioTrack}
-        localVideoTrack={localVideoTrack}
-        remoteUsers={remoteUsers}
-      /> */}
     </div>
   );
 });

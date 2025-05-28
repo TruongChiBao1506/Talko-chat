@@ -1,45 +1,3 @@
-/* .video-call-modal .ant-modal-content {
-    height: 80vh;
-    display: flex;
-    flex-direction: column;
-}
-
-.video-call-modal .ant-modal-body {
-    flex: 1;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-}
-
-.video-call-modal .ant-modal-header {
-    flex-shrink: 0;
-}
-
-.video-call-modal .agora-video-call {
-    height: 100%;
-}
-
-@media (max-width: 768px) {
-    .video-call-modal {
-        width: 100% !important;
-        max-width: 100% !important;
-        margin: 0;
-        padding: 0;
-    }
-    
-    .video-call-modal .ant-modal {
-        max-width: 100%;
-        top: 0;
-        padding-bottom: 0;
-        margin: 0;
-    }
-    
-    .video-call-modal .ant-modal-content {
-        height: 100vh;
-        border-radius: 0;
-    }
-} */
-
 .video-call-modal .call-ended-overlay {
   position: absolute;
   top: 0;
@@ -56,8 +14,7 @@
 
 .video-call-modal .call-ended-content {
   text-align: center;
-  color: white;
-  background: rgba(255, 255, 255, 0.1);
+  background: white;
   padding: 32px;
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.2);

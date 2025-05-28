@@ -1,9 +1,9 @@
 import React, { useRef, useImperativeHandle, forwardRef, useState, useEffect, useMemo } from 'react';
 import { Modal, Avatar, Button, Space } from 'antd';
-import { 
-    UserOutlined, 
-    AppstoreOutlined, 
-    BorderOutlined, 
+import {
+    UserOutlined,
+    AppstoreOutlined,
+    BorderOutlined,
     TeamOutlined,
     AudioOutlined,
     AudioMutedOutlined,
@@ -79,12 +79,12 @@ const ModalVideoCall = forwardRef((props, ref) => {
         return () => clearInterval(interval);
     }, [isVisible, viewMode, speakerUser]);
 
-    // ✅ CRITICAL: Track visibility changes like audio call (từ modal cũ)
+    // Track visibility changes like audio call (từ modal cũ)
     useEffect(() => {
         console.log(`📹 Modal visibility changed: ${prevVisibleRef.current} -> ${isVisible}`);
 
         if (!prevVisibleRef.current && isVisible) {
-            // ✅ CRITICAL: Reset status khi modal mở
+            // Reset status khi modal mở
             console.log('📹 Modal opened - resetting call status');
             setCallStatus({
                 isEnded: false,
@@ -106,7 +106,7 @@ const ModalVideoCall = forwardRef((props, ref) => {
         prevVisibleRef.current = isVisible;
     }, [isVisible]);
     useEffect(() => {
-        // ✅ CRITICAL: Chỉ handle khi có rejection message cụ thể
+        // Chỉ handle khi có rejection message cụ thể
         if (isRejected && rejectionMessage && !callStatus.isRejected && rejectionMessage.trim() !== '') {
             console.log('❌ Video call REJECTED by other user:', rejectionMessage);
 
@@ -116,7 +116,7 @@ const ModalVideoCall = forwardRef((props, ref) => {
                 message: rejectionMessage
             }));
 
-            // ✅ Delay cleanup để user có thể thấy message
+            // Delay cleanup để user có thể thấy message
             setTimeout(async () => {
                 if (agoraCallRef.current && agoraCallRef.current.cleanup && isComponentMounted.current) {
                     console.log('🧹 FORCE cleanup on video rejection');
@@ -146,7 +146,7 @@ const ModalVideoCall = forwardRef((props, ref) => {
         // }
         console.log('🚪 Video modal handleCancel called');
 
-        // ✅ IMPROVED: Reset group call states
+        // Reset group call states
         setViewMode('grid');
         setSpeakerUser(null);
         setShowParticipantsList(false);
@@ -163,11 +163,11 @@ const ModalVideoCall = forwardRef((props, ref) => {
 
     };
 
-    // ✅ CRITICAL: Thêm logic từ modal cũ - auto cleanup khi call ends
+    // Thêm logic từ modal cũ - auto cleanup khi call ends
     const handleCallStatusChange = (statusInfo) => {
         console.log('📹 Video call status changed:', statusInfo);
 
-        // ✅ CRITICAL: Chỉ update khi có status thực sự quan trọng
+        // Chỉ update khi có status thực sự quan trọng
         if (statusInfo.isEnded || statusInfo.isRejected || statusInfo.message) {
             setCallStatus({
                 isEnded: statusInfo.isEnded || false,
@@ -176,7 +176,7 @@ const ModalVideoCall = forwardRef((props, ref) => {
                 duration: statusInfo.duration || callStatus.duration // Giữ duration cũ nếu không có duration mới
             });
 
-            // ✅ CRITICAL: Cleanup when call ACTUALLY ends
+            // Cleanup when call ACTUALLY ends
             if ((statusInfo.isEnded && statusInfo.message) || (statusInfo.isRejected && statusInfo.message)) {
                 console.log('🔚 Video call ACTUALLY ended/rejected - performing cleanup');
 
@@ -205,7 +205,7 @@ const ModalVideoCall = forwardRef((props, ref) => {
         };
     }, []);
 
-    // ✅ CRITICAL: Handle rejection from other user like audio call (từ modal cũ)
+    // Handle rejection from other user like audio call (từ modal cũ)
     useEffect(() => {
         if (isRejected && rejectionMessage && !callStatus.isRejected) {
             console.log('❌ Video call REJECTED by other user - immediate cleanup');
@@ -236,9 +236,9 @@ const ModalVideoCall = forwardRef((props, ref) => {
     // Sử dụng conversationId làm tên kênh
     const channelName = generateChannelId(conversation._id);
 
-    // ✅ ADD: Call status overlay như modal cũ
+    // Call status overlay như modal cũ
     const CallStatusOverlay = () => {
-        // ✅ CRITICAL: Chỉ hiển thị khi có status cụ thể, KHÔNG hiển thị từ đầu
+        // Chỉ hiển thị khi có status cụ thể, KHÔNG hiển thị từ đầu
         const shouldShow = (callStatus.isEnded && callStatus.message) ||
             (callStatus.isRejected && callStatus.message) ||
             (isRejected && rejectionMessage);
@@ -251,6 +251,24 @@ const ModalVideoCall = forwardRef((props, ref) => {
             return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
         };
 
+        // return (
+        //     <div className="call-ended-overlay">
+        //         <div className="call-ended-content">
+        //             <div className="call-ended-icon">
+        //                 {callStatus.isRejected || isRejected ? '❌' : '📹'}
+        //             </div>
+        //             <div className="call-ended-message">
+        //                 {callStatus.message || rejectionMessage || 'Cuộc gọi video đã kết thúc'}
+        //             </div>
+        //             <div className="call-ended-duration">
+        //                 {callStatus.isEnded && callStatus.duration > 0 ?
+        //                     `Thời gian gọi: ${formatCallDuration(callStatus.duration)}` :
+        //                     'Cuộc gọi đã kết thúc'
+        //                 }
+        //             </div>
+        //         </div>
+        //     </div>
+        // );
         return (
             <div className="call-ended-overlay">
                 <div className="call-ended-content">
@@ -258,10 +276,10 @@ const ModalVideoCall = forwardRef((props, ref) => {
                         {callStatus.isRejected || isRejected ? '❌' : '📹'}
                     </div>
                     <div className="call-ended-message">
-                        {callStatus.message || rejectionMessage || 'Cuộc gọi video đã kết thúc'}
+                        {callStatus.message || rejectionMessage || 'Cuộc gọi đã kết thúc'}
                     </div>
                     <div className="call-ended-duration">
-                        {callStatus.isEnded && callStatus.duration > 0 ?
+                        {callStatus.isEnded ?
                             `Thời gian gọi: ${formatCallDuration(callStatus.duration)}` :
                             'Cuộc gọi đã kết thúc'
                         }
@@ -430,7 +448,7 @@ const ModalVideoCall = forwardRef((props, ref) => {
         );
     }, [remoteUsers, viewMode, isGroupCall]);
 
-    // ✅ ADD: Speaker View Layout
+    // Speaker View Layout
     const SpeakerViewLayout = useMemo(() => {
         if (viewMode !== 'speaker' || !speakerUser || remoteUsers.length === 0) return null;
 
@@ -796,7 +814,7 @@ const ModalVideoCall = forwardRef((props, ref) => {
         );
     }, [isGroupCall, showParticipantsList, remoteUsers, currentUser, isAudioMuted, isVideoMuted, localVideoTrack, viewMode, speakerUser, conversation.totalMembers]);
 
-    // ✅ ADD: Group Call Controls Overlay
+    // Group Call Controls Overlay
     const GroupCallControls = useMemo(() => {
         if (!isGroupCall) return null;
 
@@ -843,58 +861,6 @@ const ModalVideoCall = forwardRef((props, ref) => {
         );
     }, [isGroupCall, viewMode, showParticipantsList, remoteUsers.length]);
 
-
-
-    // return (
-    //     <Modal
-    //         title={modalTitle}
-    //         open={isVisible}
-    //         onCancel={handleCancel}
-    //         footer={null}
-    //         width="90%"
-    //         style={{ maxWidth: '750px' }}
-    //         centered
-    //         destroyOnClose={true}
-    //         maskClosable={false}
-    //         keyboard={false}
-    //         className="video-call-modal"
-    //         afterClose={async () => {
-    //             console.log('📹 Video modal completely closed - final cleanup');
-    //             if (agoraCallRef.current && agoraCallRef.current.cleanup) {
-    //                 await agoraCallRef.current.cleanup();
-    //             }
-    //             // ✅ CRITICAL: Reset status sau khi đóng hoàn toàn
-    //             setCallStatus({
-    //                 isEnded: false,
-    //                 isRejected: false,
-    //                 message: '',
-    //                 duration: 0
-    //             });
-    //         }}
-    //     >
-    //         {/* ✅ IMPROVED: Đơn giản hóa container */}
-    //         <div style={{ position: 'relative', height: '100%' }}>
-    //             {/* ✅ CRITICAL: CallStatusOverlay có zIndex cao nhất */}
-    //             <CallStatusOverlay />
-
-    //             {/* ✅ CRITICAL: AgoraVideoCall luôn render khi modal visible */}
-    //             {isVisible && (
-    //                 <AgoraVideoCall
-    //                     ref={agoraCallRef}
-    //                     channelName={channelName}
-    //                     uid={currentUser._id}
-    //                     onEndCall={handleCancel}
-    //                     currentUser={currentUser}
-    //                     conversation={conversation}
-    //                     isRejected={isRejected}
-    //                     rejectionMessage={rejectionMessage}
-    //                     onCallEnded={handleCallStatusChange}
-    //                 />
-    //             )}
-    //         </div>
-    //     </Modal>
-    // );
-
     return (
         <Modal
             title={modalTitle}
@@ -913,7 +879,7 @@ const ModalVideoCall = forwardRef((props, ref) => {
                 if (agoraCallRef.current && agoraCallRef.current.cleanup) {
                     await agoraCallRef.current.cleanup();
                 }
-                // ✅ IMPROVED: Reset all states
+                // Reset all states
                 setCallStatus({
                     isEnded: false,
                     isRejected: false,
@@ -928,7 +894,7 @@ const ModalVideoCall = forwardRef((props, ref) => {
         >
             <div style={{
                 position: 'relative',
-                height: isGroupCall ? '600px' : '500px',
+                height: isGroupCall ? '600px' : '620px',
                 background: '#1a1a1a',
                 borderRadius: '12px',
                 overflow: 'hidden'
@@ -945,33 +911,36 @@ const ModalVideoCall = forwardRef((props, ref) => {
                 {/* Main Video Content */}
                 {isVisible && (
                     <div style={{ height: '100%', position: 'relative' }}>
-                        {/* Group Video Layouts */}
-                        {isGroupCall && remoteUsers.length > 0 && (
-                            <div style={{ height: '100%' }}>
+                        {/* Always show AgoraVideoCall component */}
+                        <AgoraVideoCall
+                            ref={agoraCallRef}
+                            channelName={channelName}
+                            uid={currentUser._id}
+                            onEndCall={handleCancel}
+                            currentUser={currentUser}
+                            conversation={conversation}
+                            isRejected={isRejected}
+                            rejectionMessage={rejectionMessage}
+                            onCallEnded={handleCallStatusChange}
+                        />
+
+                        {/* Group Video Overlays (optional enhancement) */}
+                        {isGroupCall && remoteUsers.length > 1 && (
+                            <div style={{
+                                position: 'absolute',
+                                top: 0,
+                                left: 0,
+                                right: 0,
+                                bottom: 0,
+                                pointerEvents: 'none',
+                                zIndex: 5
+                            }}>
                                 {viewMode === 'speaker' && speakerUser ?
                                     SpeakerViewLayout :
                                     GridVideoLayout
                                 }
                             </div>
                         )}
-
-                        {/* AgoraVideoCall Component */}
-                        <div style={{
-                            height: '100%',
-                            display: isGroupCall && remoteUsers.length > 0 ? 'none' : 'block'
-                        }}>
-                            <AgoraVideoCall
-                                ref={agoraCallRef}
-                                channelName={channelName}
-                                uid={currentUser._id}
-                                onEndCall={handleCancel}
-                                currentUser={currentUser}
-                                conversation={conversation}
-                                isRejected={isRejected}
-                                rejectionMessage={rejectionMessage}
-                                onCallEnded={handleCallStatusChange}
-                            />
-                        </div>
                     </div>
                 )}
             </div>
