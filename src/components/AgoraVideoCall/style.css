@@ -6,7 +6,8 @@
 }
 
 .video-call-header {
-    padding: 16px;
+    /* padding: 16px; */
+    margin-bottom: 10px;
     background: rgba(255, 255, 255, 0.95);
     color: #333;
     z-index: 10;
@@ -162,11 +163,10 @@
 /* Controls styling */
 .video-call-controls {
     padding: 20px;
-    background: rgba(255, 255, 255, 0.95);
+    margin-bottom: 10px;
     display: flex;
     justify-content: center;
-    z-index: 10;
-    border-top: 1px solid #e8e8e8;
+    z-index: 1000;
 }
 
 .video-call-controls .ant-btn {
@@ -212,7 +212,7 @@
     }
 }
 
-/* ✅ ADD: Aspect ratio containers */
+/*spect ratio containers */
 .video-aspect-container {
     /* position: relative;
     width: 100%;
@@ -282,7 +282,6 @@
 
 .video-call-modal .ant-modal-content {
     height: 90vh;
-    /* Increase from 80vh to 90vh */
     padding: 0;
     background: #f5f5f5;
 }
@@ -345,9 +344,7 @@
     justify-content: center;
     height: 100%;
     background: #fff2f0;
-    /* Màu nền đỏ nhạt cho error */
     color: #cf1322;
-    /* Màu chữ đỏ */
     padding: 32px;
     border: 1px solid #ffccc7;
     border-radius: 8px;
@@ -406,8 +403,6 @@
     /* Layout recalculations */
     contain: layout style paint;
     transform: translateZ(0);
-
-    /* Browser optimizations */
     will-change: auto;
 }
 
@@ -454,11 +449,9 @@
     display: flex !important;
     flex-direction: column !important;
     align-items: center !important;
-    /* Sửa alignItems → align-items */
     justify-content: center !important;
     background: linear-gradient(135deg, #f8f9fa, #e9ecef) !important;
     z-index: 2 !important;
-    /* Sửa zIndex → z-index */
     margin: 0 !important;
     padding: 0 !important;
     border-radius: 8px;
