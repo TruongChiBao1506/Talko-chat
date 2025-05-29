@@ -39,6 +39,7 @@ function ModalJoinGroupFromLink({ isVisible, info, onCancel }) {
             await conversationApi.joinGroupFromLink(_id);
             handleCancel();
             message.success('Tham gia nhóm thành công');
+            window.location.reload();
         } catch (error) {
             console.log(error);
 

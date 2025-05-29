@@ -71,7 +71,7 @@ function ChatLayout() {
     const videoCallRef = useRef(null);
 
     const callTimeoutRef = useRef(null);
-    const CALL_TIMEOUT_DURATION = 10000;
+    const CALL_TIMEOUT_DURATION = 30000;
     const rejectedMembersRef = useRef(new Set());
 
     const [videoCallRejectedMembers, setVideoCallRejectedMembers] = useState(new Set());
@@ -135,7 +135,6 @@ function ChatLayout() {
     useEffect(() => {
         const userId = user._id;
         if (userId) {
-            console.log('📞 Registering user for calls:', userId);
             socket.emit('join', userId);
 
             handleResetNotificationCache(userId);
@@ -169,9 +168,19 @@ function ChatLayout() {
         });
 
         socket.on('update-member', async (conversationId) => {
-            const data = await conversationApi.getConversationById(conversationId);
-            const { avatar, totalMembers } = data;
-            dispatch(updateAvatarWhenUpdateMember({ conversationId, avatar, totalMembers }));
+            try {
+                const data = await conversationApi.getConversationById(conversationId);
+                const { avatar, totalMembers } = data;
+                dispatch(updateAvatarWhenUpdateMember({ conversationId, avatar, totalMembers }));
+            } catch (error) {
+                // ← Im lặng bỏ qua lỗi 404 khi user không còn quyền truy cập
+                if (error.response?.status === 404) {
+                    console.log('User no longer has access to conversation:', conversationId);
+                    return;
+                }
+                // Log các lỗi khác
+                console.error('Error updating member info:', error);
+            }
         });
 
         socket.on('new-message-of-channel', (conversationId, channelId, message) => {
@@ -264,8 +273,6 @@ function ChatLayout() {
     // Xử lý cuộc gọi đến
     useEffect(() => {
         if (!socket || !user) return;
-
-        console.log('🛠️ Setting up call event listeners');
 
         // Sự kiện cuộc gọi thoại đến
         socket.on('incoming-voice-call', (data) => {
@@ -614,8 +621,6 @@ function ChatLayout() {
     useEffect(() => {
         if (!socket || !user) return;
 
-        console.log('🛠️ Setting up VIDEO call event listeners');
-
         // Video call incoming
         socket.on('incoming-video-call', (data) => {
             console.log('📹 Đã nhận sự kiện incoming-video-call:', data);
@@ -857,7 +862,6 @@ function ChatLayout() {
     useEffect(() => {
         if (!socket || !conversations || !conversations.length || !user) return;
 
-        console.log('🔄 Joining conversation rooms');
 
         // Join vào tất cả các phòng trò chuyện
         conversations.forEach(conversation => {
@@ -865,13 +869,10 @@ function ChatLayout() {
 
             // Join vào phòng chính - quan trọng nhất cho thông báo cuộc gọi
             socket.emit('join-conversation', conversationId);
-            console.log('📱 Đã join vào phòng chính:', conversationId);
 
             // Join vào các phòng cuộc gọi
             socket.emit('join-conversation', `${conversationId}call`);
             socket.emit('join-conversation', `${conversationId}audio-call`);
-            console.log('📱 Đã join vào phòng cuộc gọi:',
-                `${conversationId}call`, `${conversationId}audio-call`);
         });
 
     }, [socket, conversations, user]);

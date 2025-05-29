@@ -7,6 +7,7 @@ import ChatLayout from './layout/ChatLayout';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchUserProfile } from './redux/globalSlice'
 import { useEffect, useState } from 'react';
+import JoinFromLink from './components/JoinFromLink';
 function App() {
   const dispatch = useDispatch();
   const [isFetch, setIsFetch] = useState(false);
@@ -32,6 +33,7 @@ function App() {
         <Route path='/home' element={<Home />} />
         <Route path='/auth/*' element={<Auth />} />
         <Route path='/chat/*' element={<ChatLayout />} />
+        <Route path='/jf-link/:conversationId' element={<JoinFromLink />} />
         <Route path='*' element={<NotFoundPage />} />
       </Routes>
     </Router>

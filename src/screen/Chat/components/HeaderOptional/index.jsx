@@ -173,8 +173,6 @@ function HeaderOptional(props) {
         }
     };
 
-    console.log('HeaderOptional rendered with props:', props);
-
     return (
         <div id='header-optional'>
             <div className='header_wrapper'>

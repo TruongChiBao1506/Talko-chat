@@ -21,7 +21,7 @@ function InfoMember({viewMemberClick, quantity}) {
     const { confirm } = Modal;
     const { user } = useSelector(state => state.global);
     const [checkLeader, setCheckLeader] = useState(false);
-    
+    const appUrl = window.location.origin;
 
     useEffect(() => {
         const tempStatus = conversations.find(ele => ele._id === currentConversation).isJoinFromLink;
@@ -29,7 +29,6 @@ function InfoMember({viewMemberClick, quantity}) {
         setCheckLeader(tempCheck);
         setSatus(tempStatus);
     }, [currentConversation])
-
 
     const styleIconDrop = {
         transform: 'rotate(-90deg)'
@@ -51,7 +50,7 @@ function InfoMember({viewMemberClick, quantity}) {
     }
 
     const handleCopyLink = () => {
-        navigator.clipboard.writeText(`${process.env.REACT_APP_URL}/jf-link/${currentConversation}`);
+        navigator.clipboard.writeText(`${appUrl}/jf-link/${currentConversation}`);
         message.info('Đã sao chép link');
     }
 
@@ -116,7 +115,7 @@ function InfoMember({viewMemberClick, quantity}) {
                         </div>
 
                         <div className="info_member-interact_link-des">
-                            {`${process.env.REACT_APP_URL}/jf-link/${currentConversation}`}
+                            {`${appUrl}/jf-link/${currentConversation}`}
                         </div>
                     </div>
 
