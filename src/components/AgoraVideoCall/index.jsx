@@ -406,134 +406,278 @@ const AgoraVideoCall = forwardRef(({
           );
         }
       });
+      // agoraClient.on('user-published', async (user, mediaType) => {
+      //   if (!isComponentMounted.current) return;
+
+      //   console.log('👤 User published:', user.uid, mediaType);
+
+      //   try {
+      //     await agoraClient.subscribe(user, mediaType);
+
+      //     if (mediaType === 'video' && user.videoTrack && isComponentMounted.current) {
+      //       const updateKey = `video-${user.uid}`;
+
+      //       // Debounce với time check
+      //       const now = Date.now();
+      //       const lastUpdate = lastUpdateTime.current.get(updateKey) || 0;
+
+      //       if (now - lastUpdate < 200) {
+      //         console.log('🔄 Debouncing video update for UID:', user.uid);
+      //         return;
+      //       }
+
+      //       lastUpdateTime.current.set(updateKey, now);
+
+      //       // Clear previous timeout
+      //       if (updateTimeouts.current.has(updateKey)) {
+      //         clearTimeout(updateTimeouts.current.get(updateKey));
+      //       }
+
+      //       // Single debounced update
+      //       updateTimeouts.current.set(updateKey, setTimeout(() => {
+      //         if (!isComponentMounted.current) return;
+
+      //         setRemoteUsers(prev => {
+      //           const existingUserIndex = prev.findIndex(u => u.uid === user.uid);
+
+      //           if (existingUserIndex !== -1) {
+      //             const currentUser = prev[existingUserIndex];
+
+      //             // ✅ ONLY update if actually different
+      //             if (currentUser.videoTrack !== user.videoTrack || !currentUser.hasVideo) {
+      //               console.log('🔄 Updating existing user with video:', user.uid);
+
+      //               const updatedUsers = [...prev];
+      //               updatedUsers[existingUserIndex] = {
+      //                 ...currentUser,
+      //                 videoTrack: user.videoTrack,
+      //                 hasVideo: true
+      //               };
+
+      //               return updatedUsers;
+      //             } else {
+      //               console.log('ℹ️ No video changes needed for user:', user.uid);
+      //             }
+      //           } else {
+      //             console.warn('⚠️ User not found in remoteUsers for video update:', user.uid);
+      //           }
+
+      //           return prev; // No changes
+      //         });
+
+      //         updateTimeouts.current.delete(updateKey);
+      //         lastUpdateTime.current.delete(updateKey);
+      //       }, 150)); // Debounce 150ms
+      //     }
+
+      //     if (mediaType === 'audio' && user.audioTrack && isComponentMounted.current) {
+      //       const updateKey = `audio-${user.uid}`;
+
+      //       // Debounce audio updates
+      //       const now = Date.now();
+      //       const lastUpdate = lastUpdateTime.current.get(updateKey) || 0;
+
+      //       if (now - lastUpdate < 200) {
+      //         console.log('🔄 Debouncing audio update for UID:', user.uid);
+      //         return;
+      //       }
+
+      //       lastUpdateTime.current.set(updateKey, now);
+
+      //       try {
+      //         await user.audioTrack.play();
+      //         console.log('✅ Audio playing for UID:', user.uid);
+      //       } catch (audioError) {
+      //         console.error('❌ Audio play error:', audioError);
+      //       }
+
+      //       // Clear previous timeout
+      //       if (updateTimeouts.current.has(updateKey)) {
+      //         clearTimeout(updateTimeouts.current.get(updateKey));
+      //       }
+
+      //       updateTimeouts.current.set(updateKey, setTimeout(() => {
+      //         if (!isComponentMounted.current) return;
+
+      //         setRemoteUsers(prev => {
+      //           const existingUserIndex = prev.findIndex(u => u.uid === user.uid);
+
+      //           if (existingUserIndex !== -1) {
+      //             const currentUser = prev[existingUserIndex];
+
+      //             // ✅ ONLY update if actually different
+      //             if (currentUser.audioTrack !== user.audioTrack || !currentUser.hasAudio) {
+      //               console.log('🔄 Updating existing user with audio:', user.uid);
+
+      //               const updatedUsers = [...prev];
+      //               updatedUsers[existingUserIndex] = {
+      //                 ...currentUser,
+      //                 audioTrack: user.audioTrack,
+      //                 hasAudio: true
+      //               };
+
+      //               return updatedUsers;
+      //             } else {
+      //               console.log('ℹ️ No audio changes needed for user:', user.uid);
+      //             }
+      //           } else {
+      //             console.warn('⚠️ User not found in remoteUsers for audio update:', user.uid);
+      //           }
+
+      //           return prev; // No changes
+      //         });
+
+      //         updateTimeouts.current.delete(updateKey);
+      //         lastUpdateTime.current.delete(updateKey);
+      //       }, 150)); // Debounce 150ms
+      //     }
+
+      //   } catch (err) {
+      //     console.error('❌ Error subscribing to user:', err);
+      //   }
+      // });
+
       agoraClient.on('user-published', async (user, mediaType) => {
         if (!isComponentMounted.current) return;
 
-        console.log('👤 User published:', user.uid, mediaType);
+        console.log('👤 User published:', user.uid, mediaType, 'isGroupCall:', isGroupCall);
 
         try {
           await agoraClient.subscribe(user, mediaType);
+          console.log('✅ Subscribed to user:', user.uid, mediaType);
 
           if (mediaType === 'video' && user.videoTrack && isComponentMounted.current) {
-            const updateKey = `video-${user.uid}`;
+            console.log('📹 Processing video track for user:', user.uid);
 
-            // Debounce với time check
-            const now = Date.now();
-            const lastUpdate = lastUpdateTime.current.get(updateKey) || 0;
+            setRemoteUsers(prev => {
+              const existingUserIndex = prev.findIndex(u => String(u.uid) === String(user.uid));
 
-            if (now - lastUpdate < 200) {
-              console.log('🔄 Debouncing video update for UID:', user.uid);
-              return;
-            }
+              if (existingUserIndex !== -1) {
+                // ✅ FIX: Update existing user
+                console.log('🔄 Updating existing user with video:', user.uid);
+                const updatedUsers = [...prev];
+                const currentUser = updatedUsers[existingUserIndex];
 
-            lastUpdateTime.current.set(updateKey, now);
+                updatedUsers[existingUserIndex] = {
+                  ...currentUser,
+                  videoTrack: user.videoTrack,
+                  hasVideo: true // ✅ Đảm bảo hasVideo = true
+                };
 
-            // Clear previous timeout
-            if (updateTimeouts.current.has(updateKey)) {
-              clearTimeout(updateTimeouts.current.get(updateKey));
-            }
+                console.log('✅ Video updated for user:', {
+                  uid: user.uid,
+                  name: updatedUsers[existingUserIndex].name,
+                  hasVideo: updatedUsers[existingUserIndex].hasVideo,
+                  hasTrack: !!updatedUsers[existingUserIndex].videoTrack
+                });
 
-            // Single debounced update
-            updateTimeouts.current.set(updateKey, setTimeout(() => {
-              if (!isComponentMounted.current) return;
+                return updatedUsers;
+              } else {
+                // ✅ FIX: User chưa tồn tại, thêm mới
+                console.log('🆕 Adding new user from video published:', user.uid);
 
-              setRemoteUsers(prev => {
-                const existingUserIndex = prev.findIndex(u => u.uid === user.uid);
+                let userName = `User ${user.uid}`;
+                let userAvatar = null;
+                let memberInfo = null;
 
-                if (existingUserIndex !== -1) {
-                  const currentUser = prev[existingUserIndex];
-
-                  // ✅ ONLY update if actually different
-                  if (currentUser.videoTrack !== user.videoTrack || !currentUser.hasVideo) {
-                    console.log('🔄 Updating existing user with video:', user.uid);
-
-                    const updatedUsers = [...prev];
-                    updatedUsers[existingUserIndex] = {
-                      ...currentUser,
-                      videoTrack: user.videoTrack,
-                      hasVideo: true
-                    };
-
-                    return updatedUsers;
+                if (!isGroupCall && conversation.totalMembers === 2) {
+                  const otherUserInfo = getOtherUserInfo();
+                  userName = otherUserInfo.name || conversation.name || `User ${user.uid}`;
+                  userAvatar = otherUserInfo.avatar || conversation.avatar;
+                } else if (isGroupCall && conversation.members) {
+                  memberInfo = findUserByUID(user.uid, conversation.members);
+                  if (memberInfo) {
+                    userName = memberInfo.name || memberInfo.username || `User ${user.uid}`;
+                    userAvatar = memberInfo.avatar;
                   } else {
-                    console.log('ℹ️ No video changes needed for user:', user.uid);
+                    userName = `Thành viên ${user.uid}`;
                   }
-                } else {
-                  console.warn('⚠️ User not found in remoteUsers for video update:', user.uid);
                 }
 
-                return prev; // No changes
-              });
+                const newUser = {
+                  uid: user.uid,
+                  hasAudio: false,
+                  hasVideo: true, // ✅ FIX: Set hasVideo = true for video track
+                  audioTrack: null,
+                  videoTrack: user.videoTrack,
+                  name: userName,
+                  avatar: userAvatar,
+                  memberId: memberInfo?._id || null
+                };
 
-              updateTimeouts.current.delete(updateKey);
-              lastUpdateTime.current.delete(updateKey);
-            }, 150)); // Debounce 150ms
+                console.log('✅ Adding new user with video:', newUser);
+                return [...prev, newUser];
+              }
+            });
           }
 
           if (mediaType === 'audio' && user.audioTrack && isComponentMounted.current) {
-            const updateKey = `audio-${user.uid}`;
-
-            // Debounce audio updates
-            const now = Date.now();
-            const lastUpdate = lastUpdateTime.current.get(updateKey) || 0;
-
-            if (now - lastUpdate < 200) {
-              console.log('🔄 Debouncing audio update for UID:', user.uid);
-              return;
-            }
-
-            lastUpdateTime.current.set(updateKey, now);
+            console.log('🎤 Processing audio track for user:', user.uid);
 
             try {
               await user.audioTrack.play();
-              console.log('✅ Audio playing for UID:', user.uid);
+              console.log('✅ Audio playing for user:', user.uid);
             } catch (audioError) {
-              console.error('❌ Audio play error:', audioError);
+              console.warn('⚠️ Audio play error:', audioError);
             }
 
-            // Clear previous timeout
-            if (updateTimeouts.current.has(updateKey)) {
-              clearTimeout(updateTimeouts.current.get(updateKey));
-            }
+            setRemoteUsers(prev => {
+              const existingUserIndex = prev.findIndex(u => String(u.uid) === String(user.uid));
 
-            updateTimeouts.current.set(updateKey, setTimeout(() => {
-              if (!isComponentMounted.current) return;
+              if (existingUserIndex !== -1) {
+                // ✅ FIX: Update existing user
+                console.log('🔄 Updating existing user with audio:', user.uid);
+                const updatedUsers = [...prev];
+                const currentUser = updatedUsers[existingUserIndex];
 
-              setRemoteUsers(prev => {
-                const existingUserIndex = prev.findIndex(u => u.uid === user.uid);
+                updatedUsers[existingUserIndex] = {
+                  ...currentUser,
+                  audioTrack: user.audioTrack,
+                  hasAudio: true // ✅ Đảm bảo hasAudio = true
+                };
 
-                if (existingUserIndex !== -1) {
-                  const currentUser = prev[existingUserIndex];
+                return updatedUsers;
+              } else {
+                // ✅ FIX: User chưa tồn tại, thêm mới
+                console.log('🆕 Adding new user from audio published:', user.uid);
 
-                  // ✅ ONLY update if actually different
-                  if (currentUser.audioTrack !== user.audioTrack || !currentUser.hasAudio) {
-                    console.log('🔄 Updating existing user with audio:', user.uid);
+                let userName = `User ${user.uid}`;
+                let userAvatar = null;
+                let memberInfo = null;
 
-                    const updatedUsers = [...prev];
-                    updatedUsers[existingUserIndex] = {
-                      ...currentUser,
-                      audioTrack: user.audioTrack,
-                      hasAudio: true
-                    };
-
-                    return updatedUsers;
+                if (!isGroupCall && conversation.totalMembers === 2) {
+                  const otherUserInfo = getOtherUserInfo();
+                  userName = otherUserInfo.name || conversation.name || `User ${user.uid}`;
+                  userAvatar = otherUserInfo.avatar || conversation.avatar;
+                } else if (isGroupCall && conversation.members) {
+                  memberInfo = findUserByUID(user.uid, conversation.members);
+                  if (memberInfo) {
+                    userName = memberInfo.name || memberInfo.username || `User ${user.uid}`;
+                    userAvatar = memberInfo.avatar;
                   } else {
-                    console.log('ℹ️ No audio changes needed for user:', user.uid);
+                    userName = `Thành viên ${user.uid}`;
                   }
-                } else {
-                  console.warn('⚠️ User not found in remoteUsers for audio update:', user.uid);
                 }
 
-                return prev; // No changes
-              });
+                const newUser = {
+                  uid: user.uid,
+                  hasAudio: true,
+                  hasVideo: false,
+                  audioTrack: user.audioTrack,
+                  videoTrack: null,
+                  name: userName,
+                  avatar: userAvatar,
+                  memberId: memberInfo?._id || null
+                };
 
-              updateTimeouts.current.delete(updateKey);
-              lastUpdateTime.current.delete(updateKey);
-            }, 150)); // Debounce 150ms
+                console.log('✅ Adding new user with audio:', newUser);
+                return [...prev, newUser];
+              }
+            });
           }
 
-        } catch (err) {
-          console.error('❌ Error subscribing to user:', err);
+        } catch (error) {
+          console.error('❌ Error subscribing to user:', user.uid, mediaType, error);
         }
       });
 
@@ -1740,6 +1884,348 @@ const AgoraVideoCall = forwardRef(({
   };
 
 
+  // const RemoteVideoPlayer = React.memo(({ user, isMainView = false, isCompact = false }) => {
+  //   const videoContainerRef = useRef(null);
+  //   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
+  //   const [retryCount, setRetryCount] = useState(0);
+
+  //   // Refs để track state without causing re-renders
+  //   const isPlayingRef = useRef(false);
+  //   const playPromiseRef = useRef(null);
+  //   const currentTrackRef = useRef(null);
+  //   const isInitializedRef = useRef(false);
+  //   const playAttemptCountRef = useRef(0);
+  //   const lastPlayTimeRef = useRef(0);
+  //   const maxRetries = 3;
+
+  //   // Deep stable user object với ref comparison
+  //   const prevUserRef = useRef(user);
+  //   const stableUser = useMemo(() => {
+  //     const currentUser = {
+  //       uid: user.uid,
+  //       hasVideo: user.hasVideo,
+  //       videoTrack: user.videoTrack,
+  //       name: user.name,
+  //       avatar: user.avatar
+  //     };
+
+  //     // Only update if actually different
+  //     const hasChanged = !prevUserRef.current ||
+  //       prevUserRef.current.uid !== currentUser.uid ||
+  //       prevUserRef.current.hasVideo !== currentUser.hasVideo ||
+  //       prevUserRef.current.videoTrack !== currentUser.videoTrack ||
+  //       prevUserRef.current.name !== currentUser.name ||
+  //       prevUserRef.current.avatar !== currentUser.avatar;
+
+  //     if (hasChanged) {
+  //       console.log('📋 User data changed for UID:', currentUser.uid);
+  //       prevUserRef.current = currentUser;
+  //       return currentUser;
+  //     }
+
+  //     // Return previous reference if no changes
+  //     return prevUserRef.current;
+  //   }, [
+  //     user.uid,
+  //     user.hasVideo,
+  //     user.videoTrack,
+  //     user.name,
+  //     user.avatar
+  //   ]);
+
+  //   // Stable overlay condition
+  //   const shouldShowOverlay = useMemo(() => {
+  //     return !stableUser.hasVideo || !stableUser.videoTrack || !isVideoLoaded;
+  //   }, [stableUser.hasVideo, stableUser.videoTrack, isVideoLoaded]);
+
+  //   // Video track change detection với debounce
+  //   const trackId = stableUser.videoTrack ?
+  //     (stableUser.videoTrack.trackMediaType + '-' + stableUser.uid) :
+  //     null;
+
+  //   useEffect(() => {
+  //     // Multiple guards để prevent duplicate calls
+  //     if (!stableUser.videoTrack || !videoContainerRef.current) {
+  //       // Reset flags nếu không có track
+  //       isPlayingRef.current = false;
+  //       playPromiseRef.current = null;
+  //       currentTrackRef.current = null;
+  //       isInitializedRef.current = false;
+  //       setIsVideoLoaded(false);
+  //       setRetryCount(0);
+  //       return;
+  //     }
+
+  //     // Check if same track already playing
+  //     if (currentTrackRef.current === stableUser.videoTrack && isPlayingRef.current) {
+  //       console.log('🎬 Same track already playing, skipping:', stableUser.uid);
+  //       return;
+  //     }
+
+  //     // Debounce multiple rapid calls
+  //     const now = Date.now();
+  //     if (now - lastPlayTimeRef.current < 500) {
+  //       console.log('🎬 Debouncing play call for UID:', stableUser.uid);
+  //       return;
+  //     }
+  //     lastPlayTimeRef.current = now;
+
+  //     // Limit play attempts
+  //     if (playAttemptCountRef.current >= 3) {
+  //       console.warn('🎬 Max play attempts reached for UID:', stableUser.uid);
+  //       return;
+  //     }
+
+  //     playAttemptCountRef.current++;
+  //     console.log(`🎬 Play attempt ${playAttemptCountRef.current}/3 for UID:`, stableUser.uid);
+
+  //     // Check if container already has video element playing this track
+  //     const existingVideo = videoContainerRef.current.querySelector('video');
+  //     if (existingVideo && !existingVideo.paused && isPlayingRef.current) {
+  //       console.log('🎬 Video element already playing, skipping play() call');
+  //       setIsVideoLoaded(true);
+  //       currentTrackRef.current = stableUser.videoTrack;
+  //       return;
+  //     }
+
+  //     const playVideo = async () => {
+  //       try {
+  //         if (!videoContainerRef.current || !stableUser.videoTrack) {
+  //           return;
+  //         }
+
+  //         // Set flags BEFORE play
+  //         isPlayingRef.current = true;
+  //         currentTrackRef.current = stableUser.videoTrack;
+  //         setIsVideoLoaded(false);
+
+  //         console.log('🎬 Starting video playback for UID:', stableUser.uid);
+
+  //         // Store play promise
+  //         playPromiseRef.current = stableUser.videoTrack.play(videoContainerRef.current);
+  //         await playPromiseRef.current;
+
+  //         console.log('✅ Video play successful for UID:', stableUser.uid);
+
+  //         // Style video ONLY once with timeout
+  //         setTimeout(() => {
+  //           if (stableUser.videoTrack &&
+  //             videoContainerRef.current &&
+  //             isPlayingRef.current &&
+  //             currentTrackRef.current === stableUser.videoTrack) {
+
+  //             const videoElement = videoContainerRef.current.querySelector('video');
+  //             if (videoElement && !videoElement.dataset.agoraStyled) {
+  //               videoElement.dataset.agoraStyled = 'true';
+
+  //               // Single CSS update
+  //               videoElement.style.cssText = `
+  //               position: absolute !important;
+  //               top: 0 !important;
+  //               left: 0 !important;
+  //               width: 100% !important;
+  //               height: 100% !important;
+  //               object-fit: cover !important;
+  //               object-position: center 20% !important;
+  //               background: #000 !important;
+  //               display: block !important;
+  //               z-index: 3 !important;
+  //               transition: none !important;
+  //               transform: translateZ(0) !important;
+  //               backface-visibility: hidden !important;
+  //               will-change: auto !important;
+  //             `;
+
+  //               // Add event listeners ONCE
+  //               const handlePause = (e) => {
+  //                 if (!videoElement.ended && isPlayingRef.current) {
+  //                   console.log('🎬 Preventing auto-pause, resuming video');
+  //                   e.preventDefault();
+  //                   videoElement.play().catch(err => {
+  //                     console.warn('⚠️ Resume failed:', err);
+  //                   });
+  //                 }
+  //               };
+
+  //               const handlePlay = () => {
+  //                 console.log('🎬 Video play event fired for UID:', stableUser.uid);
+  //                 setIsVideoLoaded(true);
+  //                 isInitializedRef.current = true;
+  //                 playAttemptCountRef.current = 0; // Reset on success
+  //               };
+
+  //               // Remove old listeners first
+  //               videoElement.removeEventListener('pause', handlePause);
+  //               videoElement.removeEventListener('play', handlePlay);
+
+  //               // Add new listeners
+  //               videoElement.addEventListener('pause', handlePause, { passive: false });
+  //               videoElement.addEventListener('play', handlePlay);
+
+  //               setIsVideoLoaded(true);
+  //               setRetryCount(0);
+  //             }
+  //           }
+  //         }, 200);
+
+  //       } catch (playError) {
+  //         console.error('❌ Failed to play remote video:', playError);
+
+  //         // Reset flags on error
+  //         isPlayingRef.current = false;
+  //         playPromiseRef.current = null;
+  //         currentTrackRef.current = null;
+  //         setIsVideoLoaded(false);
+
+  //         if (retryCount < maxRetries) {
+  //           setTimeout(() => {
+  //             setRetryCount(prev => prev + 1);
+  //           }, Math.pow(2, retryCount) * 1000);
+  //         } else {
+  //           console.error('❌ Max retries reached for video playback');
+  //         }
+  //       }
+  //     };
+
+  //     // Debounce execution
+  //     const timeoutId = setTimeout(playVideo, 100);
+
+  //     return () => {
+  //       clearTimeout(timeoutId);
+  //     };
+
+  //   }, [trackId, stableUser.uid, retryCount]); // ✅ STABLE dependencies
+
+  //   // Cleanup effect
+  //   useEffect(() => {
+  //     return () => {
+  //       // Reset all flags on unmount
+  //       isPlayingRef.current = false;
+  //       playPromiseRef.current = null;
+  //       currentTrackRef.current = null;
+  //       isInitializedRef.current = false;
+  //       playAttemptCountRef.current = 0;
+  //       lastPlayTimeRef.current = 0;
+
+  //       if (videoContainerRef.current) {
+  //         try {
+  //           const videoElement = videoContainerRef.current.querySelector('video');
+  //           if (videoElement) {
+  //             delete videoElement.dataset.agoraStyled;
+  //             // Clean removal of event listeners
+  //             const newElement = videoElement.cloneNode(true);
+  //             videoElement.parentNode?.replaceChild(newElement, videoElement);
+  //           }
+  //         } catch (error) {
+  //           // Silent cleanup
+  //         }
+  //       }
+  //     };
+  //   }, []);
+
+  //   const avatarSize = isCompact ? 40 : 80;
+  //   const fontSize = isCompact ? '12px' : '16px';
+
+  //   return (
+  //     <div
+  //       className={`remote-video-player ${isCompact ? 'compact' : ''}`}
+  //       style={{
+  //         position: 'relative',
+  //         width: '100%',
+  //         height: '100%',
+  //         background: '#000',
+  //         borderRadius: '8px',
+  //         overflow: 'hidden'
+  //       }}
+  //     >
+  //       <div
+  //         ref={videoContainerRef}
+  //         className="video-aspect-content"
+  //         style={{
+  //           position: 'absolute',
+  //           top: 0,
+  //           left: 0,
+  //           width: '100%',
+  //           height: '83%',
+  //           background: '#000',
+  //           zIndex: 1
+  //         }}
+  //       />
+
+  //       {shouldShowOverlay && (
+  //         <div className="no-video-overlay">
+  //           <Avatar
+  //             size={avatarSize}
+  //             src={stableUser.avatar}
+  //             icon={<UserOutlined />}
+  //             style={{
+  //               marginBottom: '16px',
+  //               border: '2px solid #fff',
+  //               boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
+  //             }}
+  //           />
+  //           <Text style={{
+  //             color: '#666',
+  //             fontSize: '16px',
+  //             fontWeight: '500',
+  //             marginBottom: '8px',
+  //             textAlign: 'center'
+  //           }}>
+  //             {stableUser.name}
+  //           </Text>
+  //           {!stableUser.hasVideo && (
+  //             <Text style={{
+  //               color: '#ff9500',
+  //               fontSize: '14px',
+  //               textAlign: 'center'
+  //             }}>
+  //               Camera đã tắt
+  //             </Text>
+  //           )}
+  //         </div>
+  //       )}
+
+  //       {stableUser.hasVideo && stableUser.videoTrack && isVideoLoaded && (
+  //         <div style={{
+  //           position: 'absolute',
+  //           bottom: '12px',
+  //           left: '12px',
+  //           background: 'rgba(0, 0, 0, 0.7)',
+  //           color: 'white',
+  //           padding: '6px 12px',
+  //           borderRadius: '16px',
+  //           fontSize: '12px',
+  //           fontWeight: '500',
+  //           zIndex: 4,
+  //           maxWidth: 'calc(100% - 24px)',
+  //           overflow: 'hidden',
+  //           textOverflow: 'ellipsis',
+  //           whiteSpace: 'nowrap'
+  //         }}>
+  //           {stableUser.name || `User ${stableUser.uid}`}
+  //         </div>
+  //       )}
+  //     </div>
+  //   );
+  // }, (prevProps, nextProps) => {
+  //   // ✅ CRITICAL: Deep comparison để prevent unnecessary re-renders
+  //   const prev = prevProps.user;
+  //   const next = nextProps.user;
+
+  //   const isEqual = prev.uid === next.uid &&
+  //     prev.hasVideo === next.hasVideo &&
+  //     prev.videoTrack === next.videoTrack &&
+  //     prev.name === next.name &&
+  //     prev.avatar === next.avatar &&
+  //     prevProps.isMainView === nextProps.isMainView;
+
+  //   if (!isEqual) {
+  //     console.log('🔄 RemoteVideoPlayer props changed, re-rendering for UID:', next.uid);
+  //   }
+
+  //   return isEqual;
+  // });
+
   const RemoteVideoPlayer = React.memo(({ user, isMainView = false, isCompact = false }) => {
     const videoContainerRef = useRef(null);
     const [isVideoLoaded, setIsVideoLoaded] = useState(false);
@@ -1747,240 +2233,290 @@ const AgoraVideoCall = forwardRef(({
 
     // Refs để track state without causing re-renders
     const isPlayingRef = useRef(false);
-    const playPromiseRef = useRef(null);
     const currentTrackRef = useRef(null);
-    const isInitializedRef = useRef(false);
     const playAttemptCountRef = useRef(0);
     const lastPlayTimeRef = useRef(0);
     const maxRetries = 3;
 
-    // Deep stable user object với ref comparison
-    const prevUserRef = useRef(user);
+    // ✅ FIX: Simplify stableUser - loại bỏ prevUserRef logic phức tạp
     const stableUser = useMemo(() => {
-      const currentUser = {
+      return {
         uid: user.uid,
         hasVideo: user.hasVideo,
         videoTrack: user.videoTrack,
-        name: user.name,
-        avatar: user.avatar
+        hasAudio: user.hasAudio,
+        audioTrack: user.audioTrack,
+        name: user.name || `User ${user.uid}`,
+        avatar: user.avatar,
+        memberId: user.memberId
       };
+    }, [user.uid, user.hasVideo, user.videoTrack, user.hasAudio, user.audioTrack, user.name, user.avatar, user.memberId]);
 
-      // Only update if actually different
-      const hasChanged = !prevUserRef.current ||
-        prevUserRef.current.uid !== currentUser.uid ||
-        prevUserRef.current.hasVideo !== currentUser.hasVideo ||
-        prevUserRef.current.videoTrack !== currentUser.videoTrack ||
-        prevUserRef.current.name !== currentUser.name ||
-        prevUserRef.current.avatar !== currentUser.avatar;
-
-      if (hasChanged) {
-        console.log('📋 User data changed for UID:', currentUser.uid);
-        prevUserRef.current = currentUser;
-        return currentUser;
-      }
-
-      // Return previous reference if no changes
-      return prevUserRef.current;
-    }, [
-      user.uid,
-      user.hasVideo,
-      user.videoTrack,
-      user.name,
-      user.avatar
-    ]);
-
-    // Stable overlay condition
+    // ✅ FIX: Simplified overlay condition
     const shouldShowOverlay = useMemo(() => {
-      return !stableUser.hasVideo || !stableUser.videoTrack || !isVideoLoaded;
-    }, [stableUser.hasVideo, stableUser.videoTrack, isVideoLoaded]);
+      const noVideoTrack = !stableUser.videoTrack;
+      const videoDisabled = !stableUser.hasVideo;
+      const videoNotLoaded = !isVideoLoaded;
 
-    // Video track change detection với debounce
-    const trackId = stableUser.videoTrack ?
-      (stableUser.videoTrack.trackMediaType + '-' + stableUser.uid) :
-      null;
+      const shouldShow = noVideoTrack || videoDisabled;
 
+      console.log(`🔍 Overlay check for ${stableUser.name} (${stableUser.uid}):`, {
+        noVideoTrack,
+        videoDisabled,
+        videoNotLoaded,
+        shouldShow,
+        hasVideoTrack: !!stableUser.videoTrack,
+        hasVideo: stableUser.hasVideo,
+        isVideoLoaded
+      });
+
+      return shouldShow;
+    }, [stableUser.videoTrack, stableUser.hasVideo, isVideoLoaded, stableUser.name, stableUser.uid]);
+
+    // ✅ FIX: Better video track detection
     useEffect(() => {
-      // Multiple guards để prevent duplicate calls
+      console.log(`🎬 RemoteVideoPlayer effect for ${stableUser.name} (${stableUser.uid}):`, {
+        hasVideoTrack: !!stableUser.videoTrack,
+        hasVideo: stableUser.hasVideo,
+        hasContainer: !!videoContainerRef.current,
+        isVideoLoaded,
+        shouldShowOverlay
+      });
+
+      // Reset nếu không có track hoặc container
       if (!stableUser.videoTrack || !videoContainerRef.current) {
-        // Reset flags nếu không có track
+        console.log(`❌ No track or container for ${stableUser.name}, resetting...`);
         isPlayingRef.current = false;
-        playPromiseRef.current = null;
         currentTrackRef.current = null;
-        isInitializedRef.current = false;
         setIsVideoLoaded(false);
         setRetryCount(0);
         return;
       }
 
+      // ✅ FIX: Kiểm tra hasVideo trước khi play
+      if (!stableUser.hasVideo) {
+        console.log(`📹 Video disabled for ${stableUser.name}, not playing`);
+        setIsVideoLoaded(false);
+        return;
+      }
+
       // Check if same track already playing
-      if (currentTrackRef.current === stableUser.videoTrack && isPlayingRef.current) {
-        console.log('🎬 Same track already playing, skipping:', stableUser.uid);
+      if (currentTrackRef.current === stableUser.videoTrack && isPlayingRef.current && isVideoLoaded) {
+        console.log(`🎬 Same track already playing for ${stableUser.name}, skipping`);
         return;
       }
 
       // Debounce multiple rapid calls
       const now = Date.now();
-      if (now - lastPlayTimeRef.current < 500) {
-        console.log('🎬 Debouncing play call for UID:', stableUser.uid);
+      if (now - lastPlayTimeRef.current < 300) {
+        console.log(`🎬 Debouncing play call for ${stableUser.name}`);
         return;
       }
       lastPlayTimeRef.current = now;
 
       // Limit play attempts
       if (playAttemptCountRef.current >= 3) {
-        console.warn('🎬 Max play attempts reached for UID:', stableUser.uid);
+        console.warn(`🎬 Max play attempts reached for ${stableUser.name}`);
         return;
       }
 
       playAttemptCountRef.current++;
-      console.log(`🎬 Play attempt ${playAttemptCountRef.current}/3 for UID:`, stableUser.uid);
+      console.log(`🎬 Play attempt ${playAttemptCountRef.current}/3 for ${stableUser.name}`);
 
-      // Check if container already has video element playing this track
-      const existingVideo = videoContainerRef.current.querySelector('video');
-      if (existingVideo && !existingVideo.paused && isPlayingRef.current) {
-        console.log('🎬 Video element already playing, skipping play() call');
-        setIsVideoLoaded(true);
-        currentTrackRef.current = stableUser.videoTrack;
-        return;
-      }
+      // const playVideo = async () => {
+      //   try {
+      //     if (!videoContainerRef.current || !stableUser.videoTrack || !stableUser.hasVideo) {
+      //       console.log(`❌ Missing requirements for ${stableUser.name}`);
+      //       return;
+      //     }
+
+      //     // Set flags BEFORE play
+      //     isPlayingRef.current = true;
+      //     currentTrackRef.current = stableUser.videoTrack;
+
+      //     console.log(`🎬 Starting video playback for ${stableUser.name}`);
+
+      //     // ✅ FIX: Play video track directly
+      //     await stableUser.videoTrack.play(videoContainerRef.current);
+
+      //     console.log(`✅ Video play successful for ${stableUser.name}`);
+
+      //     // ✅ FIX: Set video loaded immediately after successful play
+      //     setIsVideoLoaded(true);
+      //     playAttemptCountRef.current = 0; // Reset on success
+      //     setRetryCount(0);
+
+      //     // Style video element
+      //     setTimeout(() => {
+      //       if (videoContainerRef.current && isPlayingRef.current) {
+      //         const videoElement = videoContainerRef.current.querySelector('video');
+      //         if (videoElement && !videoElement.dataset.agoraStyled) {
+      //           videoElement.dataset.agoraStyled = 'true';
+
+      //           videoElement.style.cssText = `
+      //           position: absolute !important;
+      //           top: 0 !important;
+      //           left: 0 !important;
+      //           width: 100% !important;
+      //           height: 100% !important;
+      //           object-fit: cover !important;
+      //           object-position: center !important;
+      //           background: #000 !important;
+      //           display: block !important;
+      //           z-index: 3 !important;
+      //         `;
+
+      //           // Event listeners
+      //           const handlePlay = () => {
+      //             console.log(`🎬 Video play event for ${stableUser.name}`);
+      //             setIsVideoLoaded(true);
+      //           };
+
+      //           const handleLoadedData = () => {
+      //             console.log(`🎬 Video loaded data for ${stableUser.name}`);
+      //             setIsVideoLoaded(true);
+      //           };
+
+      //           videoElement.addEventListener('play', handlePlay);
+      //           videoElement.addEventListener('loadeddata', handleLoadedData);
+      //         }
+      //       }
+      //     }, 100);
+
+      //   } catch (playError) {
+      //     console.error(`❌ Failed to play video for ${stableUser.name}:`, playError);
+
+      //     // Reset flags on error
+      //     isPlayingRef.current = false;
+      //     currentTrackRef.current = null;
+      //     setIsVideoLoaded(false);
+
+      //     if (retryCount < maxRetries) {
+      //       console.log(`🔄 Retrying video play for ${stableUser.name} (${retryCount + 1}/${maxRetries})`);
+      //       setTimeout(() => {
+      //         setRetryCount(prev => prev + 1);
+      //       }, Math.pow(2, retryCount) * 1000);
+      //     } else {
+      //       console.error(`❌ Max retries reached for ${stableUser.name}`);
+      //     }
+      //   }
+      // };
 
       const playVideo = async () => {
         try {
-          if (!videoContainerRef.current || !stableUser.videoTrack) {
+          if (!videoContainerRef.current || !stableUser.videoTrack || !stableUser.hasVideo) {
+            console.log(`❌ Missing requirements for ${stableUser.name}:`, {
+              hasContainer: !!videoContainerRef.current,
+              hasTrack: !!stableUser.videoTrack,
+              hasVideo: stableUser.hasVideo
+            });
             return;
           }
 
           // Set flags BEFORE play
           isPlayingRef.current = true;
           currentTrackRef.current = stableUser.videoTrack;
-          setIsVideoLoaded(false);
 
-          console.log('🎬 Starting video playback for UID:', stableUser.uid);
+          console.log(`🎬 Starting video playback for ${stableUser.name}`);
 
-          // Store play promise
-          playPromiseRef.current = stableUser.videoTrack.play(videoContainerRef.current);
-          await playPromiseRef.current;
+          // ✅ FIX: Clear container trước khi play để tránh conflict
+          if (videoContainerRef.current) {
+            videoContainerRef.current.innerHTML = '';
+          }
 
-          console.log('✅ Video play successful for UID:', stableUser.uid);
+          // ✅ FIX: Play video track directly
+          await stableUser.videoTrack.play(videoContainerRef.current);
 
-          // Style video ONLY once with timeout
+          console.log(`✅ Video play successful for ${stableUser.name}`);
+
+          // ✅ FIX: Set video loaded immediately after successful play
+          setIsVideoLoaded(true);
+          playAttemptCountRef.current = 0; // Reset on success
+          setRetryCount(0);
+
+          // Style video element
           setTimeout(() => {
-            if (stableUser.videoTrack &&
-              videoContainerRef.current &&
-              isPlayingRef.current &&
-              currentTrackRef.current === stableUser.videoTrack) {
-
+            if (videoContainerRef.current && isPlayingRef.current) {
               const videoElement = videoContainerRef.current.querySelector('video');
-              if (videoElement && !videoElement.dataset.agoraStyled) {
-                videoElement.dataset.agoraStyled = 'true';
+              if (videoElement) {
+                console.log(`🎨 Styling video element for ${stableUser.name}`);
 
-                // Single CSS update
                 videoElement.style.cssText = `
-                position: absolute !important;
-                top: 0 !important;
-                left: 0 !important;
-                width: 100% !important;
-                height: 100% !important;
-                object-fit: cover !important;
-                object-position: center 20% !important;
-                background: #000 !important;
-                display: block !important;
-                z-index: 3 !important;
-                transition: none !important;
-                transform: translateZ(0) !important;
-                backface-visibility: hidden !important;
-                will-change: auto !important;
-              `;
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover !important;
+            object-position: center !important;
+            background: #000 !important;
+            display: block !important;
+            z-index: 3 !important;
+          `;
 
-                // Add event listeners ONCE
-                const handlePause = (e) => {
-                  if (!videoElement.ended && isPlayingRef.current) {
-                    console.log('🎬 Preventing auto-pause, resuming video');
-                    e.preventDefault();
-                    videoElement.play().catch(err => {
-                      console.warn('⚠️ Resume failed:', err);
-                    });
-                  }
-                };
-
+                // Event listeners
                 const handlePlay = () => {
-                  console.log('🎬 Video play event fired for UID:', stableUser.uid);
+                  console.log(`🎬 Video play event for ${stableUser.name}`);
                   setIsVideoLoaded(true);
-                  isInitializedRef.current = true;
-                  playAttemptCountRef.current = 0; // Reset on success
                 };
 
-                // Remove old listeners first
-                videoElement.removeEventListener('pause', handlePause);
-                videoElement.removeEventListener('play', handlePlay);
+                const handleLoadedData = () => {
+                  console.log(`🎬 Video loaded data for ${stableUser.name}`);
+                  setIsVideoLoaded(true);
+                };
 
-                // Add new listeners
-                videoElement.addEventListener('pause', handlePause, { passive: false });
+                const handleCanPlay = () => {
+                  console.log(`🎬 Video can play for ${stableUser.name}`);
+                  setIsVideoLoaded(true);
+                };
+
                 videoElement.addEventListener('play', handlePlay);
+                videoElement.addEventListener('loadeddata', handleLoadedData);
+                videoElement.addEventListener('canplay', handleCanPlay);
 
-                setIsVideoLoaded(true);
-                setRetryCount(0);
+                // ✅ FIX: Force video loaded nếu video đã sẵn sàng
+                if (videoElement.readyState >= 2) {
+                  console.log(`🎬 Video already ready for ${stableUser.name}, setting loaded`);
+                  setIsVideoLoaded(true);
+                }
               }
             }
-          }, 200);
+          }, 100);
 
         } catch (playError) {
-          console.error('❌ Failed to play remote video:', playError);
+          console.error(`❌ Failed to play video for ${stableUser.name}:`, playError);
 
           // Reset flags on error
           isPlayingRef.current = false;
-          playPromiseRef.current = null;
           currentTrackRef.current = null;
           setIsVideoLoaded(false);
 
           if (retryCount < maxRetries) {
+            console.log(`🔄 Retrying video play for ${stableUser.name} (${retryCount + 1}/${maxRetries})`);
             setTimeout(() => {
               setRetryCount(prev => prev + 1);
             }, Math.pow(2, retryCount) * 1000);
           } else {
-            console.error('❌ Max retries reached for video playback');
+            console.error(`❌ Max retries reached for ${stableUser.name}`);
           }
         }
       };
 
-      // Debounce execution
-      const timeoutId = setTimeout(playVideo, 100);
+      playVideo();
 
-      return () => {
-        clearTimeout(timeoutId);
-      };
-
-    }, [trackId, stableUser.uid, retryCount]); // ✅ STABLE dependencies
+    }, [stableUser.videoTrack, stableUser.hasVideo, stableUser.uid, stableUser.name, retryCount]);
 
     // Cleanup effect
     useEffect(() => {
       return () => {
-        // Reset all flags on unmount
         isPlayingRef.current = false;
-        playPromiseRef.current = null;
         currentTrackRef.current = null;
-        isInitializedRef.current = false;
         playAttemptCountRef.current = 0;
         lastPlayTimeRef.current = 0;
-
-        if (videoContainerRef.current) {
-          try {
-            const videoElement = videoContainerRef.current.querySelector('video');
-            if (videoElement) {
-              delete videoElement.dataset.agoraStyled;
-              // Clean removal of event listeners
-              const newElement = videoElement.cloneNode(true);
-              videoElement.parentNode?.replaceChild(newElement, videoElement);
-            }
-          } catch (error) {
-            // Silent cleanup
-          }
-        }
       };
     }, []);
 
-    const avatarSize = isCompact ? 40 : 80;
-    const fontSize = isCompact ? '12px' : '16px';
+    const avatarSize = isCompact ? 40 : (isMainView ? 100 : 60);
 
     return (
       <div
@@ -1994,6 +2530,7 @@ const AgoraVideoCall = forwardRef(({
           overflow: 'hidden'
         }}
       >
+        {/* ✅ FIX: Video container với full height */}
         <div
           ref={videoContainerRef}
           className="video-aspect-content"
@@ -2002,27 +2539,44 @@ const AgoraVideoCall = forwardRef(({
             top: 0,
             left: 0,
             width: '100%',
-            height: '83%',
+            height: '100%', // ✅ Full height instead of 83%
             background: '#000',
             zIndex: 1
           }}
         />
 
+        {/* ✅ FIX: Overlay chỉ hiển thị khi thực sự cần */}
         {shouldShowOverlay && (
-          <div className="no-video-overlay">
+          <div
+            className="no-video-overlay"
+            style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              width: '100%',
+              height: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              background: '#666',
+              zIndex: 2,
+              color: 'white'
+            }}
+          >
             <Avatar
               size={avatarSize}
               src={stableUser.avatar}
               icon={<UserOutlined />}
               style={{
-                marginBottom: '16px',
+                marginBottom: isCompact ? '8px' : '16px',
                 border: '2px solid #fff',
                 boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
               }}
             />
             <Text style={{
-              color: '#666',
-              fontSize: '16px',
+              color: 'white',
+              fontSize: isCompact ? '12px' : '16px',
               fontWeight: '500',
               marginBottom: '8px',
               textAlign: 'center'
@@ -2032,51 +2586,60 @@ const AgoraVideoCall = forwardRef(({
             {!stableUser.hasVideo && (
               <Text style={{
                 color: '#ff9500',
-                fontSize: '14px',
+                fontSize: isCompact ? '11px' : '14px',
                 textAlign: 'center'
               }}>
-                Camera đã tắt
+                📷 Camera đã tắt
               </Text>
             )}
           </div>
         )}
 
-        {stableUser.hasVideo && stableUser.videoTrack && isVideoLoaded && (
+        {/* ✅ FIX: Name label chỉ hiển thị khi có video và video đã load */}
+        {stableUser.hasVideo && stableUser.videoTrack && isVideoLoaded && !shouldShowOverlay && (
           <div style={{
             position: 'absolute',
-            bottom: '12px',
-            left: '12px',
-            background: 'rgba(0, 0, 0, 0.7)',
+            bottom: '8px',
+            left: '8px',
+            background: '#666',
             color: 'white',
-            padding: '6px 12px',
-            borderRadius: '16px',
-            fontSize: '12px',
+            padding: '4px 8px',
+            borderRadius: '12px',
+            fontSize: isCompact ? '10px' : '12px',
             fontWeight: '500',
             zIndex: 4,
-            maxWidth: 'calc(100% - 24px)',
+            maxWidth: 'calc(100% - 16px)',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap'
           }}>
-            {stableUser.name || `User ${stableUser.uid}`}
+            {stableUser.name}
           </div>
         )}
       </div>
     );
   }, (prevProps, nextProps) => {
-    // ✅ CRITICAL: Deep comparison để prevent unnecessary re-renders
+    // ✅ FIX: Simplified comparison
     const prev = prevProps.user;
     const next = nextProps.user;
 
     const isEqual = prev.uid === next.uid &&
       prev.hasVideo === next.hasVideo &&
       prev.videoTrack === next.videoTrack &&
+      prev.hasAudio === next.hasAudio &&
+      prev.audioTrack === next.audioTrack &&
       prev.name === next.name &&
       prev.avatar === next.avatar &&
-      prevProps.isMainView === nextProps.isMainView;
+      prevProps.isMainView === nextProps.isMainView &&
+      prevProps.isCompact === nextProps.isCompact;
 
     if (!isEqual) {
-      console.log('🔄 RemoteVideoPlayer props changed, re-rendering for UID:', next.uid);
+      console.log(`🔄 RemoteVideoPlayer re-rendering for ${next.name || next.uid}:`, {
+        uidChanged: prev.uid !== next.uid,
+        videoChanged: prev.hasVideo !== next.hasVideo,
+        trackChanged: prev.videoTrack !== next.videoTrack,
+        nameChanged: prev.name !== next.name
+      });
     }
 
     return isEqual;

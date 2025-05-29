@@ -1,43 +1,154 @@
 .video-call-modal .call-ended-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.8);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  backdrop-filter: blur(5px);
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(5px);
 }
 
 .video-call-modal .call-ended-content {
-  text-align: center;
-  background: white;
-  padding: 32px;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+    text-align: center;
+    background: white;
+    padding: 32px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .video-call-modal .call-ended-icon {
-  font-size: 48px;
-  margin-bottom: 16px;
+    font-size: 48px;
+    margin-bottom: 16px;
 }
 
 .video-call-modal .call-ended-message {
-  font-size: 18px;
-  font-weight: 500;
-  margin-bottom: 12px;
+    font-size: 18px;
+    font-weight: 500;
+    margin-bottom: 12px;
 }
 
 .video-call-modal .call-ended-duration {
-  font-size: 14px;
-  opacity: 0.8;
+    font-size: 14px;
+    opacity: 0.8;
 }
 
 .group-video-grid {
     transition: all 0.3s ease;
+    max-height: calc(80vh - 120px);
+    overflow: hidden;
+    align-items: stretch;
+    justify-items: stretch;
+    background: #1a1a1a !important;
+    box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.3) !important;
+    animation: fadeInGrid 0.3s ease;
+    margin-top: 10px;
+}
+
+.group-video-grid.grid-1 {
+    grid-template-rows: 1fr;
+    padding: 20px !important;
+}
+
+.group-video-grid.grid-2 {
+    grid-template-rows: 1fr;
+    padding: 18px !important;
+}
+
+.group-video-grid.grid-3 {
+    grid-template-rows: 1fr;
+    padding: 16px !important;
+}
+
+.group-video-grid.grid-4 {
+    grid-template-rows: 1fr 1fr;
+    padding: 16px !important;
+    gap: 8px !important;
+}
+
+.group-video-grid.grid-5,
+.group-video-grid.grid-6 {
+    grid-template-rows: 1fr 1fr;
+    padding: 14px !important;
+    gap: 8px !important;
+}
+
+.group-video-grid.grid-7,
+.group-video-grid.grid-8,
+.group-video-grid.grid-9 {
+    grid-template-rows: 1fr 1fr 1fr;
+    padding: 12px !important;
+    gap: 6px !important;
+}
+
+.group-video-item {
+    background: rgba(20, 20, 20, 0.5) !important;
+    min-height: 120px !important;
+    max-height: 250px !important;
+    width: 100%;
+    /* Đảm bảo tỷ lệ phù hợp */
+}
+
+/* 4 người - layout đặc biệt */
+.group-video-grid.grid-4 .group-video-item {
+    min-height: 180px !important;
+    max-height: 220px !important;
+    aspect-ratio: 4/3;
+    /* Tỷ lệ vuông vừa cho 4 người */
+}
+
+.group-video-item .no-video-overlay {
+    background: rgba(40, 40, 40, 0.95) !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+/* 1-2 người - layout rộng */
+.group-video-grid.grid-1 .group-video-item,
+.group-video-grid.grid-2 .group-video-item {
+    aspect-ratio: 16/9;
+    min-height: 250px !important;
+    max-height: 350px !important;
+}
+
+/* 3 người - layout ngang */
+.group-video-grid.grid-3 .group-video-item {
+    aspect-ratio: 4/3;
+    min-height: 200px !important;
+    max-height: 280px !important;
+}
+
+/* Responsive improvements for mobile */
+@media (max-width: 768px) {
+    .group-video-grid.grid-4 {
+        grid-template-columns: repeat(2, 1fr) !important;
+        grid-template-rows: 1fr 1fr !important;
+        gap: 6px !important;
+        padding: 12px !important;
+    }
+
+    .group-video-grid.grid-4 .group-video-item {
+        min-height: 140px !important;
+        max-height: 180px !important;
+        aspect-ratio: 1/1;
+    }
+}
+
+@media (max-width: 480px) {
+    .group-video-grid.grid-4 {
+        grid-template-columns: 1fr !important;
+        grid-template-rows: repeat(4, 1fr) !important;
+        gap: 4px !important;
+        padding: 8px !important;
+    }
+
+    .group-video-grid.grid-4 .group-video-item {
+        min-height: 100px !important;
+        max-height: 120px !important;
+        aspect-ratio: 16/9;
+    }
 }
 
 .group-video-item:hover .participant-info-overlay {
@@ -50,6 +161,9 @@
 
 .speaker-view-layout {
     animation: fadeIn 0.3s ease;
+    max-height: calc(80vh - 120px);
+    /* Giới hạn chiều cao */
+    overflow: hidden;
 }
 
 .participants-sidebar.show {
@@ -61,23 +175,51 @@
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: scale(0.95); }
-    to { opacity: 1; transform: scale(1); }
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
 
 @keyframes slideInRight {
-    from { transform: translateX(100%); opacity: 0; }
-    to { transform: translateX(0); opacity: 1; }
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
 }
 
 @keyframes slideOutRight {
-    from { transform: translateX(0); opacity: 1; }
-    to { transform: translateX(100%); opacity: 0; }
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
 }
 
 @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.7; }
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.7;
+    }
 }
 
 /* ✅ RESPONSIVE: Mobile optimizations */
@@ -87,38 +229,51 @@
         gap: 8px !important;
         padding: 8px !important;
     }
-    
+
     .participants-sidebar {
         width: 200px !important;
         right: 10px !important;
     }
-    
+
     .speaker-view-layout {
         flex-direction: column !important;
         gap: 8px !important;
     }
-    
-    .speaker-view-layout > div:last-child {
+
+    .speaker-view-layout>div:last-child {
         width: 100% !important;
         height: 120px !important;
         flex-direction: row !important;
     }
 }
+@keyframes fadeInGrid {
+    from { opacity: 0; transform: scale(0.98); }
+    to { opacity: 1; transform: scale(1); }
+}
 
 /* ✅ IMPROVED: Modal styles */
 .video-call-modal .ant-modal-content {
-    border-radius: 16px;
+    /* border-radius: 16px; */
     overflow: hidden;
 }
 
 .video-call-modal .ant-modal-body {
-    padding: 0;
+    /* padding: 50px 0 80px 0; */
+    padding-bottom: 60px;
+    position: relative;
+    max-height: 80vh;
+    overflow: hidden;
 }
 
 .video-call-modal .ant-modal-header {
-    background: linear-gradient(135deg, #1890ff, #096dd9);
-    border-bottom: none;
-    border-radius: 16px 16px 0 0;
+    /* background: rgba(23, 161, 247, 0.8); */
+    backdrop-filter: blur(10px);
+    position: absolute;
+    width: 100%;
+    z-index: 10;
+    top: 0;
+    left: 0;
+    right: 0;
 }
 
 .video-call-modal .ant-modal-title {
@@ -132,4 +287,75 @@
 
 .video-call-modal .ant-modal-close:hover {
     color: #f0f0f0;
+}
+.local-video-container-extra {
+    display: none !important;
+}
+
+@keyframes speakingPulse {
+
+    0%,
+    100% {
+        box-shadow: 0 4px 15px rgba(82, 196, 26, 0.4);
+        transform: scale(1);
+    }
+
+    50% {
+        box-shadow: 0 6px 25px rgba(82, 196, 26, 0.6);
+        transform: scale(1.02);
+    }
+}
+
+@keyframes speakingDot {
+
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.6;
+        transform: scale(1.2);
+    }
+}
+
+.group-video-item:hover .click-indicator {
+    opacity: 1 !important;
+}
+
+/* .video-call-modal .ant-modal-content {
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+    border-radius: 20px;
+    overflow: hidden;
+} */
+
+.video-call-modal .ant-modal-header {
+    background: rgba(23, 161, 247, 0.8);
+    backdrop-filter: blur(10px);
+    /* border-bottom: 1px solid rgba(255, 255, 255, 0.1); */
+}
+
+.video-call-modal .ant-modal-title {
+    color: white;
+    font-weight: 600;
+}
+
+/* Custom scrollbar for sidebar */
+.speaker-view-layout div::-webkit-scrollbar {
+    width: 4px;
+}
+
+.speaker-view-layout div::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+}
+
+.speaker-view-layout div::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 2px;
+}
+
+.speaker-view-layout div::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.5);
 }

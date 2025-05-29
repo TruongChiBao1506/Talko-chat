@@ -11,7 +11,7 @@ import {
     StopOutlined
 } from '@ant-design/icons';
 import PropTypes from 'prop-types';
-import AgoraVideoCall from '../../components/AgoraVideoCall';
+import AgoraVideoCall, { RemoteVideoPlayer } from '../../components/AgoraVideoCall';
 import { generateChannelId } from '../../utils/agoraConfig';
 import './style.css';
 
@@ -294,31 +294,35 @@ const ModalVideoCall = forwardRef((props, ref) => {
 
         const userCount = remoteUsers.length;
 
-        // Determine optimal grid layout
+        // Cải thiện grid layout
         const getGridLayout = (count) => {
-            if (count === 1) return { cols: 1, rows: 1, minHeight: '300px' };
-            if (count === 2) return { cols: 2, rows: 1, minHeight: '250px' };
-            if (count <= 4) return { cols: 2, rows: 2, minHeight: '200px' };
-            if (count <= 6) return { cols: 3, rows: 2, minHeight: '180px' };
-            if (count <= 9) return { cols: 3, rows: 3, minHeight: '160px' };
-            return { cols: 4, rows: Math.ceil(count / 4), minHeight: '140px' };
+            if (count === 1) return { cols: 1, rows: 1, minHeight: '280px', gap: '12px' };
+            if (count === 2) return { cols: 2, rows: 1, minHeight: '250px', gap: '12px' };
+            if (count === 3) return { cols: 3, rows: 1, minHeight: '220px', gap: '10px' };
+            if (count === 4) return { cols: 2, rows: 2, minHeight: '180px', gap: '8px' }; // Giảm gap cho 4 người
+            if (count <= 6) return { cols: 3, rows: 2, minHeight: '160px', gap: '8px' };
+            if (count <= 9) return { cols: 3, rows: 3, minHeight: '140px', gap: '6px' };
+            return { cols: 4, rows: Math.ceil(count / 4), minHeight: '120px', gap: '6px' };
         };
 
         const layout = getGridLayout(userCount);
 
         return (
             <div
-                className="group-video-grid"
+                className={`group-video-grid grid-${userCount}`}
                 style={{
                     display: 'grid',
                     gridTemplateColumns: `repeat(${layout.cols}, 1fr)`,
                     gridTemplateRows: `repeat(${layout.rows}, 1fr)`,
-                    gap: '12px',
+                    gap: layout.gap,
                     width: '100%',
                     height: '100%',
-                    padding: '16px',
-                    background: '#1a1a1a',
-                    borderRadius: '12px'
+                    padding: userCount <= 4 ? '16px' : '12px',
+                    background: '#1a1a1a', // Thêm background thống nhất
+                    borderRadius: '16px',
+                    overflow: 'hidden',
+                    alignItems: 'stretch',
+                    justifyItems: 'stretch'
                 }}
             >
                 {remoteUsers.map((user, index) => (
@@ -327,13 +331,17 @@ const ModalVideoCall = forwardRef((props, ref) => {
                         className="group-video-item"
                         style={{
                             position: 'relative',
-                            background: '#000',
-                            borderRadius: '12px',
+                            background: 'rgba(25, 25, 25, 0.9)', // Thống nhất màu nền tối
+                            borderRadius: userCount <= 4 ? '16px' : '12px',
                             overflow: 'hidden',
                             minHeight: layout.minHeight,
-                            border: '2px solid transparent',
-                            transition: 'all 0.3s ease',
-                            cursor: viewMode === 'speaker' ? 'pointer' : 'default'
+                            maxHeight: userCount <= 4 ? '250px' : '180px',
+                            border: '2px solid rgba(255,255,255,0.1)',
+                            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                            cursor: viewMode === 'speaker' ? 'pointer' : 'default',
+                            boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+                            transform: 'translateZ(0)',
+                            aspectRatio: userCount <= 2 ? '16/9' : userCount <= 4 ? '4/3' : '1/1'
                         }}
                         onClick={() => {
                             if (viewMode === 'speaker') {
@@ -342,11 +350,13 @@ const ModalVideoCall = forwardRef((props, ref) => {
                         }}
                         onMouseEnter={(e) => {
                             e.currentTarget.style.border = '2px solid #1890ff';
-                            e.currentTarget.style.transform = 'scale(1.02)';
+                            e.currentTarget.style.transform = 'translateY(-2px) scale(1.02)';
+                            e.currentTarget.style.boxShadow = '0 8px 30px rgba(24,144,255,0.3)';
                         }}
                         onMouseLeave={(e) => {
-                            e.currentTarget.style.border = '2px solid transparent';
-                            e.currentTarget.style.transform = 'scale(1)';
+                            e.currentTarget.style.border = '2px solid rgba(255,255,255,0.1)';
+                            e.currentTarget.style.transform = 'translateY(0) scale(1)';
+                            e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,0,0,0.3)';
                         }}
                     >
                         {/* Video Container */}
@@ -355,10 +365,11 @@ const ModalVideoCall = forwardRef((props, ref) => {
                             style={{
                                 width: '100%',
                                 height: '100%',
-                                background: '#333',
+                                // background: 'rgba(30, 30, 30, 0.9)',
                                 display: 'flex',
                                 alignItems: 'center',
-                                justifyContent: 'center'
+                                justifyContent: 'center',
+                                position: 'relative'
                             }}
                         >
                             {!user.hasVideo ? (
@@ -366,62 +377,161 @@ const ModalVideoCall = forwardRef((props, ref) => {
                                     display: 'flex',
                                     flexDirection: 'column',
                                     alignItems: 'center',
-                                    color: 'white'
+                                    justifyContent: 'center',
+                                    // background: 'rgba(40, 40, 40, 0.95)',
+                                    width: '100%',
+                                    height: '100%',
+                                    backdropFilter: 'blur(10px)',
+                                    position: 'relative'
                                 }}>
+                                    {/* Decorative background pattern */}
+                                    <div style={{
+                                        position: 'absolute',
+                                        top: 0,
+                                        left: 0,
+                                        right: 0,
+                                        bottom: 0,
+                                        opacity: 0.1,
+                                        background: `radial-gradient(circle at 30% 20%, #1890ff 0%, transparent 50%), 
+                                               radial-gradient(circle at 70% 80%, #52c41a 0%, transparent 50%)`
+                                    }} />
+
                                     <Avatar
-                                        size={userCount <= 2 ? 80 : userCount <= 4 ? 60 : 40}
+                                        size={userCount <= 2 ? 90 : userCount <= 4 ? 70 : 50}
                                         src={user.avatar}
                                         icon={<UserOutlined />}
+                                        style={{
+                                            marginBottom: userCount <= 4 ? '16px' : '12px',
+                                            border: '3px solid rgba(255,255,255,0.2)',
+                                            boxShadow: '0 8px 32px rgba(0,0,0,0.15), 0 2px 8px rgba(0,0,0,0.1)',
+                                            zIndex: 2
+                                        }}
                                     />
                                     <div style={{
-                                        marginTop: '8px',
-                                        fontSize: userCount <= 4 ? '14px' : '12px',
+                                        fontSize: userCount <= 4 ? '16px' : '14px',
+                                        fontWeight: '600',
+                                        textAlign: 'center',
+                                        color: 'rgba(255,255,255,0.9)', // Text màu sáng trên nền tối
+                                        marginBottom: '8px',
+                                        maxWidth: '90%',
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                        whiteSpace: 'nowrap',
+                                        zIndex: 2
+                                    }}>
+                                        {user.name || `User ${user.uid}`}
+                                    </div>
+                                    <div style={{
+                                        fontSize: userCount <= 4 ? '13px' : '11px',
+                                        color: '#ff9500',
+                                        textAlign: 'center',
+                                        background: 'rgba(255,149,0,0.2)',
+                                        padding: '4px 12px',
+                                        borderRadius: '20px',
+                                        border: '1px solid rgba(255,149,0,0.3)',
+                                        zIndex: 2,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '4px'
+                                    }}>
+                                        📷 <span>Camera đã tắt</span>
+                                    </div>
+                                </div>
+                            ) : (
+                                // Video player khi có video
+                                <div
+                                    style={{
+                                        width: '100%',
+                                        height: '100%',
+                                        background: '#000',
+                                        position: 'relative',
+                                        borderRadius: '12px',
+                                        overflow: 'hidden'
+                                    }}
+                                    ref={(element) => {
+                                        if (element && user.videoTrack && user.hasVideo) {
+                                            try {
+                                                user.videoTrack.play(element);
+                                            } catch (error) {
+                                                console.error('Failed to play video:', error);
+                                            }
+                                        }
+                                    }}
+                                >
+                                    {/* Video overlay gradient */}
+                                    <div style={{
+                                        position: 'absolute',
+                                        bottom: 0,
+                                        left: 0,
+                                        right: 0,
+                                        height: '60px',
+                                        // background: 'linear-gradient(transparent, rgba(0,0,0,0.7))',
+                                        zIndex: 2
+                                    }} />
+
+                                    {/* Name tag */}
+                                    <div style={{
+                                        position: 'absolute',
+                                        bottom: '12px',
+                                        left: '12px',
+                                        background: 'rgba(0,0,0,0.8)',
+                                        backdropFilter: 'blur(10px)',
+                                        color: 'white',
+                                        padding: '6px 12px',
+                                        borderRadius: '20px',
+                                        fontSize: '12px',
                                         fontWeight: '500',
-                                        textAlign: 'center'
+                                        zIndex: 3,
+                                        border: '1px solid rgba(255,255,255,0.2)',
+                                        maxWidth: 'calc(100% - 24px)',
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                        whiteSpace: 'nowrap'
                                     }}>
                                         {user.name || `User ${user.uid}`}
                                     </div>
                                 </div>
-                            ) : (
-                                <div style={{ width: '100%', height: '100%', background: '#000' }} />
                             )}
                         </div>
 
-                        {/* Participant Info Overlay */}
-                        <div className="participant-info-overlay" style={{
+                        {/* Status Indicators */}
+                        <div style={{
                             position: 'absolute',
-                            bottom: '0',
-                            left: '0',
-                            right: '0',
-                            background: 'linear-gradient(transparent, rgba(0,0,0,0.8))',
-                            padding: '8px 12px',
+                            top: '12px',
+                            right: '12px',
                             display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            opacity: '0',
-                            transition: 'opacity 0.3s ease',
-                            color: 'white'
+                            gap: '6px',
+                            zIndex: 4
                         }}>
                             <div style={{
-                                fontSize: '12px',
+                                background: user.hasAudio ? 'rgba(82,196,26,0.9)' : 'rgba(255,77,79,0.9)',
+                                padding: '4px 8px',
+                                borderRadius: '12px',
+                                fontSize: '10px',
+                                color: 'white',
                                 fontWeight: '500',
-                                textShadow: '1px 1px 2px rgba(0,0,0,0.5)'
+                                backdropFilter: 'blur(10px)',
+                                border: '1px solid rgba(255,255,255,0.2)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '2px'
                             }}>
-                                {user.name || `User ${user.uid}`}
+                                🎤
                             </div>
-                            <div style={{ display: 'flex', gap: '4px', fontSize: '14px' }}>
-                                <span style={{
-                                    opacity: user.hasAudio ? 1 : 0.3,
-                                    filter: user.hasAudio ? 'none' : 'grayscale(100%)'
-                                }}>
-                                    🎤
-                                </span>
-                                <span style={{
-                                    opacity: user.hasVideo ? 1 : 0.3,
-                                    filter: user.hasVideo ? 'none' : 'grayscale(100%)'
-                                }}>
-                                    📹
-                                </span>
+                            <div style={{
+                                background: user.hasVideo ? 'rgba(82,196,26,0.9)' : 'rgba(255,77,79,0.9)',
+                                padding: '4px 8px',
+                                borderRadius: '12px',
+                                fontSize: '10px',
+                                color: 'white',
+                                fontWeight: '500',
+                                backdropFilter: 'blur(10px)',
+                                border: '1px solid rgba(255,255,255,0.2)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '2px'
+                            }}>
+                                📹
                             </div>
                         </div>
 
@@ -429,17 +539,30 @@ const ModalVideoCall = forwardRef((props, ref) => {
                         {user.isSpeaking && (
                             <div style={{
                                 position: 'absolute',
-                                top: '8px',
-                                left: '8px',
-                                background: '#52c41a',
+                                top: '12px',
+                                left: '12px',
+                                background: 'linear-gradient(135deg, #52c41a, #73d13d)',
                                 color: 'white',
-                                padding: '4px 8px',
-                                borderRadius: '12px',
-                                fontSize: '10px',
-                                fontWeight: '500',
-                                animation: 'pulse 1.5s infinite'
+                                padding: '6px 12px',
+                                borderRadius: '20px',
+                                fontSize: '11px',
+                                fontWeight: '600',
+                                zIndex: 4,
+                                boxShadow: '0 4px 15px rgba(82,196,26,0.4)',
+                                border: '1px solid rgba(255,255,255,0.3)',
+                                animation: 'speakingPulse 2s infinite',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '4px'
                             }}>
-                                🎤 Đang nói
+                                <div style={{
+                                    width: '6px',
+                                    height: '6px',
+                                    background: '#fff',
+                                    borderRadius: '50%',
+                                    animation: 'speakingDot 1s infinite'
+                                }} />
+                                Đang nói
                             </div>
                         )}
                     </div>
@@ -448,7 +571,6 @@ const ModalVideoCall = forwardRef((props, ref) => {
         );
     }, [remoteUsers, viewMode, isGroupCall]);
 
-    // Speaker View Layout
     const SpeakerViewLayout = useMemo(() => {
         if (viewMode !== 'speaker' || !speakerUser || remoteUsers.length === 0) return null;
 
@@ -458,26 +580,28 @@ const ModalVideoCall = forwardRef((props, ref) => {
             <div className="speaker-view-layout" style={{
                 display: 'flex',
                 height: '100%',
-                gap: '12px',
+                gap: '16px',
                 padding: '16px',
-                background: '#1a1a1a',
-                borderRadius: '12px'
+                background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
+                borderRadius: '16px'
             }}>
-                {/* Main Speaker */}
+                {/* Enhanced Main Speaker */}
                 <div style={{
                     flex: 1,
-                    background: '#000',
-                    borderRadius: '12px',
+                    background: 'linear-gradient(145deg, #2a2a2a, #1e1e1e)',
+                    borderRadius: '20px',
                     overflow: 'hidden',
                     position: 'relative',
-                    minHeight: '400px'
+                    minHeight: '400px',
+                    boxShadow: '0 8px 40px rgba(0,0,0,0.3)',
+                    border: '2px solid rgba(24,144,255,0.3)'
                 }}>
                     <div
                         id={`speaker-video-${speakerUser.uid}`}
                         style={{
                             width: '100%',
                             height: '100%',
-                            background: '#333',
+                            background: 'linear-gradient(145deg, #333, #1a1a1a)',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center'
@@ -488,14 +612,36 @@ const ModalVideoCall = forwardRef((props, ref) => {
                                 display: 'flex',
                                 flexDirection: 'column',
                                 alignItems: 'center',
-                                color: 'white'
+                                color: 'white',
+                                background: 'radial-gradient(circle at center, rgba(24,144,255,0.1) 0%, transparent 70%)'
                             }}>
-                                <Avatar size={120} src={speakerUser.avatar} icon={<UserOutlined />} />
-                                <div style={{ marginTop: '16px', fontSize: '24px', fontWeight: '500' }}>
+                                <Avatar
+                                    size={140}
+                                    src={speakerUser.avatar}
+                                    icon={<UserOutlined />}
+                                    style={{
+                                        border: '4px solid rgba(24,144,255,0.5)',
+                                        boxShadow: '0 12px 48px rgba(24,144,255,0.2)',
+                                        marginBottom: '24px'
+                                    }}
+                                />
+                                <div style={{
+                                    fontSize: '28px',
+                                    fontWeight: '600',
+                                    marginBottom: '8px',
+                                    textShadow: '0 2px 10px rgba(0,0,0,0.5)'
+                                }}>
                                     {speakerUser.name || `User ${speakerUser.uid}`}
                                 </div>
-                                <div style={{ marginTop: '8px', fontSize: '16px', opacity: 0.7 }}>
-                                    Đang phát biểu
+                                <div style={{
+                                    fontSize: '16px',
+                                    opacity: 0.8,
+                                    background: 'rgba(24,144,255,0.2)',
+                                    padding: '8px 16px',
+                                    borderRadius: '20px',
+                                    border: '1px solid rgba(24,144,255,0.3)'
+                                }}>
+                                    🎤 Người phát biểu chính
                                 </div>
                             </div>
                         ) : (
@@ -503,318 +649,215 @@ const ModalVideoCall = forwardRef((props, ref) => {
                         )}
                     </div>
 
-                    {/* Speaker Info */}
+                    {/* Enhanced Speaker Info */}
                     <div style={{
                         position: 'absolute',
-                        bottom: '16px',
-                        left: '16px',
-                        right: '16px',
-                        background: 'rgba(0,0,0,0.8)',
-                        borderRadius: '8px',
-                        padding: '12px',
+                        bottom: '20px',
+                        left: '20px',
+                        right: '20px',
+                        background: 'rgba(0,0,0,0.85)',
+                        backdropFilter: 'blur(20px)',
+                        borderRadius: '16px',
+                        padding: '16px',
                         color: 'white',
                         display: 'flex',
                         justifyContent: 'space-between',
-                        alignItems: 'center'
+                        alignItems: 'center',
+                        border: '1px solid rgba(255,255,255,0.1)',
+                        boxShadow: '0 8px 32px rgba(0,0,0,0.3)'
                     }}>
                         <div>
-                            <div style={{ fontSize: '16px', fontWeight: '500' }}>
+                            <div style={{ fontSize: '18px', fontWeight: '600', marginBottom: '4px' }}>
                                 {speakerUser.name || `User ${speakerUser.uid}`}
                             </div>
-                            <div style={{ fontSize: '12px', opacity: 0.8 }}>
+                            <div style={{ fontSize: '13px', opacity: 0.8, color: '#1890ff' }}>
                                 Người phát biểu chính
                             </div>
                         </div>
-                        <div style={{ display: 'flex', gap: '8px', fontSize: '18px' }}>
-                            <span style={{ opacity: speakerUser.hasAudio ? 1 : 0.5 }}>🎤</span>
-                            <span style={{ opacity: speakerUser.hasVideo ? 1 : 0.5 }}>📹</span>
+                        <div style={{ display: 'flex', gap: '12px' }}>
+                            <div style={{
+                                background: speakerUser.hasAudio ? 'rgba(82,196,26,0.9)' : 'rgba(255,77,79,0.9)',
+                                padding: '8px 12px',
+                                borderRadius: '12px',
+                                fontSize: '16px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                                fontWeight: '500'
+                            }}>
+                                🎤
+                            </div>
+                            <div style={{
+                                background: speakerUser.hasVideo ? 'rgba(82,196,26,0.9)' : 'rgba(255,77,79,0.9)',
+                                padding: '8px 12px',
+                                borderRadius: '12px',
+                                fontSize: '16px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                                fontWeight: '500'
+                            }}>
+                                📹
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                {/* Other Participants Sidebar */}
+                {/* Enhanced Other Participants Sidebar */}
                 {otherUsers.length > 0 && (
                     <div style={{
-                        width: '200px',
+                        width: '220px',
                         display: 'flex',
                         flexDirection: 'column',
-                        gap: '8px'
+                        gap: '12px'
                     }}>
                         <div style={{
                             color: 'white',
-                            fontSize: '12px',
-                            fontWeight: '500',
+                            fontSize: '14px',
+                            fontWeight: '600',
                             marginBottom: '8px',
-                            padding: '0 8px'
+                            padding: '0 8px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px'
                         }}>
+                            <TeamOutlined style={{ color: '#1890ff' }} />
                             Người khác ({otherUsers.length})
                         </div>
 
-                        {otherUsers.map(user => (
-                            <div
-                                key={user.uid}
-                                style={{
-                                    height: '120px',
-                                    background: '#000',
-                                    borderRadius: '8px',
-                                    overflow: 'hidden',
-                                    cursor: 'pointer',
-                                    position: 'relative',
-                                    border: '2px solid transparent',
-                                    transition: 'all 0.3s ease'
-                                }}
-                                onClick={() => setSpeakerUser(user)}
-                                onMouseEnter={(e) => {
-                                    e.currentTarget.style.border = '2px solid #1890ff';
-                                }}
-                                onMouseLeave={(e) => {
-                                    e.currentTarget.style.border = '2px solid transparent';
-                                }}
-                            >
+                        <div style={{
+                            maxHeight: '500px',
+                            overflowY: 'auto',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '8px',
+                            scrollbarWidth: 'thin',
+                            scrollbarColor: 'rgba(255,255,255,0.3) transparent'
+                        }}>
+                            {otherUsers.map(user => (
                                 <div
-                                    id={`sidebar-video-${user.uid}`}
+                                    key={user.uid}
                                     style={{
-                                        width: '100%',
-                                        height: '100%',
-                                        background: '#333',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center'
+                                        height: '140px',
+                                        background: 'linear-gradient(145deg, #2a2a2a, #1e1e1e)',
+                                        borderRadius: '12px',
+                                        overflow: 'hidden',
+                                        cursor: 'pointer',
+                                        position: 'relative',
+                                        border: '2px solid rgba(255,255,255,0.1)',
+                                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                                        boxShadow: '0 4px 20px rgba(0,0,0,0.2)'
+                                    }}
+                                    onClick={() => setSpeakerUser(user)}
+                                    onMouseEnter={(e) => {
+                                        e.currentTarget.style.border = '2px solid #1890ff';
+                                        e.currentTarget.style.transform = 'translateY(-2px)';
+                                        e.currentTarget.style.boxShadow = '0 8px 30px rgba(24,144,255,0.3)';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.currentTarget.style.border = '2px solid rgba(255,255,255,0.1)';
+                                        e.currentTarget.style.transform = 'translateY(0)';
+                                        e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,0,0,0.2)';
                                     }}
                                 >
-                                    {!user.hasVideo ? (
-                                        <div style={{
+                                    <div
+                                        id={`sidebar-video-${user.uid}`}
+                                        style={{
+                                            width: '100%',
+                                            height: '100%',
+                                            background: 'linear-gradient(145deg, #333, #1a1a1a)',
                                             display: 'flex',
-                                            flexDirection: 'column',
                                             alignItems: 'center',
+                                            justifyContent: 'center'
+                                        }}
+                                    >
+                                        {!user.hasVideo ? (
+                                            <div style={{
+                                                display: 'flex',
+                                                flexDirection: 'column',
+                                                alignItems: 'center',
+                                                color: 'white',
+                                                padding: '12px'
+                                            }}>
+                                                <Avatar
+                                                    size={40}
+                                                    src={user.avatar}
+                                                    icon={<UserOutlined />}
+                                                    style={{
+                                                        border: '2px solid rgba(255,255,255,0.3)',
+                                                        marginBottom: '8px'
+                                                    }}
+                                                />
+                                                <div style={{
+                                                    fontSize: '11px',
+                                                    textAlign: 'center',
+                                                    wordBreak: 'break-word',
+                                                    fontWeight: '500',
+                                                    maxWidth: '100%',
+                                                    overflow: 'hidden',
+                                                    textOverflow: 'ellipsis',
+                                                    whiteSpace: 'nowrap'
+                                                }}>
+                                                    {user.name || `User ${user.uid}`}
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <div style={{ width: '100%', height: '100%', background: '#000' }} />
+                                        )}
+                                    </div>
+
+                                    {/* Enhanced status indicators */}
+                                    <div style={{
+                                        position: 'absolute',
+                                        bottom: '8px',
+                                        left: '8px',
+                                        display: 'flex',
+                                        gap: '4px'
+                                    }}>
+                                        <div style={{
+                                            background: user.hasAudio ? 'rgba(82,196,26,0.9)' : 'rgba(255,77,79,0.9)',
+                                            padding: '2px 6px',
+                                            borderRadius: '8px',
+                                            fontSize: '8px',
                                             color: 'white'
                                         }}>
-                                            <Avatar size={32} src={user.avatar} icon={<UserOutlined />} />
-                                            <div style={{
-                                                marginTop: '4px',
-                                                fontSize: '10px',
-                                                textAlign: 'center',
-                                                wordBreak: 'break-word'
-                                            }}>
-                                                {user.name || `User ${user.uid}`}
-                                            </div>
+                                            🎤
                                         </div>
-                                    ) : (
-                                        <div style={{ width: '100%', height: '100%', background: '#000' }} />
-                                    )}
-                                </div>
+                                        <div style={{
+                                            background: user.hasVideo ? 'rgba(82,196,26,0.9)' : 'rgba(255,77,79,0.9)',
+                                            padding: '2px 6px',
+                                            borderRadius: '8px',
+                                            fontSize: '8px',
+                                            color: 'white'
+                                        }}>
+                                            📹
+                                        </div>
+                                    </div>
 
-                                {/* Status indicators */}
-                                <div style={{
-                                    position: 'absolute',
-                                    bottom: '4px',
-                                    left: '4px',
-                                    display: 'flex',
-                                    gap: '4px',
-                                    fontSize: '10px'
-                                }}>
-                                    <span style={{ opacity: user.hasAudio ? 1 : 0.5 }}>🎤</span>
-                                    <span style={{ opacity: user.hasVideo ? 1 : 0.5 }}>📹</span>
+                                    {/* Click to switch indicator */}
+                                    <div style={{
+                                        position: 'absolute',
+                                        top: '8px',
+                                        right: '8px',
+                                        background: 'rgba(24,144,255,0.8)',
+                                        padding: '4px',
+                                        borderRadius: '50%',
+                                        fontSize: '8px',
+                                        color: 'white',
+                                        opacity: 0,
+                                        transition: 'opacity 0.3s ease'
+                                    }}>
+                                        👆
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
+                            ))}
+                        </div>
                     </div>
                 )}
             </div>
         );
     }, [viewMode, speakerUser, remoteUsers]);
 
-    const EnhancedParticipantsSidebar = useMemo(() => {
-        if (!isGroupCall) return null;
-
-        return (
-            <div
-                className={`participants-sidebar ${showParticipantsList ? 'show' : 'hide'}`}
-                style={{
-                    position: 'absolute',
-                    top: '20px',
-                    right: showParticipantsList ? '20px' : '-260px',
-                    width: '240px',
-                    maxHeight: '400px',
-                    background: 'rgba(0, 0, 0, 0.9)',
-                    backdropFilter: 'blur(10px)',
-                    borderRadius: '12px',
-                    padding: '16px',
-                    color: 'white',
-                    zIndex: 1000,
-                    transition: 'right 0.3s ease',
-                    border: '1px solid rgba(255,255,255,0.1)',
-                    boxShadow: '0 8px 32px rgba(0,0,0,0.3)'
-                }}
-            >
-                {/* Header */}
-                <div style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    marginBottom: '16px',
-                    paddingBottom: '12px',
-                    borderBottom: '1px solid rgba(255,255,255,0.2)'
-                }}>
-                    <div style={{
-                        fontSize: '14px',
-                        fontWeight: '600'
-                    }}>
-                        Người tham gia
-                    </div>
-                    <div style={{
-                        background: '#1890ff',
-                        borderRadius: '12px',
-                        padding: '2px 8px',
-                        fontSize: '11px',
-                        fontWeight: '500'
-                    }}>
-                        {remoteUsers.length + 1}/{conversation.totalMembers}
-                    </div>
-                </div>
-
-                {/* Participants List */}
-                <div style={{
-                    maxHeight: '260px',
-                    overflowY: 'auto'
-                }}>
-                    {/* Current User */}
-                    <div className="participant-item enhanced" style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        padding: '8px',
-                        marginBottom: '4px',
-                        borderRadius: '8px',
-                        background: 'rgba(24, 144, 255, 0.2)',
-                        border: '1px solid rgba(24, 144, 255, 0.3)'
-                    }}>
-                        <Avatar size={28} src={currentUser.avatar} icon={<UserOutlined />} />
-                        <div style={{ marginLeft: '10px', flex: 1 }}>
-                            <div style={{ fontSize: '12px', fontWeight: '500' }}>
-                                {currentUser.name} (Bạn)
-                            </div>
-                            <div style={{ fontSize: '10px', opacity: 0.8 }}>
-                                Chủ phòng
-                            </div>
-                        </div>
-                        <div style={{ display: 'flex', gap: '4px' }}>
-                            <span style={{
-                                fontSize: '14px',
-                                opacity: !isAudioMuted ? 1 : 0.3,
-                                filter: !isAudioMuted ? 'none' : 'grayscale(100%)'
-                            }}>
-                                🎤
-                            </span>
-                            <span style={{
-                                fontSize: '14px',
-                                opacity: (!isVideoMuted && localVideoTrack) ? 1 : 0.3,
-                                filter: (!isVideoMuted && localVideoTrack) ? 'none' : 'grayscale(100%)'
-                            }}>
-                                📹
-                            </span>
-                        </div>
-                    </div>
-
-                    {/* Remote Users */}
-                    {remoteUsers.map(user => (
-                        <div key={user.uid} className="participant-item enhanced" style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            padding: '8px',
-                            marginBottom: '4px',
-                            borderRadius: '8px',
-                            background: 'rgba(255,255,255,0.05)',
-                            border: '1px solid rgba(255,255,255,0.1)',
-                            transition: 'all 0.3s ease',
-                            cursor: viewMode === 'speaker' ? 'pointer' : 'default',
-                            position: 'relative'
-                        }}
-                            onClick={() => {
-                                if (viewMode === 'speaker') {
-                                    setSpeakerUser(user);
-                                }
-                            }}
-                            onMouseEnter={(e) => {
-                                e.currentTarget.style.background = 'rgba(255,255,255,0.1)';
-                            }}
-                            onMouseLeave={(e) => {
-                                e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
-                            }}
-                        >
-                            <Avatar size={28} src={user.avatar} icon={<UserOutlined />} />
-                            <div style={{ marginLeft: '10px', flex: 1 }}>
-                                <div style={{ fontSize: '12px', fontWeight: '500' }}>
-                                    {user.name || `User ${user.uid}`}
-                                </div>
-                                <div style={{ fontSize: '10px', opacity: 0.8 }}>
-                                    {user.isSpeaking ? '🎤 Đang nói' : 'Đã tham gia'}
-                                </div>
-                            </div>
-                            <div style={{ display: 'flex', gap: '4px' }}>
-                                <span style={{
-                                    fontSize: '14px',
-                                    opacity: user.hasAudio ? 1 : 0.3,
-                                    filter: user.hasAudio ? 'none' : 'grayscale(100%)'
-                                }}>
-                                    🎤
-                                </span>
-                                <span style={{
-                                    fontSize: '14px',
-                                    opacity: user.hasVideo ? 1 : 0.3,
-                                    filter: user.hasVideo ? 'none' : 'grayscale(100%)'
-                                }}>
-                                    📹
-                                </span>
-                            </div>
-
-                            {/* Speaker indicator */}
-                            {viewMode === 'speaker' && speakerUser?.uid === user.uid && (
-                                <div style={{
-                                    position: 'absolute',
-                                    left: '-2px',
-                                    top: '-2px',
-                                    bottom: '-2px',
-                                    width: '3px',
-                                    background: '#52c41a',
-                                    borderRadius: '2px'
-                                }} />
-                            )}
-                        </div>
-                    ))}
-                </div>
-
-                {/* Controls */}
-                <div style={{
-                    marginTop: '12px',
-                    paddingTop: '12px',
-                    borderTop: '1px solid rgba(255,255,255,0.2)',
-                    display: 'flex',
-                    gap: '6px'
-                }}>
-                    <Button
-                        size="small"
-                        type={viewMode === 'grid' ? 'primary' : 'default'}
-                        icon={<AppstoreOutlined />}
-                        onClick={() => setViewMode('grid')}
-                        style={{ flex: 1, fontSize: '11px' }}
-                    >
-                        Lưới
-                    </Button>
-                    <Button
-                        size="small"
-                        type={viewMode === 'speaker' ? 'primary' : 'default'}
-                        icon={<BorderOutlined />}
-                        onClick={() => setViewMode('speaker')}
-                        style={{ flex: 1, fontSize: '11px' }}
-                    >
-                        Diễn giả
-                    </Button>
-                </div>
-            </div>
-        );
-    }, [isGroupCall, showParticipantsList, remoteUsers, currentUser, isAudioMuted, isVideoMuted, localVideoTrack, viewMode, speakerUser, conversation.totalMembers]);
-
-    // Group Call Controls Overlay
     const GroupCallControls = useMemo(() => {
         if (!isGroupCall) return null;
 
@@ -822,40 +865,60 @@ const ModalVideoCall = forwardRef((props, ref) => {
             <div style={{
                 position: 'absolute',
                 top: '20px',
-                left: '20px',
+                right: '90px',
                 display: 'flex',
-                gap: '8px',
+                gap: '12px',
                 zIndex: 999
             }}>
-                {/* View Mode Toggle */}
+                {/* Enhanced View Mode Toggle */}
                 <Button
                     type="default"
-                    size="small"
+                    size="middle"
                     icon={viewMode === 'grid' ? <BorderOutlined /> : <AppstoreOutlined />}
                     onClick={() => setViewMode(prev => prev === 'grid' ? 'speaker' : 'grid')}
                     style={{
-                        background: 'rgba(0,0,0,0.7)',
-                        borderColor: 'rgba(255,255,255,0.3)',
+                        background: 'rgba(0,0,0,0.8)',
+                        backdropFilter: 'blur(10px)',
+                        borderColor: 'rgba(255,255,255,0.2)',
                         color: 'white',
-                        fontSize: '11px'
+                        fontSize: '12px',
+                        fontWeight: '500',
+                        padding: '8px 16px',
+                        height: '40px',
+                        borderRadius: '20px',
+                        boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+                        border: '1px solid rgba(255,255,255,0.1)'
                     }}
                     title={`Chuyển sang ${viewMode === 'grid' ? 'Speaker View' : 'Grid View'}`}
-                />
+                >
+                    {viewMode === 'grid' ? 'Speaker' : 'Grid'}
+                </Button>
 
-                {/* Participants List Toggle */}
+                {/* Enhanced Participants Counter */}
                 <Button
                     type={showParticipantsList ? 'primary' : 'default'}
-                    size="small"
+                    size="middle"
                     icon={<TeamOutlined />}
                     onClick={() => setShowParticipantsList(prev => !prev)}
                     style={{
-                        background: showParticipantsList ? '#1890ff' : 'rgba(0,0,0,0.7)',
-                        borderColor: showParticipantsList ? '#1890ff' : 'rgba(255,255,255,0.3)',
+                        background: showParticipantsList ?
+                            'linear-gradient(135deg, #1890ff, #40a9ff)' :
+                            'rgba(0,0,0,0.8)',
+                        backdropFilter: 'blur(10px)',
+                        borderColor: showParticipantsList ? '#1890ff' : 'rgba(255,255,255,0.2)',
                         color: 'white',
-                        fontSize: '11px'
+                        fontSize: '12px',
+                        fontWeight: '500',
+                        padding: '8px 16px',
+                        height: '40px',
+                        borderRadius: '20px',
+                        boxShadow: showParticipantsList ?
+                            '0 4px 20px rgba(24,144,255,0.4)' :
+                            '0 4px 20px rgba(0,0,0,0.3)',
+                        border: '1px solid rgba(255,255,255,0.1)'
                     }}
                 >
-                    {remoteUsers.length + 1}
+                    {remoteUsers.length + 1} người
                 </Button>
             </div>
         );
@@ -868,7 +931,7 @@ const ModalVideoCall = forwardRef((props, ref) => {
             onCancel={handleCancel}
             footer={null}
             width="95%"
-            style={{ maxWidth: isGroupCall ? '1200px' : '750px' }}
+            style={{ maxWidth: isGroupCall ? '900px' : '750px' }}
             centered
             destroyOnClose={true}
             maskClosable={false}
@@ -897,16 +960,14 @@ const ModalVideoCall = forwardRef((props, ref) => {
                 height: isGroupCall ? '600px' : '620px',
                 background: '#1a1a1a',
                 borderRadius: '12px',
-                overflow: 'hidden'
+                overflow: 'hidden',
+                // paddingTop: '50px'
             }}>
                 {/* Call Status Overlay */}
                 <CallStatusOverlay />
 
                 {/* Group Call Controls */}
                 {GroupCallControls}
-
-                {/* Enhanced Participants Sidebar */}
-                {EnhancedParticipantsSidebar}
 
                 {/* Main Video Content */}
                 {isVisible && (
@@ -933,7 +994,8 @@ const ModalVideoCall = forwardRef((props, ref) => {
                                 right: 0,
                                 bottom: 0,
                                 pointerEvents: 'none',
-                                zIndex: 5
+                                zIndex: 5,
+                                paddingTop: '50px'
                             }}>
                                 {viewMode === 'speaker' && speakerUser ?
                                     SpeakerViewLayout :
