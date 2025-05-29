@@ -36,7 +36,6 @@ function cleanupOldMessages() {
 
 // Reset bộ nhớ cache tin nhắn
 function resetMessageCache() {
-  console.log('Reset bộ nhớ cache tin nhắn');
   recentlySentMessages.clear();
   Object.keys(messageExpirations).forEach(key => {
     delete messageExpirations[key];
@@ -85,7 +84,6 @@ class NotificationSoundManager {  constructor() {
   setCurrentUser(userId) {
     if (userId) {
       this._currentUserId = userId;
-      console.log('Đã cập nhật ID người dùng hiện tại:', userId);
     }
   }
   

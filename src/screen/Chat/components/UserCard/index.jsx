@@ -173,7 +173,7 @@ function UserCard(props) {
                 <div className="user-card_wrapper">
                     <div className="user-card_cover-image">
                         <Image
-                            src={user?.coverImage? user?.coverImage : coverImage}
+                            src={user?.coverImage ? user?.coverImage : coverImage}
                             preview={false}
                             style={UserCardStyle.CoverImageStyle}
                         />
@@ -211,7 +211,7 @@ function UserCard(props) {
                                 type="primary"
                                 shape="default"
                                 size="small"
-                                style={{marginLeft: '5px'}}
+                                style={{ marginLeft: '5px' }}
                             />
                         </Tooltip>
                     </div>
@@ -279,7 +279,7 @@ function UserCard(props) {
 
                         <div className={`user-card-button--message ${(status === 'FRIEND') ? 'user-card-button--no-margin' : ''}`}>
                             <Button
-                                onClick={() => { console.log('chat') }}
+                                onClick={handleClickMessage}
                                 type="default"
                                 style={(status === 'FOLLOWER') ? UserCardStyle.buttonStyle_2 : UserCardStyle.buttonStyle_1}
                             >Nhắn tin
